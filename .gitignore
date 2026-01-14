@@ -11,3 +11,6 @@ venv/
 
 # OS files
 .DS_Store
+
+# Hypothesis cache
+.hypothesis/

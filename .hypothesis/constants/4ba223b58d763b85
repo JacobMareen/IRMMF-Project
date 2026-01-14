@@ -1,4 +1,0 @@
-# file: /Users/jacobmareen/Documents/IRMMF Project/services.py
-# hypothesis_version: 6.150.0
-
-['logic_reason', 'next_q_id', 'reachable_path', 'responses', 'status', 'success']

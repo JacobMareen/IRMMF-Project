@@ -1,4 +1,0 @@
-# file: /Users/jacobmareen/Documents/IRMMF Project/auth.py
-# hypothesis_version: 6.150.0
-
-[401, '1', 'DEV_AUTH_DISABLED', 'DEV_SUBJECT', 'DEV_TOKEN', 'Invalid token', 'Missing bearer token', 'bearer ', 'dev', 'dev-token', 'true', 'yes']

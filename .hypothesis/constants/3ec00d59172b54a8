@@ -1,4 +1,0 @@
-# file: /Users/jacobmareen/Documents/IRMMF Project/database.py
-# hypothesis_version: 6.150.0
-
-['10', '5', 'DATABASE_URL', 'DB_MAX_OVERFLOW', 'DB_POOL_SIZE']
