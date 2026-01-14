@@ -1,0 +1,2618 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRMMF Command Center v6.1</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            /* BRAND CONSTANTS (Fixed) */
+            --brand-navy: #011E3D;
+            --brand-gold: #e8b373;
+            --brand-bronze: #907054;
+            --success: #27ae60;
+            --warn: #f39c12;
+
+            /* DEFAULT THEME: DARK MODE */
+            --bg-page: #000f1f;       /* Very Dark Navy */
+            --bg-card: #011E3D;       /* Brand Navy */
+            --bg-sidebar: #01162e;    /* Slightly darker than card */
+            --bg-input: #02264d;
+            
+            --text-main: #ffffff;
+            --text-sub: #b0c4de;      /* Light Blue-Gray */
+            --border-color: #1a3a5c;
+            
+            --shadow: rgba(0,0,0,0.5);
+            --chart-grid: rgba(255,255,255,0.1);
+        }
+
+        /* LIGHT MODE OVERRIDES */
+        [data-theme="light"] {
+            --bg-page: #f4f7f6;
+            --bg-card: #ffffff;
+            --bg-sidebar: #ffffff;
+            --bg-input: #ffffff;
+            
+            --text-main: #011E3D;     /* Navy Text */
+            --text-sub: #666666;
+            --border-color: #e0e0e0;
+            
+            --shadow: rgba(0,0,0,0.08);
+            --chart-grid: rgba(0,0,0,0.1);
+        }
+
+        /* --- GLOBAL STYLES --- */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.3s, color 0.3s;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        h1, h2, h3, h4, .brand-font { font-family: 'League Spartan', sans-serif; font-weight: 700; letter-spacing: -0.5px; }
+
+        /* --- HEADER --- */
+        header {
+            background: var(--bg-card); /* Adaptive Header */
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .logo-area { font-family: 'League Spartan', sans-serif; font-size: 1.4em; color: var(--brand-gold); letter-spacing: 1px; }
+
+        .nav-link {
+            background: transparent;
+            color: var(--text-sub);
+            border: 1px solid var(--border-color);
+            padding: 8px 18px; border-radius: 4px;
+            cursor: pointer; margin-left: 10px;
+            font-family: 'Montserrat', sans-serif; font-weight: 500; font-size: 0.9em;
+            transition: 0.2s;
+        }
+        .nav-link:hover { border-color: var(--brand-gold); color: var(--brand-gold); }
+        .nav-link.active { background: var(--brand-gold); color: var(--brand-navy); border-color: var(--brand-gold); font-weight: 700; }
+        .nav-group { display: flex; align-items: center; gap: 8px; }
+        .nav-divider { width: 1px; height: 26px; background: var(--border-color); margin: 0 8px; }
+        .nav-dropdown { position: relative; }
+        .nav-menu {
+            position: absolute; right: 0; top: 42px; background: var(--bg-card);
+            border: 1px solid var(--border-color); border-radius: 10px; min-width: 180px;
+            box-shadow: 0 10px 24px var(--shadow); display: none; z-index: 3000;
+        }
+        .nav-menu button {
+            width: 100%; text-align: left; background: transparent; border: none; color: var(--text-main);
+            padding: 10px 12px; cursor: pointer; font-weight: 600;
+        }
+        .nav-menu button:hover { background: rgba(232, 179, 115, 0.12); color: var(--brand-gold); }
+
+        /* --- LAYOUT --- */
+        .main-layout { display: flex; flex: 1; overflow: hidden; }
+        .left-nav {
+            width: 210px;
+            padding: 20px 12px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .left-nav .side-btn {
+            text-decoration: none;
+            color: var(--text-main);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 600;
+            text-align: left;
+        }
+        .left-nav .side-btn:hover {
+            border-color: var(--brand-gold);
+            color: var(--brand-gold);
+        }
+        .left-nav .side-btn.active {
+            border-color: var(--brand-gold);
+            color: var(--brand-navy);
+            background: var(--brand-gold);
+        }
+        
+        #sidebar { 
+            width: 320px; background: var(--bg-sidebar); 
+            border-right: 1px solid var(--border-color); 
+            display: none; flex-direction: column; 
+        }
+        #sidebar.collapsed { width: 60px; }
+        #sidebar.collapsed #sidebar-list { display: none; }
+        #sidebar.collapsed #sb-subtitle { display: none; }
+        #sidebar.collapsed #sb-title { font-size: 0.85em; }
+        #sidebar-handle {
+            width: 6px;
+            cursor: col-resize;
+            background: transparent;
+            height: 100vh;
+        }
+        #sidebar-handle:hover { background: rgba(232, 179, 115, 0.2); }
+        #sidebar-header { padding: 25px; border-bottom: 2px solid var(--border-color); }
+        #sidebar-list { flex: 1; overflow-y: auto; padding: 15px; }
+        
+        .sb-item { 
+            padding: 12px 15px; border-radius: 6px; cursor: pointer; 
+            margin-bottom: 8px; font-size: 0.95em; display: flex; gap: 12px; align-items: center; 
+            border: 1px solid transparent; color: var(--text-sub); transition: 0.2s;
+        }
+        .sb-domain-header {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--brand-gold);
+            font-family: 'League Spartan', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .sb-domain-header:hover {
+            border-color: var(--brand-gold);
+        }
+        .sb-domain-header.active {
+            background: rgba(232, 179, 115, 0.1);
+            border-bottom: 2px solid var(--brand-gold);
+            border-radius: 6px 6px 0 0;
+            margin-bottom: 0;
+        }
+        .sb-child-container {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            padding: 10px 5px;
+            margin-bottom: 15px;
+        }
+
+        .sb-item.child {
+            margin-left: 10px;
+            padding: 8px 12px;
+            font-size: 0.9em;
+            border: none;
+            background: transparent;
+        }
+
+        .sb-item.child:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sb-item.child.active {
+            background: var(--brand-gold);
+            color: var(--brand-navy);
+        }
+        .sb-item:hover { background: rgba(232, 179, 115, 0.1); color: var(--brand-gold); }
+        .sb-item.active { background: var(--brand-gold); color: var(--brand-navy); font-weight: 600; }
+        .sb-item.done { border-left: 4px solid var(--success); }
+        .sb-item.deferred { border-left: 4px solid var(--warn); }
+        .sb-item.locked {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px dashed var(--border-color) !important;
+            opacity: 0.5;
+            cursor: not-allowed;
+            color: var(--text-sub);
+        }
+        .sb-item.locked span {filter: grayscale(1); }        
+        .sb-item.locked:hover::after { content: attr(data-reason); position: absolute; left: 105%; top: 0; width: 200px; background: var(--brand-navy); color: white; padding: 10px; border-radius: 4px; font-size: 0.8em; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .content-area { flex: 1; overflow-y: auto; padding: 50px; position: relative; }
+        .view-container { max-width: 900px; margin: auto; display: none; }
+
+        /* --- CARDS & DASHBOARD --- */
+        .dash-header { 
+            font-family: 'League Spartan', sans-serif; font-size: 1.4em; 
+            color: var(--brand-gold); 
+            border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; 
+        }
+        
+        .domain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        
+        .domain-card { 
+            background: var(--bg-card); 
+            padding: 30px; border-radius: 8px; 
+            box-shadow: 0 5px 20px var(--shadow); 
+            cursor: pointer; border-top: 6px solid var(--border-color); 
+            transition: transform 0.2s; 
+        }
+        .domain-card:hover { transform: translateY(-4px); border-top-color: var(--brand-gold); }
+        .domain-card h3 { color: var(--text-main); margin: 0 0 15px 0; font-size: 1.2em; }
+        .domain-meta { color: var(--text-sub); font-size: 0.9em; margin-top: 15px; }
+
+        .prog-bg { background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden; }
+        [data-theme="light"] .prog-bg { background: #eee; }
+        .prog-fill { background: var(--success); height: 100%; width: 0%; transition: 0.6s; }
+
+        /* --- BUTTONS & INPUTS --- */
+        .opt-btn { 
+            display: block; width: 100%; text-align: left; 
+            padding: 14px 18px; margin: 8px 0; 
+            border: 2px solid var(--border-color); border-radius: 8px; 
+            background: var(--bg-card); color: var(--text-main);
+            cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 0.95em; 
+            transition: all 0.2s; 
+        }
+        .opt-btn:hover { border-color: var(--brand-gold); color: var(--brand-gold); }
+        .opt-btn.selected { 
+            border-color: var(--brand-gold); background-color: var(--brand-gold); 
+            color: var(--brand-navy); font-weight: 700; 
+        }
+
+        .main-btn { 
+            padding: 12px 30px; border-radius: 4px; border: none;
+            cursor: pointer; font-weight: 600; font-family: 'Montserrat', sans-serif; 
+        }
+
+        input[type="text"] {
+            background: var(--bg-input); color: var(--text-main);
+            border: 2px solid var(--border-color);
+        }
+
+        /* --- SPECIAL UI --- */
+        .id-card { 
+            text-align: center; background: var(--bg-card); padding: 60px; 
+            border-radius: 12px; box-shadow: 0 10px 40px var(--shadow); 
+            margin-top: 8vh; border: 1px solid var(--border-color);
+        }
+        .id-card h1 { color: var(--brand-gold); }
+        .home-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'League Spartan';
+            text-decoration: none;
+            color: var(--brand-gold);
+            border: 1px solid var(--brand-gold);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.9em;
+        }
+        .home-link:hover {
+            background: rgba(244, 194, 58, 0.15);
+        }
+        
+        .theme-toggle {
+            background: transparent; border: none; cursor: pointer; font-size: 1.2em;
+            color: var(--brand-gold); padding: 5px; margin-left: 15px;
+        }
+
+        /* --- MODAL --- */
+        .modal-overlay { background: rgba(0, 0, 0, 0.85); display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; align-items:center; justify-content:center; backdrop-filter: blur(4px); }
+        .modal-box { background: var(--bg-card); color: var(--text-main); padding:40px; border-radius: 12px; max-width:550px; width:90%; box-shadow: 0 25px 50px black; border-top: 6px solid var(--brand-gold); }
+        
+        #logic-toast { position: absolute; top: 30px; right: 30px; background: var(--bg-card); color: var(--brand-gold); padding: 20px 25px; border-radius: 8px; border-left: 6px solid var(--brand-gold); transform: translateX(150%); transition: 0.4s; box-shadow: 0 5px 20px black; z-index:2000; }
+        #logic-toast.show { transform: translateX(0); }
+    </style>
+</head>
+<body>
+
+<header id="app-header" style="display:none;">
+    <div class="logo-area">IRMMF <span style="font-weight:400; font-size:0.8em; color:var(--text-sub);">Command</span></div>
+    <div style="display:flex; align-items:center;">
+        <nav class="nav-group">
+            <a class="nav-link" href="index.html" style="text-decoration:none;">Command Center</a>
+            <div class="nav-dropdown">
+                <button id="btn-seg-maturity" class="nav-link active" onclick="toggleNavMenu('maturity-menu')">Maturity Assessment ▾</button>
+                <div id="maturity-menu" class="nav-menu">
+                    <button onclick="switchTab('results')">Dashboard</button>
+                    <button onclick="switchTab('dashboard')">Assessment</button>
+                    <button onclick="switchTab('risks')">Risks</button>
+                    <button onclick="switchTab('review')">Review</button>
+                </div>
+            </div>
+            <div class="nav-dropdown">
+                <button id="btn-seg-workforce" class="nav-link" onclick="toggleNavMenu('workforce-menu')">Workforce ▾</button>
+                <div id="workforce-menu" class="nav-menu">
+                    <button onclick="openDwf()">Open Workforce</button>
+                </div>
+            </div>
+        </nav>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+            <span id="theme-icon">☀️</span>
+        </button>
+    </div>
+</header>
+
+<div class="main-layout">
+    <div id="left-menu" class="left-nav">
+        <a class="side-btn" href="index.html">Command Center</a>
+        <a class="side-btn" href="assessment.html#dashboard">Assessment Hub</a>
+        <div style="display:flex; flex-direction:column; gap:8px; margin:8px 0 0 8px;">
+            <a class="side-btn" href="assessment.html#dashboard">Assessments</a>
+            <a class="side-btn" href="assessment.html#results">Results</a>
+            <a class="side-btn" href="assessment.html#risks">Risks</a>
+            <a class="side-btn" href="assessment.html#review">Review</a>
+        </div>
+        <details>
+            <summary class="side-btn">Workforce ▾</summary>
+            <div style="display:flex; flex-direction:column; gap:8px; margin:8px 0 0 8px;">
+                <a class="side-btn" href="dynamic_workforce.html">DWF Overview</a>
+            </div>
+        </details>
+    </div>
+    <div id="sidebar">
+        <div id="sidebar-header">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 id="sb-title" style="margin:0; color:var(--brand-gold);">Context</h4>
+                <button id="sidebar-toggle" class="main-btn" style="padding:6px 10px; background:var(--bg-card); color:var(--text-sub); border:1px solid var(--border-color);" title="Collapse sidebar">⟷</button>
+            </div>
+            <small id="sb-subtitle" style="color:var(--text-sub); display:block; margin-top:5px;">Loading...</small>
+        </div>
+        <div id="sidebar-list"></div>
+    </div>
+    <div id="sidebar-handle"></div>
+
+    <div class="content-area">
+        <div id="logic-toast"><h4>Neuro-Adaptive Jump</h4><div id="logic-msg"></div></div>
+
+        <div id="dashboard-view" class="view-container">
+            <input type="text" id="assessment-id-input" style="display:none;">
+            <div id="assessment-status" style="margin-bottom:20px;"></div>
+            <div id="results-preview" class="dash-section" style="display:none;">
+                <div class="dash-header">Snapshot Preview</div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+                    <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px; padding:14px;">
+                        <div style="color:var(--text-sub); font-size:0.8em;">Overall maturity</div>
+                        <div style="font-size:1.6em; font-weight:600; color:var(--brand-gold); margin-top:6px;">--%</div>
+                    </div>
+                    <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px; padding:14px;">
+                        <div style="color:var(--text-sub); font-size:0.8em;">Top risks</div>
+                        <div style="color:var(--text-main); margin-top:6px;">Complete intake to see risk ranking.</div>
+                    </div>
+                    <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px; padding:14px;">
+                        <div style="color:var(--text-sub); font-size:0.8em;">Benchmarking</div>
+                        <div style="color:var(--text-main); margin-top:6px;">Awaiting intake tags.</div>
+                    </div>
+                </div>
+            </div>
+            <div id="override-controls" style="margin-bottom:20px;"></div>
+            <div id="role-controls" style="margin-bottom:20px;"></div>
+            <div id="intake-tile" style="margin-bottom:20px;"></div>
+            <div id="dash-soft" class="dash-section" style="display:none;">
+                <div class="dash-header">Snapshot (Soft Mean)</div>
+                <div id="grid-soft" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;"></div>
+            </div>
+            <div id="dash-deferred" class="dash-section" style="display:none;">
+                <div class="dash-header" style="color:var(--warn); border-color:var(--warn);">Deferred Questions</div>
+                <div id="deferred-summary" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px; padding:14px; color:var(--text-sub);">
+                    Deferred questions are hidden here. Answering all questions improves routing accuracy and benchmark clarity.
+                </div>
+            </div>
+            <div id="dash-review" class="dash-section" style="display:none;">
+                <div class="dash-header" style="color:var(--brand-gold); border-color:var(--brand-gold);">Marked for Review</div>
+                <div class="domain-grid" id="grid-review"></div>
+            </div>
+            <div id="dash-ongoing" class="dash-section" style="display:none;">
+                <div class="dash-header">Ongoing Domains</div>
+                <div class="domain-grid" id="grid-ongoing"></div>
+            </div>
+            <div id="dash-not-started" class="dash-section">
+                <div class="dash-header">Not Started</div>
+                <div class="domain-grid" id="grid-not-started"></div>
+            </div>
+            <div id="dash-completed" class="dash-section" style="display:none;">
+                <div class="dash-header" style="color:var(--success); border-color:var(--success);">Completed</div>
+                <div class="domain-grid" id="grid-completed"></div>
+            </div>
+            <div id="dashboard-intake" class="dash-section" style="display:none;">
+                <div class="dash-header" style="color:var(--brand-gold); border-color:var(--brand-gold);">Intake (Required)</div>
+                <div style="color:var(--text-sub); margin-bottom:16px;">Complete the intake to unlock kick-start and assessment routing.</div>
+                <button class="main-btn" style="background:var(--brand-gold); color:var(--brand-navy);" onclick="switchTab('intake')">Open Intake</button>
+            </div>
+        </div>
+
+        <div id="intake-view" class="view-container">
+            <div style="background:var(--bg-card); padding:40px; border-radius:12px; box-shadow:0 15px 50px var(--shadow); border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                    <div>
+                        <div style="color:var(--brand-gold); font-weight:700; font-size:0.85em; text-transform:uppercase; letter-spacing:0.8px;">Intake Assessment</div>
+                        <div style="color:var(--text-sub); font-size:0.9em;">Answer at least one question to unlock kick-start and routing.</div>
+                    </div>
+                    <button class="main-btn" style="background:var(--border-color); color:var(--text-sub);" onclick="switchTab('dashboard')">Back to Dashboard</button>
+                </div>
+                <div id="intake-flow" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:24px; box-shadow:0 8px 24px var(--shadow);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <span id="intake-section" style="color:var(--brand-gold); font-weight:700; font-size:0.85em; text-transform:uppercase; letter-spacing:0.8px;"></span>
+                        <span id="intake-progress" style="color:var(--text-sub); font-size:0.85em;"></span>
+                    </div>
+                    <h2 id="intake-question" style="margin:0 0 12px 0; line-height:1.3; color:var(--text-main); font-size:1.35em;"></h2>
+                    <div id="intake-guidance" style="font-style:italic; color:var(--text-sub); font-size:0.92em; margin-bottom:18px;"></div>
+                    <div id="intake-options" style="display:flex; flex-direction:column; gap:10px;"></div>
+                    <div id="intake-input" style="display:none; flex-direction:column; gap:10px; margin-top:8px;"></div>
+                    <div style="margin-top:24px; display:flex; justify-content:space-between; gap:12px;">
+                        <div style="display:flex; gap:10px;">
+                            <button class="main-btn" style="background:var(--border-color); color:var(--text-sub);" onclick="prevIntakeQuestion()">Back</button>
+                            <button class="main-btn" style="background:var(--bg-dark); color:var(--text-sub); border:1px solid var(--border-color);" onclick="deferIntakeQuestion()">Defer</button>
+                        </div>
+                        <button id="intake-next-btn" class="main-btn" style="background:var(--brand-gold); color:var(--brand-navy);" onclick="saveIntakeAndNext()">Save & Continue</button>
+                    </div>
+                </div>
+                <div id="intake-result" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <div id="assessment-view" class="view-container">
+            <div style="background:var(--bg-card); padding:50px; border-radius:12px; box-shadow:0 15px 50px var(--shadow); border:1px solid var(--border-color);">
+                <div id="assessment-intake-lock" style="display:none; background:rgba(232, 179, 115, 0.08); border:1px solid var(--border-color); border-left:4px solid var(--brand-gold); padding:18px; border-radius:8px; margin-bottom:20px; color:var(--text-sub);">
+                    <span id="assessment-lock-text">Intake required. Complete at least one intake question to unlock the assessment flow.</span>
+                </div>
+                <div id="logic-context-box" style="background: rgba(232, 179, 115, 0.1); border-left: 5px solid var(--brand-gold); color: var(--text-main); padding: 15px; border-radius: 6px; margin-bottom: 15px; display: none;">
+                    <strong style="color:var(--brand-gold);">Logic Context:</strong> <span id="logic-context-text"></span>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid var(--border-color); padding-bottom:15px;">
+                    <span id="q-domain" style="font-family:'League Spartan'; font-weight:700; color:var(--brand-gold); font-size:0.8em; text-transform:uppercase; letter-spacing:0.8px;"></span>
+                    <span id="q-id" style="color:var(--text-sub); font-size:0.8em; font-family:monospace;"></span>
+                </div>
+                
+                <h2 id="q-text" style="margin:0 0 12px 0; line-height:1.3; color:var(--text-main); font-size:1.35em;"></h2>
+                <div id="q-guidance" style="font-style:italic; color:var(--text-sub); font-size:0.92em; margin-bottom:22px;"></div>
+                
+                <div id="evidence-panel" style="display:none; background:rgba(232, 179, 115, 0.08); border:1px solid var(--border-color); border-left:4px solid var(--brand-gold); padding:18px; border-radius:8px; margin-bottom:25px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <strong style="color:var(--brand-gold);">Evidence Attestation</strong>
+                        <span id="evidence-policy-label" style="color:var(--text-sub); font-size:0.85em;"></span>
+                    </div>
+                    <label style="display:flex; flex-direction:column; gap:8px; color:var(--text-main); margin-bottom:12px;">
+                        <span>Do you have evidence?</span>
+                        <select id="evidence-has" style="padding:8px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-main);">
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </label>
+                    <div id="evidence-checks-inline" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;"></div>
+                    <label style="display:flex; flex-direction:column; gap:8px; color:var(--text-main);">
+                        <span>Optional notes</span>
+                        <textarea id="evidence-notes" rows="3" style="padding:8px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-main);"></textarea>
+                    </label>
+                    <div style="display:flex; justify-content:flex-end; margin-top:12px;">
+                        <button class="main-btn" style="background:var(--brand-gold); color:#0b0b0b;" onclick="submitEvidencePanel()">Confirm & Continue</button>
+                    </div>
+                </div>
+
+                <div id="options-area"></div>
+                
+                <div style="margin-top:50px; border-top:1px solid var(--border-color); padding-top:25px; display:flex; justify-content:space-between;">
+                    <button class="main-btn" style="background:rgba(243, 156, 18, 0.2); color:var(--warn);" onclick="deferQuestion()">Defer / Skip</button>
+                    <button class="main-btn" style="background:var(--border-color); color:var(--text-sub);" onclick="switchTab('dashboard')">Assessment</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="results-view" class="view-container">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <h2 id="archetype-label" style="margin:0; color:var(--brand-gold);">Dashboard</h2>
+                    <div id="evidence-confidence-summary" style="color:var(--text-sub); font-size:0.9em;"></div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="main-btn" style="background:var(--bg-card); border:1px solid var(--brand-gold); color:var(--brand-gold); font-size:0.9em; padding:10px 20px;" onclick="downloadExport('csv')">📥 Report (.csv)</button>
+                    <button class="main-btn" style="background:var(--border-color); color:var(--text-main); font-size:0.9em; padding:10px 20px;" onclick="downloadExport('json')">💾 Backup (.json)</button>
+                </div>
+            </div>
+            
+            <div id="analysis-content">
+                <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:30px; margin-bottom:30px;">
+                    <div style="background:var(--bg-card); padding:20px; border-radius:12px; box-shadow:0 5px 20px var(--shadow); border:1px solid var(--border-color);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <strong style="color:var(--brand-gold);">Archetype Rationale</strong>
+                            <span style="color:var(--text-sub); font-size:0.85em;">Why this fits</span>
+                        </div>
+                        <div id="archetype-rationale" style="display:flex; flex-direction:column; gap:8px;"></div>
+                    </div>
+                    <div style="background:var(--bg-card); padding:20px; border-radius:12px; box-shadow:0 5px 20px var(--shadow); border:1px solid var(--border-color);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <strong style="color:var(--brand-gold);">Top Actions</strong>
+                            <span style="color:var(--text-sub); font-size:0.85em;">30/60/90 day view</span>
+                        </div>
+                        <div id="recommendations" style="display:flex; flex-direction:column; gap:10px;"></div>
+                    </div>
+                </div>
+                <div style="background:var(--bg-card); padding:20px; border-radius:12px; box-shadow:0 5px 20px var(--shadow); border:1px solid var(--border-color); margin-bottom:30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <strong style="color:var(--brand-gold);">Strength Pockets</strong>
+                        <span style="color:var(--text-sub); font-size:0.85em;">Local strengths to scale</span>
+                    </div>
+                    <div id="strength-pockets" style="display:flex; flex-direction:column; gap:10px;"></div>
+                </div>
+                <div style="background:var(--bg-card); padding:20px; border-radius:12px; box-shadow:0 5px 20px var(--shadow); border:1px solid var(--border-color); margin-bottom:30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <strong style="color:var(--brand-gold);">Maturity Scores</strong>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <label style="display:flex; align-items:center; gap:6px; color:var(--text-sub); font-size:0.85em;">
+                                <input id="expanded-overlay-toggle" type="checkbox">
+                                Show expanded overlay
+                            </label>
+                            <button id="radar-expand-toggle" class="main-btn" style="background:var(--bg-dark); color:var(--text-main); border:1px solid var(--border-color); font-size:0.85em; padding:6px 10px;">Expand</button>
+                        </div>
+                    </div>
+                    <div id="maturity-explanation" style="color:var(--text-sub); font-size:0.85em; margin-bottom:12px;"></div>
+                    <div id="maturity-scores" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px;"></div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1.6fr 1fr; gap:40px;">
+                    <div id="radar-card" style="background:var(--bg-card); padding:30px; border-radius:12px; height: 500px; display:flex; align-items:center; justify-content:center; box-shadow:0 5px 20px var(--shadow); border:1px solid var(--border-color); position:relative;">
+                        <div style="position:relative; height:450px; width:100%;">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                        <div id="radar-explainer" style="display:none; position:absolute; bottom:14px; left:18px; right:18px; background:rgba(0,0,0,0.6); color:var(--text-main); font-size:0.8em; padding:8px 10px; border-radius:8px;">
+                            Baseline = adaptive path. Expanded overlay = baseline + override answers.
+                        </div>
+                    </div>
+                    <div id="axis-details" style="display:flex; flex-direction:column; gap:15px;"></div>
+                </div>
+                <!-- TODO: Benchmarking is placeholder-only until intake-driven baselines are defined. -->
+                <div style="margin-top:30px; background:var(--bg-card); padding:20px; border-radius:12px; box-shadow:0 5px 20px var(--shadow); border:1px solid var(--border-color);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <strong style="color:var(--brand-gold);">Benchmarking</strong>
+                        <span style="color:var(--text-sub); font-size:0.85em;">Per-axis comparison</span>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+                        <select id="benchmark-sector" style="background:var(--bg-dark); color:var(--text-main); border:1px solid var(--border-color); border-radius:8px; padding:6px 10px;">
+                            <option value="all">Sector: All</option>
+                            <option value="technology">Sector: Technology</option>
+                            <option value="healthcare">Sector: Healthcare</option>
+                            <option value="financial">Sector: Financial Services</option>
+                            <option value="manufacturing">Sector: Manufacturing</option>
+                        </select>
+                        <select id="benchmark-size" style="background:var(--bg-dark); color:var(--text-main); border:1px solid var(--border-color); border-radius:8px; padding:6px 10px;">
+                            <option value="all">Size: All</option>
+                            <option value="sme">SME (&lt;250)</option>
+                            <option value="mid">Mid-Market (250-4999)</option>
+                            <option value="enterprise">Enterprise (5000+)</option>
+                        </select>
+                        <select id="benchmark-region" style="background:var(--bg-dark); color:var(--text-main); border:1px solid var(--border-color); border-radius:8px; padding:6px 10px;">
+                            <option value="all">Region: All</option>
+                            <option value="eu">EU</option>
+                            <option value="na">North America</option>
+                            <option value="apac">APAC</option>
+                        </select>
+                    </div>
+                    <div id="benchmark-table" style="overflow:auto;"></div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:30px; margin-top:30px;">
+                    <div style="background:var(--bg-card); padding:20px; border-radius:12px; box-shadow:0 5px 20px var(--shadow); border:1px solid var(--border-color);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <strong style="color:var(--brand-gold);">Declared vs Verified</strong>
+                            <span style="color:var(--text-sub); font-size:0.85em;">SI gap highlights paper programs</span>
+                        </div>
+                        <div id="declared-verified-details" style="display:flex; flex-direction:column; gap:12px;"></div>
+                    </div>
+                    <div style="background:var(--bg-card); padding:20px; border-radius:12px; box-shadow:0 5px 20px var(--shadow); border:1px solid var(--border-color);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <strong style="color:var(--brand-gold);">Circuit Breakers</strong>
+                            <span style="color:var(--text-sub); font-size:0.85em;">Caps applied</span>
+                        </div>
+                        <div id="cap-badges" style="display:flex; flex-direction:column; gap:10px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="risks-view" class="view-container">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0; color:var(--brand-gold);">Risk Overview</h2>
+            </div>
+            <div style="display:grid; grid-template-columns: 1.3fr 0.7fr; gap:30px;">
+                <div style="background:var(--bg-card); padding:20px; border-radius:12px; box-shadow:0 5px 20px var(--shadow); border:1px solid var(--border-color);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <strong style="color:var(--brand-gold);">Risk Heatmap</strong>
+                        <span style="color:var(--text-sub); font-size:0.85em;">Likelihood × Impact</span>
+                    </div>
+                    <div id="risk-heatmap" style="display:grid; grid-template-columns: 36px 1fr; grid-template-rows: 1fr 26px; gap:8px; align-items:stretch;"></div>
+                </div>
+                <div style="background:var(--bg-card); padding:20px; border-radius:12px; box-shadow:0 5px 20px var(--shadow); border:1px solid var(--border-color);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <strong style="color:var(--brand-gold);">Top Risks</strong>
+                        <span style="color:var(--text-sub); font-size:0.85em;">Highest priority</span>
+                    </div>
+                    <div id="top-risks" style="display:flex; flex-direction:column; gap:10px;"></div>
+                </div>
+            </div>
+            <div style="margin-top:30px; background:var(--bg-card); padding:20px; border-radius:12px; box-shadow:0 5px 20px var(--shadow); border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <strong style="color:var(--brand-gold);">Risk Table</strong>
+                    <span style="color:var(--text-sub); font-size:0.85em;">Sorted by risk score</span>
+                </div>
+                <div id="risk-table" style="overflow:auto;"></div>
+            </div>
+        </div>
+
+        <div id="review-view" class="view-container">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0; color:var(--brand-gold);">Review Table</h2>
+                <button class="main-btn" style="background:var(--bg-card); border:1px solid var(--brand-gold); color:var(--brand-gold);" onclick="exportReviewCsv()">Export CSV</button>
+            </div>
+            <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:20px; box-shadow:0 5px 20px var(--shadow);">
+                <div id="review-table-container" style="overflow:auto; max-height:70vh;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = "http://127.0.0.1:8000/api/v1";
+    let currentUser = localStorage.getItem('irmmf_user') || "";
+    let allQuestions = [], userResponses = {}, assessmentId = "", currentQIndex = 0, reachablePath = [];
+    let activeLogicReason = null, deferredQIds = new Set(), flaggedQIds = new Set(), myRadarChart = null, pendingResponse = null;
+    let pendingSelection = null;
+    let reviewRows = [];
+    let dashboardSoftSummary = null;
+    let lastServerState = null; // Stores the most recent response from /resume or /submit
+    let expandedDomain = null;
+    let overrideDepth = false;
+    let overrideDomains = new Set();
+    let baseReachablePath = [];
+    let intakeAnswers = [];
+    let intakeOptionTotal = 0;
+    let intakeQuestions = [];
+    let intakeIndex = 0;
+    let intakeDraft = {};
+    let benchmarkRows = [];
+    let requiresIntake = false;
+    let intakeCompleted = false;
+    let pendingStartTab = null;
+
+    const DEFAULT_EVIDENCE_CHECKS = [
+        { id: "freshness", label: "Updated in the last 12 months?" },
+        { id: "scope", label: "Coverage is organization-wide?" },
+        { id: "independence", label: "Independently reviewed?" },
+        { id: "sampling", label: "Verified via sampling or testing?" },
+        { id: "traceability", label: "Mapped to policy/standards?" },
+        { id: "ops_usage", label: "Used in operational decisions?" }
+    ];
+
+    const EVIDENCE_POLICIES = {
+        GOV_STD: { label: "Governance standard", checks: DEFAULT_EVIDENCE_CHECKS },
+        RISK_STD: { label: "Risk/targeting standard", checks: DEFAULT_EVIDENCE_CHECKS.slice(0, 5) },
+        OPS_STD: { label: "Operational standard", checks: DEFAULT_EVIDENCE_CHECKS },
+        CULT_SOFT: { label: "Culture soft", checks: DEFAULT_EVIDENCE_CHECKS.slice(0, 4) },
+        LEG_STRICT: { label: "Legal strict", checks: DEFAULT_EVIDENCE_CHECKS },
+        HUMAN_BIO: { label: "Human bio-social", checks: DEFAULT_EVIDENCE_CHECKS.slice(0, 5) },
+        FRICTION_AI: { label: "Friction/AI arbitrage", checks: DEFAULT_EVIDENCE_CHECKS },
+        TECH_STRICT: { label: "Technical strict", checks: DEFAULT_EVIDENCE_CHECKS }
+    };
+
+    // --- THEME LOGIC ---
+    function initTheme() {
+        const stored = localStorage.getItem('theme');
+        if (stored) {
+            document.documentElement.setAttribute('data-theme', stored);
+            updateThemeIcon(stored);
+        }
+    }
+    
+    function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme');
+        const next = current === 'light' ? 'dark' : 'light';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        updateThemeIcon(next);
+        if(myRadarChart) loadResults(); // Re-render chart to fix grid colors
+    }
+
+    function updateThemeIcon(theme) {
+        const btn = document.getElementById('theme-icon');
+        btn.innerText = theme === 'light' ? '🌙' : '☀️';
+    }
+    
+    initTheme(); // Run on load
+
+    function setupSidebarControls() {
+        const sidebar = document.getElementById('sidebar');
+        const handle = document.getElementById('sidebar-handle');
+        const toggle = document.getElementById('sidebar-toggle');
+        const savedWidth = localStorage.getItem('sidebar_width');
+        const collapsed = localStorage.getItem('sidebar_collapsed') === 'true';
+        if (savedWidth) sidebar.style.width = savedWidth + "px";
+        if (collapsed) sidebar.classList.add('collapsed');
+
+        toggle.onclick = () => {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebar_collapsed', sidebar.classList.contains('collapsed'));
+        };
+
+        let dragging = false;
+        handle.addEventListener('mousedown', (e) => {
+            dragging = true;
+            document.body.style.userSelect = 'none';
+            e.preventDefault();
+        });
+        window.addEventListener('mouseup', () => {
+            dragging = false;
+            document.body.style.userSelect = '';
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!dragging || sidebar.classList.contains('collapsed')) return;
+            const minW = 220;
+            const maxW = 480;
+            const nextW = Math.min(maxW, Math.max(minW, e.clientX));
+            sidebar.style.width = nextW + "px";
+            localStorage.setItem('sidebar_width', nextW);
+        });
+    }
+
+async function prepareMode(mode) {
+    const idInput = document.getElementById('assessment-id-input');
+
+    if (!currentUser) {
+        showDashboardEntry("Login required. Please sign in from the Command Center.");
+        return;
+    }
+
+    if (mode === 'new') {
+        try {
+            const resp = await fetch(`${API_BASE}/assessment/new`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUser || null })
+            });
+            const data = await resp.json();
+            if (idInput) idInput.value = data.assessment_id;
+            setSavedAssessmentId(data.assessment_id);
+            initSession();
+        } catch (e) {
+            console.error(e);
+            showDashboardEntry("Server Error: Could not generate secure ID. Is the backend running?");
+        }
+        return;
+    }
+
+    const saved = getSavedAssessmentId();
+    if (!saved) {
+        showDashboardEntry("No saved assessment found for this user.");
+        return;
+    }
+    if (idInput) idInput.value = saved;
+    initSession();
+}
+
+    function loadOverrideDomains() {
+        if (!assessmentId) return;
+        const raw = localStorage.getItem(`override_domains_${assessmentId}`);
+        if (!raw) return;
+        try {
+            const list = JSON.parse(raw);
+            if (Array.isArray(list)) overrideDomains = new Set(list);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function persistOverrideDomains() {
+        if (!assessmentId) return;
+        localStorage.setItem(`override_domains_${assessmentId}`, JSON.stringify([...overrideDomains]));
+    }
+
+    async function syncOverrideDepth() {
+        if (!assessmentId) return;
+        const desired = overrideDomains.size > 0;
+        if (overrideDepth === desired) return;
+        overrideDepth = desired;
+        try {
+            await fetch(`${API_BASE}/assessment/${assessmentId}/override`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({override_depth: overrideDepth})
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function isOverrideQuestion(qId) {
+        const q = allQuestions.find(x => x.q_id === qId);
+        if (!q) return false;
+        return overrideDomains.has(q.domain) && !baseReachablePath.includes(qId);
+    }
+
+    function toggleDomainOverride(domain, enabled) {
+        if (enabled) overrideDomains.add(domain);
+        else overrideDomains.delete(domain);
+        persistOverrideDomains();
+        syncOverrideDepth();
+        applyOverridePath();
+        if (document.getElementById('assessment-view').style.display === 'block') {
+            renderQuestion();
+            renderSidebar();
+        }
+        renderDashboard();
+    }
+
+    function applyOverridePath() {
+        if (overrideDomains.size === 0) {
+            reachablePath = baseReachablePath.slice();
+            return;
+        }
+        const baseSet = new Set(baseReachablePath);
+        const extra = allQuestions
+            .filter(q => overrideDomains.has(q.domain) && !baseSet.has(q.q_id))
+            .sort((a, b) => (a.domain || "").localeCompare(b.domain || "") || (a.q_id || "").localeCompare(b.q_id || ""));
+        reachablePath = baseReachablePath.concat(extra.map(q => q.q_id));
+        if (!reachablePath.includes(reachablePath[currentQIndex])) {
+            currentQIndex = 0;
+        }
+    }
+
+    function applyState(state) {
+        userResponses = state.responses || {};
+        baseReachablePath = state.reachable_path || [];
+        reachablePath = baseReachablePath.slice();
+        if (state.deferred_ids) deferredQIds = new Set(state.deferred_ids);
+        if (state.flagged_ids) flaggedQIds = new Set(state.flagged_ids);
+        lastServerState = state;
+        overrideDepth = !!state.override_depth;
+        loadOverrideDomains();
+        applyOverridePath();
+        dashboardSoftSummary = state.dashboard_soft || null;
+        renderContinueCard(state.next_best_qid, state.next_reason);
+    }
+
+    function getSavedAssessmentId() {
+        if (currentUser) {
+            const byUser = localStorage.getItem(`assessment_id_${currentUser}`);
+            if (byUser) return byUser;
+        }
+        return localStorage.getItem('assessment_id') || null;
+    }
+
+    function setSavedAssessmentId(value) {
+        if (currentUser) {
+            localStorage.setItem(`assessment_id_${currentUser}`, value);
+        }
+        localStorage.setItem('assessment_id', value);
+    }
+
+    function updateAssessmentLinks() {
+        if (!assessmentId) return;
+        document.querySelectorAll('.left-nav a.side-btn').forEach(link => {
+            const href = link.getAttribute('href') || "";
+            if (!href.startsWith('assessment.html#')) return;
+            const tab = href.split('#')[1]?.split('&')[0] || "";
+            if (!tab) return;
+            link.setAttribute('href', `assessment.html#${tab}&aid=${encodeURIComponent(assessmentId)}`);
+        });
+    }
+
+    function showDashboardEntry(message) {
+        document.getElementById('app-header').style.display = 'flex';
+        document.querySelectorAll('.view-container').forEach(v => v.style.display = 'none');
+        document.getElementById('dashboard-view').style.display = 'block';
+        document.getElementById('sidebar').style.display = 'none';
+        document.getElementById('sidebar-handle').style.display = 'none';
+        updateDashboardStatus(message || "");
+        setRoute('dashboard');
+    }
+
+    function updateDashboardStatus(message) {
+        const status = document.getElementById('assessment-status');
+        if (!status) return;
+
+        const hasAssessment = !!assessmentId;
+        const hasIntakeProgress = (intakeAnswers || []).some(a => a.value != null && a.value !== "");
+        const hasAssessmentProgress = Object.keys(userResponses || {}).length > 0;
+        const isFresh = hasAssessment && !hasIntakeProgress && !hasAssessmentProgress;
+        const intakeSection = document.getElementById('dashboard-intake');
+        const intakeTile = document.getElementById('intake-tile');
+        const overrideBox = document.getElementById('override-controls');
+        const roleBox = document.getElementById('role-controls');
+        const preview = document.getElementById('results-preview');
+        const sections = ['dash-soft', 'dash-deferred', 'dash-review', 'dash-ongoing', 'dash-not-started', 'dash-completed'];
+        const showIntake = hasAssessment && requiresIntake;
+
+        sections.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = (!hasAssessment || showIntake || isFresh) ? 'none' : '';
+        });
+        if (intakeSection) intakeSection.style.display = showIntake ? 'block' : 'none';
+        if (intakeTile) intakeTile.style.display = hasAssessment ? 'block' : 'none';
+        if (overrideBox) overrideBox.style.display = (!hasAssessment || showIntake) ? 'none' : 'block';
+        if (roleBox) roleBox.style.display = (!hasAssessment || showIntake) ? 'none' : 'block';
+        if (preview) preview.style.display = (!hasAssessment || showIntake) ? 'block' : 'none';
+
+        if (!hasAssessment) {
+            status.innerHTML = `
+                <div class="id-card" style="margin-bottom:0;">
+                    <h2 style="margin:0 0 10px 0;">Assessment Dashboard</h2>
+                    <p style="color:var(--text-sub); margin:0 0 18px 0;">No assessment created yet. Start a new one to unlock the workflow.</p>
+                    ${message ? `<div style="color:var(--warn); margin-bottom:12px;">${message}</div>` : ""}
+                    <button class="main-btn" style="background:var(--brand-gold); color:var(--brand-navy);" onclick="prepareMode('new')">Create Assessment</button>
+                </div>
+            `;
+            return;
+        }
+
+        if (showIntake) {
+            status.innerHTML = `
+                <div class="id-card" style="margin-bottom:0;">
+                    <h2 style="margin:0 0 8px 0;">Intake Required</h2>
+                    <p style="color:var(--text-sub); margin:0;">Complete intake before kick-start and adaptive routing unlock.</p>
+                    <div style="margin-top:14px;">
+                        <button class="main-btn" style="background:var(--brand-gold); color:var(--brand-navy);" onclick="switchTab('intake')">Start Intake</button>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        status.innerHTML = `
+            <div class="id-card" style="margin-bottom:0; display:flex; align-items:center; justify-content:space-between; gap:16px;">
+                <div>
+                    <h2 style="margin:0 0 6px 0;">Assessment Ready</h2>
+                    <p style="color:var(--text-sub); margin:0;">Continue where you left off or review progress.</p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="main-btn" style="background:var(--brand-gold); color:var(--brand-navy);" onclick="switchTab('assessment')">${isFresh ? 'Start Assessment' : 'Continue Assessment'}</button>
+                    <button class="main-btn" style="background:var(--bg-card); color:var(--text-main); border:1px solid var(--border-color);" onclick="switchTab('results')">View Dashboard</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- P0-03 UPDATED INIT SESSION ---
+    async function initSession() {
+        const idInput = document.getElementById('assessment-id-input');
+        let val = idInput ? idInput.value.trim() : "";
+        if (!val) {
+            const saved = getSavedAssessmentId();
+            if (!saved) {
+                showDashboardEntry("No assessment available for this user yet.");
+                return;
+            }
+            val = saved;
+            if (idInput) idInput.value = saved;
+        }
+        assessmentId = val;
+
+        try {
+            const [qResp, rResp, intakeResp, intakeStartResp] = await Promise.all([
+                fetch(`${API_BASE}/questions/all`),
+                fetch(`${API_BASE}/assessment/${assessmentId}/resume`),
+                fetch(`${API_BASE}/intake/${assessmentId}`),
+                fetch(`${API_BASE}/intake/start`)
+            ]);
+            
+            if(!qResp.ok || !rResp.ok) throw new Error("API Error");
+
+            allQuestions = await qResp.json();
+            const state = await rResp.json();
+            if (intakeResp.ok) {
+                intakeAnswers = await intakeResp.json();
+            } else {
+                intakeAnswers = [];
+            }
+            if (intakeStartResp.ok) {
+                const intakeQs = await intakeStartResp.json();
+                intakeOptionTotal = Array.isArray(intakeQs) ? intakeQs.length : 0;
+            }
+            const intakeFlag = localStorage.getItem(`intake_completed_${assessmentId}`);
+            intakeCompleted = intakeFlag === "1" || (intakeAnswers || []).length > 0;
+            applyState(state);
+            setupSidebarControls();
+            document.getElementById('app-header').style.display = 'flex';
+            if (currentUser) setSavedAssessmentId(assessmentId);
+            updateAssessmentLinks();
+
+            const answeredCount = (intakeAnswers || []).filter(a => a.value != null && a.value !== "").length;
+            requiresIntake = !(intakeCompleted || answeredCount > 0);
+
+            if (requiresIntake) {
+                if (pendingStartTab === 'intake') {
+                    pendingStartTab = null;
+                    switchTab('intake');
+                    return;
+                }
+                showDashboardEntry();
+                return;
+            }
+
+            const nextTab = getTabFromHash();
+            switchTab(nextTab);
+            
+        } catch(e) {
+            console.error(e);
+            showDashboardEntry("Connection Error. Is Uvicorn running?");
+        }
+    }
+
+    // --- P0-03 CONTINUE CARD LOGIC ---
+    function renderContinueCard(nextId, reason) {
+        return;
+        const dashView = document.getElementById('dashboard-view');
+        const existingCard = document.getElementById('continue-card');
+        if(existingCard) existingCard.remove();
+
+        if (!nextId || requiresIntake) return; // All Done or intake gating
+
+        const q = allQuestions.find(x => x.q_id === nextId);
+        if (!q) return;
+
+        // Uses Theme Variables for styling
+        const cardHTML = `
+            <div id="continue-card" style="background:var(--bg-card); border-left:5px solid var(--brand-gold); padding:20px; border-radius:8px; margin-bottom:30px; box-shadow:0 5px 20px var(--shadow); display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border-color);">
+                <div>
+                    <div style="color:var(--brand-gold); font-size:0.85em; text-transform:uppercase; letter-spacing:1px; font-weight:bold; margin-bottom:5px;">${reason || 'Recommended Next Step'}</div>
+                    <h3 style="margin:0; color:var(--text-main); font-family:'League Spartan'; font-size:1.3em;">${q.question_title || q.q_id}</h3>
+                    <div style="color:var(--text-sub); font-size:0.9em; margin-top:5px;">${q.domain}</div>
+                </div>
+                <button class="main-btn" style="background:var(--brand-gold); color:var(--brand-navy); font-size:0.95em;" onclick="jumpToQuestion('${nextId}')">
+                    Continue &rarr;
+                </button>
+            </div>
+        `;
+        
+        // Insert at the top of dashboard view
+        dashView.insertAdjacentHTML('afterbegin', cardHTML);
+    }
+
+    function setRoute(tab) {
+        const aid = assessmentId ? `&aid=${encodeURIComponent(assessmentId)}` : "";
+        const next = `#${tab}${aid}`;
+        if (location.hash !== next) {
+            history.replaceState(null, "", next);
+        }
+    }
+
+    function openDwf() {
+        const aid = assessmentId || getAidFromHash() || localStorage.getItem('assessment_id') || "";
+        const target = aid ? `dynamic_workforce.html#aid=${encodeURIComponent(aid)}` : "dynamic_workforce.html";
+        window.location.href = target;
+    }
+
+    function getTabFromHash() {
+        const raw = (location.hash || "").replace("#", "");
+        const [tab] = raw.split("&");
+        if (["dashboard", "assessment", "results", "review", "risks", "intake"].includes(tab)) {
+            return tab;
+        }
+        return "dashboard";
+    }
+
+    function getAidFromHash() {
+        const raw = (location.hash || "").replace("#", "");
+        const parts = raw.split("&");
+        const aidPart = parts.find(p => p.startsWith("aid="));
+        if (!aidPart) return null;
+        return decodeURIComponent(aidPart.replace("aid=", ""));
+    }
+
+    function getQidFromHash() {
+        const raw = (location.hash || "").replace("#", "");
+        const parts = raw.split("&");
+        const qidPart = parts.find(p => p.startsWith("qid="));
+        if (!qidPart) return null;
+        return decodeURIComponent(qidPart.replace("qid=", ""));
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.view-container').forEach(v => v.style.display = 'none');
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        const view = document.getElementById(tab + '-view');
+        if (!view) {
+            showDashboardEntry("Requested view is unavailable.");
+            return;
+        }
+        view.style.display = 'block';
+        document.getElementById('btn-seg-maturity').classList.add('active');
+        const showSidebar = (tab === 'assessment');
+        document.getElementById('sidebar').style.display = showSidebar ? 'flex' : 'none';
+        document.getElementById('sidebar-handle').style.display = showSidebar ? 'block' : 'none';
+        
+        if(tab === 'dashboard') {
+            loadIntakeOptions();
+            renderDashboard();
+            bindBenchmarkFilters();
+        }
+        if(tab === 'assessment') {
+            const lockMsg = document.getElementById('assessment-intake-lock');
+            const lockText = document.getElementById('assessment-lock-text');
+            if (requiresIntake) {
+                if (lockMsg) lockMsg.style.display = 'block';
+                if (lockText) lockText.innerText = "Intake required. Complete at least one intake question to unlock the assessment flow.";
+                const qText = document.getElementById('q-text');
+                const qGuidance = document.getElementById('q-guidance');
+                const options = document.getElementById('options-area');
+                const qDomain = document.getElementById('q-domain');
+                const qId = document.getElementById('q-id');
+                if (qText) qText.innerText = "";
+                if (qGuidance) qGuidance.innerText = "";
+                if (options) options.innerHTML = "";
+                if (qDomain) qDomain.innerText = "";
+                if (qId) qId.innerText = "";
+                setRoute(tab);
+                setActiveSidebarLink();
+                return;
+            }
+            if (lockMsg) lockMsg.style.display = 'none';
+            const qidFromHash = getQidFromHash();
+            if (!reachablePath.length) {
+                if (lastServerState && lastServerState.next_best_qid && allQuestions.find(q => q.q_id === lastServerState.next_best_qid)) {
+                    reachablePath = [lastServerState.next_best_qid];
+                    currentQIndex = 0;
+                } else if (!allQuestions.length) {
+                    if (lockMsg) lockMsg.style.display = 'block';
+                    if (lockText) lockText.innerText = "No questions found. Run the question bank ingest and refresh.";
+                    return;
+                } else {
+                    if (lockMsg) lockMsg.style.display = 'block';
+                    if (lockText) lockText.innerText = "No reachable questions yet. Please refresh or restart the assessment.";
+                    return;
+                }
+            }
+            if (qidFromHash && reachablePath.includes(qidFromHash)) {
+                currentQIndex = reachablePath.indexOf(qidFromHash);
+            } else if (lastServerState && lastServerState.next_best_qid && reachablePath.includes(lastServerState.next_best_qid)) {
+                currentQIndex = reachablePath.indexOf(lastServerState.next_best_qid);
+            } else if (qidFromHash && !reachablePath.includes(qidFromHash) && allQuestions.find(q => q.q_id === qidFromHash)) {
+                jumpToQuestion(qidFromHash);
+                return;
+            } else if (reachablePath.length) {
+                currentQIndex = Math.max(0, Math.min(currentQIndex, reachablePath.length - 1));
+            }
+            if (reachablePath.length) {
+                renderQuestion();
+                renderSidebar();
+            }
+        }
+        if(tab === 'results') loadResults();
+        if(tab === 'risks') loadRisks();
+        if(tab === 'review') loadReviewTable();
+        if(tab === 'intake') loadIntakeQuestions();
+        if(tab === 'results') bindRadarControls();
+        setRoute(tab);
+        updateAssessmentLinks();
+        setActiveSidebarLink();
+    }
+
+    function setActiveSidebarLink() {
+        const links = document.querySelectorAll('.left-nav a.side-btn');
+        const current = location.pathname.split('/').pop() + (location.hash || "");
+        links.forEach(link => {
+            link.classList.remove('active');
+            const href = link.getAttribute('href') || "";
+            if (href === current || (href.includes('#') && current.endsWith(href.split('#')[1]) && href.startsWith(current.split('#')[0] || ""))) {
+                link.classList.add('active');
+            }
+        });
+        try {
+            localStorage.setItem('irmmf_sidebar_last', current);
+        } catch (e) {}
+    }
+
+    function restoreSidebarState() {
+        try {
+            const last = localStorage.getItem('irmmf_sidebar_last');
+            if (last && !location.hash && location.pathname.endsWith('assessment.html')) {
+                const target = last.split('#')[1];
+                if (target) switchTab(target);
+            }
+        } catch (e) {}
+    }
+
+    function toggleNavMenu(menuId) {
+        const menu = document.getElementById(menuId);
+        if (!menu) return;
+        document.querySelectorAll('.nav-menu').forEach(m => {
+            if (m !== menu) m.style.display = 'none';
+        });
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    document.addEventListener('click', (e) => {
+        const dropdowns = document.querySelectorAll('.nav-dropdown');
+        let inside = false;
+        dropdowns.forEach(d => { if (d.contains(e.target)) inside = true; });
+        if (!inside) {
+            document.querySelectorAll('.nav-menu').forEach(m => m.style.display = 'none');
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target && e.target.matches('.left-nav a.side-btn')) {
+            setActiveSidebarLink();
+        }
+    });
+
+    function renderDashboard() {
+        if (!assessmentId) {
+            updateDashboardStatus();
+            return;
+        }
+        const hasIntakeProgress = (intakeAnswers || []).some(a => a.value != null && a.value !== "");
+        const hasAssessmentProgress = Object.keys(userResponses || {}).length > 0;
+        const isFresh = !hasIntakeProgress && !hasAssessmentProgress;
+        const domains = [...new Set(allQuestions.map(q => q.domain))].sort();
+        const grids = { ongoing: document.getElementById('grid-ongoing'), pending: document.getElementById('grid-not-started'), completed: document.getElementById('grid-completed'), review: document.getElementById('grid-review'), soft: document.getElementById('grid-soft') };
+        Object.values(grids).forEach(g => { if (g) g.innerHTML = ""; });
+        let counts = { ongoing: 0, completed: 0, deferred: deferredQIds.size, review: flaggedQIds.size };
+        const deferredSummary = document.getElementById('deferred-summary');
+
+        const intakeTile = document.getElementById('intake-tile');
+        if (intakeTile) {
+            const entries = intakeAnswers || [];
+            const answered = entries.length;
+            const total = intakeOptionTotal || Math.max(1, entries.length);
+            const pct = Math.round((answered / total) * 100);
+            intakeTile.innerHTML = `
+                <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:14px 16px; box-shadow:0 5px 20px var(--shadow);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="color:var(--text-main); font-weight:600;">Intake Summary</div>
+                        <span style="color:var(--text-sub); font-size:0.85em;">${answered}/${total} completed</span>
+                    </div>
+                    <div class="prog-bg" style="height:6px; margin-bottom:10px;">
+                        <div class="prog-fill" style="width:${pct}%; background:var(--brand-gold);"></div>
+                    </div>
+                    <div style="color:var(--text-sub); font-size:0.85em;">Complete intake to refine routing and benchmarks.</div>
+                    <div style="margin-top:12px;">
+                        <button class="main-btn" style="background:var(--bg-dark); color:var(--text-sub); border:1px solid var(--border-color);" onclick="switchTab('intake')">Continue Intake</button>
+                    </div>
+                </div>
+            `;
+        }
+        if (isFresh) {
+            ['dash-soft', 'dash-deferred', 'dash-review', 'dash-ongoing', 'dash-not-started', 'dash-completed'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            return;
+        }
+
+
+        const roleBox = document.getElementById('role-controls');
+        if (roleBox) {
+            roleBox.innerHTML = `
+                <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:14px 16px; box-shadow:0 5px 20px var(--shadow); display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="color:var(--text-main); font-weight:600;">Role lens (view-only)</div>
+                        <div style="color:var(--text-sub); font-size:0.85em;">Filters will map to role tags once metadata is available.</div>
+                    </div>
+                    <select id="role-lens" style="background:var(--bg-dark); color:var(--text-main); border:1px solid var(--border-color); border-radius:8px; padding:6px 10px;">
+                        <option value="overall">Overall</option>
+                        <option value="ciso">CISO</option>
+                        <option value="ia">Internal Audit</option>
+                        <option value="hr">HR</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        const overrideBox = document.getElementById('override-controls');
+        if (overrideBox) {
+            overrideBox.innerHTML = `
+                <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:16px; box-shadow:0 5px 20px var(--shadow); display:flex; justify-content:space-between; align-items:center; gap:16px;">
+                    <div>
+                        <div style="color:var(--text-main); font-weight:600;">Explore deeper questions</div>
+                        <div style="color:var(--text-sub); font-size:0.85em;">Select domains to include deeper items. Overrides are excluded from benchmarks.</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <label style="display:flex; align-items:center; gap:8px; color:var(--text-main);">
+                            <input id="override-global-toggle" type="checkbox" ${overrideDomains.size ? "checked" : ""} />
+                            <span style="font-size:0.85em; color:var(--text-sub);">Enable</span>
+                        </label>
+                        <details style="background:var(--bg-dark); border:1px solid var(--border-color); border-radius:8px; padding:6px 10px;">
+                            <summary style="cursor:pointer; color:var(--text-main); font-size:0.85em;">Domains</summary>
+                            <div id="override-domain-list" style="margin-top:8px; display:flex; flex-direction:column; gap:6px; max-height:180px; overflow:auto;"></div>
+                        </details>
+                    </div>
+                </div>
+            `;
+            const list = document.getElementById('override-domain-list');
+            if (list) {
+                list.innerHTML = domains.map(d => `
+                    <label style="display:flex; align-items:center; gap:8px; color:var(--text-main); font-size:0.85em;">
+                        <input type="checkbox" data-domain="${d}" ${overrideDomains.has(d) ? "checked" : ""} />
+                        ${d}
+                    </label>
+                `).join("");
+            }
+            const globalToggle = document.getElementById('override-global-toggle');
+            if (globalToggle) {
+                globalToggle.addEventListener('change', (e) => {
+                    if (!e.target.checked) {
+                        overrideDomains.clear();
+                        persistOverrideDomains();
+                        syncOverrideDepth();
+                        applyOverridePath();
+                        renderDashboard();
+                        if (document.getElementById('assessment-view').style.display === 'block') {
+                            renderQuestion();
+                            renderSidebar();
+                        }
+                    }
+                });
+            }
+            overrideBox.querySelectorAll('input[data-domain]').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const domain = e.target.getAttribute('data-domain');
+                    toggleDomainOverride(domain, e.target.checked);
+                    const global = document.getElementById('override-global-toggle');
+                    if (global) global.checked = overrideDomains.size > 0;
+                });
+            });
+        }
+
+        if (dashboardSoftSummary && Array.isArray(dashboardSoftSummary.axes) && dashboardSoftSummary.axes.length > 0) {
+            grids.soft.innerHTML = `<div style="grid-column:1/-1; color:var(--text-sub); font-size:0.9em;">Overall: ${dashboardSoftSummary.overall || 0}%</div>`;
+            dashboardSoftSummary.axes.forEach(a => {
+                grids.soft.innerHTML += `<div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <strong style="color:var(--text-main); font-size:0.95em;">${a.axis}</strong>
+                        <span style="color:var(--brand-gold); font-weight:600;">${a.score}%</span>
+                    </div>
+                    <div class="prog-bg" style="height:6px;"><div class="prog-fill" style="width:${a.score}%; background:var(--brand-gold);"></div></div>
+                </div>`;
+            });
+        }
+
+        if (deferredSummary) {
+            const count = deferredQIds.size;
+            deferredSummary.innerHTML = count
+                ? `<div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+                        <div>Deferred questions are hidden here. Answering all questions improves routing accuracy and benchmark clarity.</div>
+                        <div style="color:var(--warn); font-weight:600;">${count} deferred</div>
+                   </div>`
+                : "No deferred questions.";
+        }
+
+        flaggedQIds.forEach(qId => {
+            const q = allQuestions.find(x => x.q_id === qId);
+            grids.review.innerHTML += `<div class="domain-card ongoing" style="border-top-color:var(--brand-gold);" onclick="jumpToQuestion('${qId}')"><h3 style="margin:0;">${q.domain}</h3><div class="domain-meta">ID: ${qId} | <b>Review</b></div></div>`;
+        });
+
+        domains.forEach(d => {
+            const domainQs = allQuestions.filter(q => q.domain === d);
+            // Count only non-deferred answers
+            const answeredCount = domainQs.filter(q => userResponses[q.q_id] && !deferredQIds.has(q.q_id)).length;
+            const reachableInDomain = reachablePath.filter(rId => domainQs.find(dq => dq.q_id === rId));
+            const isComplete = reachableInDomain.length > 0 && reachableInDomain.every(rId => userResponses[rId] && !deferredQIds.has(rId));
+            
+            let status = (answeredCount > 0) ? (isComplete ? 'completed' : 'ongoing') : 'not-started';
+            const locked = requiresIntake;
+            if (status !== 'not-started') counts[status]++;
+
+            const pct = Math.round((answeredCount / domainQs.length) * 100);
+            const isOverrideDomain = overrideDomains.has(d);
+            const lockBadge = locked ? `<div style="margin-top:8px; color:var(--warn); font-size:0.75em;">Complete intake to unlock</div>` : "";
+            const overrideToggle = locked
+                ? `<span style="font-size:0.75em; color:var(--text-sub);">Locked</span>`
+                : `<label style="display:flex; align-items:center; gap:6px; font-size:0.75em; color:${isOverrideDomain ? 'var(--warn)' : 'var(--text-sub)'};" onclick="event.stopPropagation();">
+                        <input type="checkbox" ${isOverrideDomain ? "checked" : ""} onchange="toggleDomainOverride('${d}', this.checked); event.stopPropagation();" />
+                        Explore deeper
+                    </label>`;
+            const cardHtml = `<div class="domain-card ${status} ${locked ? 'locked' : ''}" ${locked ? "" : `onclick="startDomain('${d}')"`} style="${locked ? "opacity:0.55; cursor:not-allowed;" : ""}">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                    <h3>${d}</h3>
+                    ${overrideToggle}
+                </div>
+                <div class="prog-bg"><div class="prog-fill" style="width: ${status === 'completed' ? '100%' : pct + '%'}"></div></div>
+                <div class="domain-meta">${status === 'completed' ? 'Path Complete' : '~' + (domainQs.length - answeredCount) + ' Potential Remaining'}</div>
+                ${lockBadge}
+            </div>`;
+            
+            if (status === 'ongoing') grids.ongoing.innerHTML += cardHtml;
+            else if (status === 'completed') grids.completed.innerHTML += cardHtml;
+            else grids.pending.innerHTML += cardHtml;
+        });
+
+        document.getElementById('dash-soft').style.display = (dashboardSoftSummary && dashboardSoftSummary.axes && dashboardSoftSummary.axes.length) ? 'block' : 'none';
+        document.getElementById('dash-deferred').style.display = counts.deferred ? 'block' : 'none';
+        document.getElementById('dash-review').style.display = counts.review ? 'block' : 'none';
+        document.getElementById('dash-ongoing').style.display = counts.ongoing ? 'block' : 'none';
+        document.getElementById('dash-completed').style.display = counts.completed ? 'block' : 'none';
+    }
+
+    async function loadIntakeOptions() {
+        try {
+            if (intakeQuestions.length) {
+                intakeOptionTotal = intakeQuestions.length;
+                return;
+            }
+            const resp = await fetch(`${API_BASE}/intake/start`);
+            const questions = await resp.json();
+            intakeOptionTotal = Array.isArray(questions) ? questions.length : 0;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function hydrateIntakeDraft() {
+        intakeDraft = {};
+        (intakeAnswers || []).forEach(row => {
+            if (row.value != null && row.value !== "") {
+                intakeDraft[row.intake_q_id] = row.value;
+            }
+        });
+    }
+
+    function findFirstUnansweredIntakeIndex() {
+        for (let i = 0; i < intakeQuestions.length; i++) {
+            const qid = intakeQuestions[i].intake_q_id;
+            const val = intakeDraft[qid];
+            if (!val) return i;
+        }
+        return Math.max(0, intakeQuestions.length - 1);
+    }
+
+    function getIntakeAnswer(qid) {
+        return intakeDraft[qid] || "";
+    }
+
+    function setIntakeAnswer(qid, value) {
+        if (value == null || value === "") delete intakeDraft[qid];
+        else intakeDraft[qid] = value;
+    }
+
+    function updateIntakeProgress() {
+        const answered = Object.keys(intakeDraft).filter(k => intakeDraft[k] !== "").length;
+        const total = intakeQuestions.length;
+        const progress = document.getElementById('intake-progress');
+        if (progress) {
+            progress.innerText = total ? `${answered}/${total} completed` : "";
+        }
+        intakeOptionTotal = total;
+        requiresIntake = !(intakeCompleted || answered > 0);
+    }
+
+    async function loadIntakeQuestions() {
+        const flow = document.getElementById('intake-flow');
+        if (!flow) return;
+        try {
+            const resp = await fetch(`${API_BASE}/intake/start`);
+            if (!resp.ok) {
+                const detail = await resp.text();
+                flow.innerHTML = `Error: Intake service responded with ${resp.status}. ${detail || ""}`;
+                return;
+            }
+            const questions = await resp.json();
+            if (!Array.isArray(questions) || questions.length === 0) {
+                flow.innerHTML = "No intake questions found. Run the question bank ingest and restart the API.";
+                return;
+            }
+            intakeQuestions = questions;
+            hydrateIntakeDraft();
+            intakeIndex = findFirstUnansweredIntakeIndex();
+            renderIntakeQuestion();
+        } catch (e) {
+            flow.innerHTML = "Error: Intake service is offline. Please refresh after restarting the API.";
+        }
+    }
+
+    function renderIntakeQuestion() {
+        const q = intakeQuestions[intakeIndex];
+        if (!q) return;
+        const section = document.getElementById('intake-section');
+        const question = document.getElementById('intake-question');
+        const guidance = document.getElementById('intake-guidance');
+        const options = document.getElementById('intake-options');
+        const inputWrap = document.getElementById('intake-input');
+        const nextBtn = document.getElementById('intake-next-btn');
+
+        if (section) section.innerText = q.section || "Intake";
+        if (question) question.innerText = q.question_text || q.intake_q_id;
+        if (guidance) guidance.innerText = q.guidance || "";
+
+        if (options) options.innerHTML = "";
+        if (inputWrap) {
+            inputWrap.innerHTML = "";
+            inputWrap.style.display = 'none';
+        }
+        if (nextBtn) {
+            nextBtn.disabled = false;
+            nextBtn.style.display = 'inline-flex';
+            nextBtn.innerText = (intakeIndex >= intakeQuestions.length - 1) ? "Finish Intake" : "Save & Continue";
+        }
+
+        const inputType = (q.input_type || "").toLowerCase();
+        const hasOptions = Array.isArray(q.options) && q.options.length;
+        const currentValue = getIntakeAnswer(q.intake_q_id);
+
+        if (inputType === "single" && hasOptions) {
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                const selected = currentValue === opt.value;
+                btn.className = `opt-btn ${selected ? 'selected' : ''}`;
+                btn.innerHTML = `<b>${opt.value}</b>`;
+                btn.onclick = async () => {
+                    setIntakeAnswer(q.intake_q_id, opt.value);
+                    await submitIntakeAnswers(intakeDraft);
+                    nextIntakeQuestion();
+                };
+                options.appendChild(btn);
+            });
+            if (nextBtn) nextBtn.style.display = 'none';
+        } else if (inputType === "multi" && hasOptions) {
+            inputWrap.style.display = 'flex';
+            const values = currentValue ? currentValue.split(",").map(v => v.trim()).filter(Boolean) : [];
+            q.options.forEach(opt => {
+                const item = document.createElement('label');
+                const checked = values.includes(opt.value);
+                item.style.cssText = "display:flex; align-items:center; gap:8px;";
+                item.innerHTML = `<input type="checkbox" value="${opt.value}" ${checked ? "checked" : ""} /> ${opt.value}`;
+                inputWrap.appendChild(item);
+            });
+        } else {
+            inputWrap.style.display = 'flex';
+            const input = document.createElement('input');
+            input.type = inputType === "number" ? "number" : (inputType === "date" ? "date" : "text");
+            input.value = currentValue;
+            input.style.cssText = "padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-main);";
+            inputWrap.appendChild(input);
+        }
+
+        updateIntakeProgress();
+        const progress = document.getElementById('intake-progress');
+        if (progress) {
+            progress.innerText = `${intakeIndex + 1} / ${intakeQuestions.length} • ${progress.innerText.replace(' completed', '')} completed`;
+        }
+    }
+
+    function prevIntakeQuestion() {
+        if (intakeIndex > 0) {
+            intakeIndex -= 1;
+            renderIntakeQuestion();
+        }
+    }
+
+    function nextIntakeQuestion() {
+        if (intakeIndex < intakeQuestions.length - 1) {
+            intakeIndex += 1;
+            renderIntakeQuestion();
+            return;
+        }
+        completeIntakeFlow();
+    }
+
+    async function saveIntakeAndNext() {
+        const q = intakeQuestions[intakeIndex];
+        if (!q) return;
+        const inputType = (q.input_type || "").toLowerCase();
+        if (inputType === "multi") {
+            const values = [];
+            document.querySelectorAll('#intake-input input[type="checkbox"]').forEach(cb => {
+                if (cb.checked) values.push(cb.value);
+            });
+            setIntakeAnswer(q.intake_q_id, values.join(","));
+        } else {
+            const input = document.querySelector('#intake-input input');
+            if (input) setIntakeAnswer(q.intake_q_id, input.value);
+        }
+        await submitIntakeAnswers(intakeDraft);
+        nextIntakeQuestion();
+    }
+
+    function deferIntakeQuestion() {
+        nextIntakeQuestion();
+    }
+
+    function completeIntakeFlow() {
+        switchTab('dashboard');
+    }
+
+    async function submitIntakeAnswers(answers) {
+        if (!assessmentId) return alert("No active assessment ID.");
+        const wasRequired = requiresIntake;
+        try {
+            const resp = await fetch(`${API_BASE}/intake/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assessment_id: assessmentId, answers })
+            });
+            const res = await resp.json();
+            intakeAnswers = Object.keys(answers).map(k => ({ intake_q_id: k, value: answers[k] })).filter(x => x.value);
+            const result = document.getElementById('intake-result');
+            if (result) {
+                result.innerHTML = `
+                    <div style="border:1px solid var(--border-color); border-radius:10px; padding:12px; margin-top:10px;">
+                        <div style="color:var(--text-main); font-weight:600;">Suggested Depth: ${res.depth_suggestion || "Core"}</div>
+                        <div style="color:var(--text-sub); font-size:0.85em; margin-top:6px;">Benchmark tags captured.</div>
+                    </div>
+                `;
+            }
+            updateIntakeProgress();
+            intakeCompleted = true;
+            if (assessmentId) {
+                localStorage.setItem(`intake_completed_${assessmentId}`, "1");
+                setSavedAssessmentId(assessmentId);
+            }
+            if (wasRequired && !requiresIntake) {
+                if (document.getElementById('dashboard-view').style.display === 'block') {
+                    renderDashboard();
+                }
+            }
+        } catch (e) {
+            const result = document.getElementById('intake-result');
+            if (result) result.innerHTML = "<div style='color:var(--text-sub);'>Failed to save intake.</div>";
+        }
+    }
+
+    async function toggleReview(qId) {
+        const q = allQuestions.find(x => x.q_id === qId);
+        const aId = userResponses[qId];
+        if (!q || !aId) return;
+        const isFlagged = flaggedQIds.has(qId);
+        const score = getScoreForAnswer(qId, aId);
+        const res = await fetch(`${API_BASE}/assessment/submit`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                assessment_id: assessmentId,
+                q_id: qId,
+                a_id: aId,
+                score: score,
+                pack_id: q.domain,
+                origin: isOverrideQuestion(qId) ? "override" : "adaptive",
+                is_flagged: !isFlagged,
+                is_deferred: false
+            })
+        });
+        try {
+            const data = await res.json();
+            lastServerState = data;
+            if (data.flagged_ids) flaggedQIds = new Set(data.flagged_ids);
+        } catch (e) {
+            console.error(e);
+        }
+        if (isFlagged) flaggedQIds.delete(qId);
+        else flaggedQIds.add(qId);
+        renderDashboard();
+        renderSidebar();
+    }
+
+    function startDomain(domain) {
+        const resumeId = reachablePath.find(id => { const q = allQuestions.find(x => x.q_id === id); return q.domain === domain && !userResponses[id]; });
+        jumpToQuestion(resumeId || allQuestions.find(q => q.domain === domain).q_id);
+    }
+
+    function jumpToQuestion(qId) {
+        if(!reachablePath.includes(qId)) reachablePath.push(qId);
+        currentQIndex = reachablePath.indexOf(qId);
+        switchTab('assessment');
+        renderQuestion();
+        renderSidebar();
+    }
+
+    function renderSidebar() {
+        const list = document.getElementById('sidebar-list'); 
+        list.innerHTML = "";
+        
+        const activeQId = reachablePath[currentQIndex];
+        const activeQ = allQuestions.find(q => q.q_id === activeQId);
+        const currentDomain = activeQ ? activeQ.domain : "";
+
+        // Auto-expand the domain we are currently working in
+        if (!expandedDomain) expandedDomain = currentDomain;
+
+        if (!lastServerState || !lastServerState.sidebar_context) return;
+
+        const baseMap = {};
+        lastServerState.sidebar_context.forEach(item => {
+            baseMap[item.q_id] = item;
+        });
+        const combined = overrideDomains.size
+            ? allQuestions.map(q => ({
+                q_id: q.q_id,
+                domain: q.domain,
+                title: q.question_title || q.q_id,
+                status: baseMap[q.q_id]?.status || (overrideDomains.has(q.domain) ? "override" : "hidden"),
+                reason: baseMap[q.q_id]?.reason
+            }))
+            : lastServerState.sidebar_context;
+
+        // 1. Group the server context by Domain
+        const domains = [...new Set(combined.map(item => item.domain))];
+
+        domains.forEach(domainName => {
+            const domainItems = combined.filter(i => i.domain === domainName);
+            if (domainItems.every(i => i.status === "hidden")) return; // Skip if all hidden
+
+            // 2. Create the Domain Header (The "Single Element")
+            const header = document.createElement('div');
+            const isExpanded = expandedDomain === domainName;
+            
+            header.className = `sb-domain-header ${isExpanded ? 'active' : ''}`;
+            header.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                    <span>${domainName}</span>
+                    <span style="font-size:0.8em; transform: rotate(${isExpanded ? '0' : '-90'}deg); transition: 0.2s;">▼</span>
+                </div>
+            `;
+            
+            header.onclick = () => {
+                expandedDomain = (expandedDomain === domainName) ? null : domainName;
+                renderSidebar();
+            };
+            list.appendChild(header);
+
+            // 3. If expanded, render the children (Questions)
+            if (isExpanded) {
+                const childContainer = document.createElement('div');
+                childContainer.className = "sb-child-container";
+
+                domainItems.forEach(item => {
+                    if (item.status === "hidden") return;
+
+                    const div = document.createElement('div');
+                    const isDef = deferredQIds.has(item.q_id);
+                    const isDone = userResponses[item.q_id] && !isDef;
+                    const isReviewed = flaggedQIds.has(item.q_id);
+                    const isActive = item.q_id === activeQId;
+
+                    div.className = `sb-item child ${item.status} ${isDone ? 'done' : ''} ${isDef ? 'deferred' : ''} ${isActive ? 'active' : ''}`;
+                    
+                    if (item.status === "locked") {
+                        div.setAttribute('data-reason', item.reason || "Gatekeeper required");
+                        div.innerHTML = `<span>🔒</span><div style="font-size:0.85em;">${item.title}</div>`;
+                    } else {
+                        const overrideBadge = isOverrideQuestion(item.q_id)
+                            ? `<span style="color:var(--warn); font-size:0.75em; border:1px solid var(--warn); border-radius:6px; padding:1px 6px;">override</span>`
+                            : "";
+                        div.innerHTML = `
+                            <span style="font-weight:bold; font-size:1.1em;">${isDone ? '✓' : (isDef ? '?' : '•')}</span>
+                            <div style="font-size:0.85em; flex:1;">${item.title}</div>
+                            ${overrideBadge}
+                            ${isDone ? `<button data-qid="${item.q_id}" class="review-flag" style="background:transparent; border:none; color:${isReviewed ? 'var(--brand-gold)' : 'var(--text-sub)'}; font-size:1.1em; cursor:pointer;" title="Mark for review">${isReviewed ? '★' : '☆'}</button>` : ''}
+                        `;
+                        div.onclick = (e) => {
+                            e.stopPropagation(); // Don't collapse the header
+                            jumpToQuestion(item.q_id);
+                        };
+                        const flagBtn = div.querySelector('.review-flag');
+                        if (flagBtn) {
+                            flagBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                toggleReview(item.q_id);
+                            });
+                        }
+                    }
+                    childContainer.appendChild(div);
+                });
+                list.appendChild(childContainer);
+            }
+        });
+    }
+
+    function renderQuestion() {
+        const qId = reachablePath[currentQIndex], q = allQuestions.find(x => x.q_id === qId);
+        const isOverride = isOverrideQuestion(qId);
+        document.getElementById('q-domain').innerText = q.domain;
+        document.getElementById('q-id').innerText = isOverride ? `${q.q_id} · override` : q.q_id;
+        document.getElementById('q-text').innerText = q.question_text; document.getElementById('q-guidance').innerText = q.guidance || "";
+        
+        const ctxBox = document.getElementById('logic-context-box');
+        ctxBox.style.display = activeLogicReason ? 'block' : 'none';
+        document.getElementById('logic-context-text').innerText = activeLogicReason || "";
+        
+        const area = document.getElementById('options-area'); area.innerHTML = "";
+        q.options.forEach(opt => {
+            const btn = document.createElement('button'); 
+            const isSelected = (userResponses[q.q_id] === opt.a_id && !deferredQIds.has(q.q_id)) ||
+                (pendingResponse && pendingResponse.q_id === q.q_id && pendingSelection === opt.a_id);
+            btn.className = `opt-btn ${isSelected ? 'selected' : ''}`;
+            btn.innerHTML = `<b>${opt.answer_text}</b>`;
+            btn.onclick = () => handleAnswer(q, opt); area.appendChild(btn);
+        });
+
+        renderEvidencePanel(q);
+    }
+
+    async function refreshState() {
+        const resp = await fetch(`${API_BASE}/assessment/${assessmentId}/resume`);
+        const state = await resp.json();
+        applyState(state);
+    }
+
+    window.addEventListener('load', () => {
+        setupSidebarControls();
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('new') === '1') {
+            pendingStartTab = 'intake';
+            startNewAssessment();
+            return;
+        }
+        const hashAid = getAidFromHash();
+        const saved = hashAid || getSavedAssessmentId();
+        if (saved) {
+            const idInput = document.getElementById('assessment-id-input');
+            idInput.value = saved;
+            initSession();
+            return;
+        }
+        showDashboardEntry();
+        setActiveSidebarLink();
+        restoreSidebarState();
+    });
+
+    window.addEventListener('hashchange', () => {
+        const nextTab = getTabFromHash();
+        switchTab(nextTab);
+    });
+
+    function exitSession() {
+        if (currentUser) {
+            localStorage.removeItem(`assessment_id_${currentUser}`);
+        }
+        localStorage.removeItem('assessment_id');
+        if (assessmentId) localStorage.removeItem(`intake_completed_${assessmentId}`);
+        assessmentId = "";
+        userResponses = {};
+        deferredQIds = new Set();
+        flaggedQIds = new Set();
+        reachablePath = [];
+        intakeAnswers = [];
+        intakeOptionTotal = 0;
+        intakeQuestions = [];
+        intakeIndex = 0;
+        intakeDraft = {};
+        overrideDomains.clear();
+        overrideDepth = false;
+        baseReachablePath = [];
+        pendingResponse = null;
+        pendingSelection = null;
+        lastServerState = null;
+        requiresIntake = false;
+        showDashboardEntry();
+        history.replaceState(null, "", location.pathname);
+    }
+
+    function startNewAssessment() {
+        exitSession();
+        prepareMode('new');
+    }
+
+    function getEvidencePolicy(policyId) {
+        if (!policyId) return null;
+        return EVIDENCE_POLICIES[policyId] || { label: policyId, checks: DEFAULT_EVIDENCE_CHECKS };
+    }
+
+    function renderEvidencePanel(q) {
+        const panel = document.getElementById('evidence-panel');
+        const checksContainer = document.getElementById('evidence-checks-inline');
+        const notesField = document.getElementById('evidence-notes');
+        const hasSelect = document.getElementById('evidence-has');
+        const label = document.getElementById('evidence-policy-label');
+
+        if (!pendingResponse || pendingResponse.q_id !== q.q_id || !q.evidence_policy_id) {
+            panel.style.display = 'none';
+            checksContainer.innerHTML = "";
+            notesField.value = "";
+            return;
+        }
+
+        const policy = getEvidencePolicy(q.evidence_policy_id);
+        label.innerText = policy ? policy.label : q.evidence_policy_id;
+        panel.style.display = 'block';
+        hasSelect.value = 'yes';
+
+        checksContainer.innerHTML = "";
+        (policy?.checks || DEFAULT_EVIDENCE_CHECKS).forEach(check => {
+            const row = document.createElement('label');
+            row.style.cssText = "display:flex; gap:12px; cursor:pointer; align-items:center; color:var(--text-main);";
+            row.innerHTML = `<input type="checkbox" data-check-id="${check.id}" style="transform:scale(1.2); accent-color:var(--brand-gold);"> <span>${check.label}</span>`;
+            checksContainer.appendChild(row);
+        });
+
+        hasSelect.onchange = () => {
+            const showChecks = hasSelect.value === 'yes';
+            checksContainer.style.display = showChecks ? 'flex' : 'none';
+        };
+        checksContainer.style.display = 'flex';
+    }
+
+    async function handleAnswer(q, opt) {
+        if (q.evidence_policy_id) {
+            pendingResponse = { q_id: q.q_id, a_id: opt.a_id, score: opt.base_score, domain: q.domain, policy_id: q.evidence_policy_id };
+            pendingSelection = opt.a_id;
+            renderQuestion();
+            return;
+        }
+        await finalSubmit(q.q_id, opt.a_id, opt.base_score, q.domain, null, null);
+    }
+
+    async function submitEvidencePanel() {
+        if (!pendingResponse) return;
+        const hasEvidence = document.getElementById('evidence-has').value === 'yes';
+        const checks = {};
+        if (hasEvidence) {
+            document.querySelectorAll('#evidence-checks-inline input[type="checkbox"]').forEach(cb => {
+                const id = cb.getAttribute('data-check-id');
+                checks[id] = cb.checked;
+            });
+        }
+        const evidencePayload = {
+            policy_id: pendingResponse.policy_id,
+            has_evidence: hasEvidence,
+            checks: checks,
+            notes: document.getElementById('evidence-notes').value || ""
+        };
+        await finalSubmit(
+            pendingResponse.q_id,
+            pendingResponse.a_id,
+            pendingResponse.score,
+            pendingResponse.domain,
+            null,
+            evidencePayload
+        );
+        pendingResponse = null;
+        pendingSelection = null;
+        renderQuestion();
+    }
+
+    async function finalSubmit(q_id, a_id, score, domain, confidence, evidencePayload) {
+        // Optimistic UI updates
+        userResponses[q_id] = a_id; 
+        deferredQIds.delete(q_id); // If answering, it's no longer deferred
+        renderQuestion();
+        
+        const res = await fetch(`${API_BASE}/assessment/submit`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                assessment_id: assessmentId, 
+                q_id: q_id, 
+                a_id: a_id, 
+                score: score, 
+                pack_id: domain, 
+                confidence: confidence,
+                evidence: evidencePayload,
+                origin: isOverrideQuestion(q_id) ? "override" : "adaptive",
+                is_deferred: false // Explicitly not deferred
+            })
+        });
+        
+        const data = await res.json();
+        lastServerState = data;
+        if (assessmentId) setSavedAssessmentId(assessmentId);
+        updateBenchmarkPlaceholders();
+        baseReachablePath = data.reachable_path || baseReachablePath;
+        applyOverridePath();
+        if (data.flagged_ids) flaggedQIds = new Set(data.flagged_ids);
+        
+        if (data.logic_reason) {
+            activeLogicReason = data.logic_reason; 
+            const toast = document.getElementById('logic-toast');
+            document.getElementById('logic-msg').innerText = data.logic_reason;
+            toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
+        } else { activeLogicReason = null; }
+
+        // P0-03: Update the Continue Card based on Server Logic
+        if (data.next_best_qid) {
+            renderContinueCard(data.next_best_qid, data.next_reason);
+        }
+
+        if (data.next_best_qid) {
+            setTimeout(() => { 
+                const jumpIdx = reachablePath.indexOf(data.next_best_qid);
+                if (jumpIdx !== -1) {
+                    currentQIndex = jumpIdx; 
+                    renderQuestion(); 
+                    renderSidebar();
+                }
+            }, 150);
+        } else {
+            switchTab('results');
+        }
+        renderSidebar();
+    }
+    
+    function getScoreForAnswer(qId, aId) {
+        const q = allQuestions.find(x => x.q_id === qId);
+        if (!q || !q.options) return 0.0;
+        const opt = q.options.find(o => o.a_id === aId);
+        return opt ? opt.base_score : 0.0;
+    }
+
+    // --- P0-03 UPDATED DEFER LOGIC ---
+    async function deferQuestion() { 
+        const qId = reachablePath[currentQIndex];
+        const q = allQuestions.find(x => x.q_id === qId);
+        const existingAId = userResponses[qId];
+        const safeAId = existingAId || (q.options && q.options.length ? q.options[0].a_id : null);
+        if (!safeAId) {
+            alert("Unable to defer without a valid answer option.");
+            return;
+        }
+        const score = existingAId ? getScoreForAnswer(qId, existingAId) : 0.0;
+
+        // Optimistic UI
+        deferredQIds.add(qId);
+        
+        // Server Sync
+        const res = await fetch(`${API_BASE}/assessment/submit`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                assessment_id: assessmentId,
+                q_id: qId,
+                a_id: safeAId,
+                score: score,
+                pack_id: q.domain,
+                origin: isOverrideQuestion(qId) ? "override" : "adaptive",
+                is_deferred: true // NEW FLAG
+            })
+        });
+        try {
+            const data = await res.json();
+            lastServerState = data;
+            baseReachablePath = data.reachable_path || baseReachablePath;
+            applyOverridePath();
+            if (data.flagged_ids) flaggedQIds = new Set(data.flagged_ids);
+        } catch (e) {
+            console.error(e);
+        }
+
+        (currentQIndex + 1 < reachablePath.length) ? (currentQIndex++, renderQuestion(), renderSidebar()) : switchTab('results'); 
+    }
+
+    function downloadExport(type) {
+        if (!assessmentId) return alert("No active session ID.");
+        window.open(`${API_BASE}/assessment/${assessmentId}/export/${type}`, '_blank');
+    }
+
+    async function loadResults() {
+        try {
+            const resp = await fetch(`${API_BASE.replace('/api/v1','')}/responses/analysis/${assessmentId}`);
+            const data = await resp.json();
+            lastServerState = data;
+            updateBenchmarkPlaceholders();
+            document.getElementById('archetype-label').innerText = "Archetype: " + (data.archetype || "Unknown");
+            const confSummary = document.getElementById('evidence-confidence-summary');
+            if (data.summary && data.summary.evidence_confidence_avg !== undefined) {
+                confSummary.innerText = `Evidence confidence avg: ${Math.round(data.summary.evidence_confidence_avg * 100)}%`;
+            } else {
+                confSummary.innerText = "";
+            }
+
+            const rationaleBox = document.getElementById('archetype-rationale');
+            if (rationaleBox) {
+                const rationale = data.archetype_details?.rationale || [];
+                rationaleBox.innerHTML = rationale.length
+                    ? rationale.map(line => `<div style="border:1px solid var(--border-color); border-radius:8px; padding:10px; color:var(--text-sub);">${line}</div>`).join("")
+                    : "<div style='padding:10px; color:var(--text-sub); text-align:center;'>No rationale available.</div>";
+            }
+
+            const recBox = document.getElementById('recommendations');
+            if (recBox) {
+                const recs = data.recommendations || [];
+                recBox.innerHTML = recs.length
+                    ? recs.map(r => `<div style="border:1px solid var(--border-color); border-left:4px solid var(--brand-gold); border-radius:8px; padding:10px;">
+                        <div style="color:var(--text-main); font-weight:600;">${r.title}</div>
+                        <div style="color:var(--text-sub); font-size:0.85em;">${r.rationale || ""}</div>
+                        <div style="color:var(--text-sub); font-size:0.8em; margin-top:6px;">Priority: ${r.priority} · ${r.timeline}</div>
+                    </div>`).join("")
+                    : "<div style='padding:10px; color:var(--text-sub); text-align:center;'>Recommendations pending.</div>";
+            }
+
+            const pockets = document.getElementById('strength-pockets');
+            if (pockets) {
+                const strong = (data.axes || []).filter(a => a.score >= 75).slice(0, 4);
+                pockets.innerHTML = strong.length
+                    ? strong.map(a => `<div style="border:1px solid var(--border-color); border-left:4px solid var(--success); border-radius:8px; padding:10px;">
+                        <div style="color:var(--text-main); font-weight:600;">${a.axis}</div>
+                        <div style="color:var(--text-sub); font-size:0.85em;">Strong maturity detected. Consider scaling across teams.</div>
+                    </div>`).join("")
+                    : "<div style='padding:10px; color:var(--text-sub); text-align:center;'>No strength pockets detected yet.</div>";
+            }
+
+            const explainer = document.getElementById('maturity-explanation');
+            if (explainer) {
+                explainer.innerText = data.maturity_explanation || "";
+            }
+            const scoreBox = document.getElementById('maturity-scores');
+            if (scoreBox) {
+                const baseline = data.maturity_scores?.baseline || {};
+                const expanded = data.maturity_scores?.expanded || {};
+                scoreBox.innerHTML = `
+                    <div style="border:1px solid var(--border-color); border-radius:10px; padding:12px;">
+                        <div style="color:var(--text-sub); font-size:0.85em;">Baseline (adaptive only)</div>
+                        <div style="color:var(--text-main); font-size:1.4em; font-weight:700; margin-top:6px;">${baseline.trust_index ?? "--"}</div>
+                        <div style="color:var(--text-sub); font-size:0.8em;">Friction ${baseline.friction_score ?? "--"}</div>
+                    </div>
+                    <div style="border:1px solid var(--border-color); border-radius:10px; padding:12px;">
+                        <div style="color:var(--text-sub); font-size:0.85em;">Expanded (incl. overrides)</div>
+                        <div style="color:var(--text-main); font-size:1.4em; font-weight:700; margin-top:6px;">${expanded.trust_index ?? "--"}</div>
+                        <div style="color:var(--text-sub); font-size:0.8em;">Friction ${expanded.friction_score ?? "--"}</div>
+                    </div>
+                `;
+            }
+            
+            const details = document.getElementById('axis-details'); details.innerHTML = "";
+            if (!data.axes || data.axes.length === 0) { details.innerHTML = "<div style='padding:20px; color:var(--text-sub); text-align:center;'>Insufficient Data</div>"; return; }
+            
+            data.axes.forEach(a => { 
+                details.innerHTML += `<div style="background:var(--bg-card); padding:15px; border-radius:8px; border-left:4px solid var(--brand-gold); box-shadow:0 2px 5px var(--shadow); border:1px solid var(--border-color);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <strong style="color:var(--text-main);">${a.axis}</strong>
+                        <span style="color:var(--brand-gold); font-weight:bold;">${a.score}%</span>
+                    </div>
+                    <div class="prog-bg" style="height:6px; margin:5px 0;"><div class="prog-fill" style="width:${a.score}%; background:var(--brand-gold);"></div></div>
+                </div>`; 
+            });
+
+            const dv = document.getElementById('declared-verified-details'); dv.innerHTML = "";
+            const declared = Array.isArray(data.declared_vector) ? data.declared_vector : [];
+            const verified = Array.isArray(data.verified_vector) ? data.verified_vector : [];
+            const gap = Array.isArray(data.gap_vector) ? data.gap_vector : [];
+            if (declared.length === 0 && verified.length === 0 && gap.length === 0) {
+                dv.innerHTML = "<div style='padding:10px; color:var(--text-sub); text-align:center;'>No declared/verified split available.</div>";
+            } else {
+                const byAxis = {};
+                declared.forEach(a => { byAxis[a.axis] = { axis: a.axis, declared: a.score, code: a.code }; });
+                verified.forEach(a => { if (!byAxis[a.axis]) byAxis[a.axis] = { axis: a.axis, code: a.code }; byAxis[a.axis].verified = a.score; });
+                gap.forEach(a => { if (!byAxis[a.axis]) byAxis[a.axis] = { axis: a.axis, code: a.code }; byAxis[a.axis].gap = a.score; });
+                Object.values(byAxis).forEach(a => {
+                    const declaredScore = (a.declared ?? 0);
+                    const verifiedScore = (a.verified ?? 0);
+                    const gapScore = (a.gap ?? (declaredScore - verifiedScore));
+                    dv.innerHTML += `<div style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                            <strong style="color:var(--text-main);">${a.axis}</strong>
+                            <span style="color:var(--text-sub); font-size:0.85em;">Gap: ${gapScore}%</span>
+                        </div>
+                        <div style="display:flex; gap:10px; font-size:0.85em;">
+                            <span style="color:var(--brand-gold);">Declared: ${declaredScore}%</span>
+                            <span style="color:var(--text-sub);">Verified: ${verifiedScore}%</span>
+                        </div>
+                    </div>`;
+                });
+            }
+
+            const caps = document.getElementById('cap-badges'); caps.innerHTML = "";
+            if (Array.isArray(data.caps_applied) && data.caps_applied.length > 0) {
+                data.caps_applied.forEach(cap => {
+                    caps.innerHTML += `<div style="border:1px solid var(--border-color); border-left:4px solid var(--warn); border-radius:8px; padding:10px;">
+                        <div style="color:var(--text-main); font-weight:600;">${cap.type || "cap"} on ${cap.axis || "axis"}</div>
+                        <div style="color:var(--text-sub); font-size:0.85em;">${cap.reason || ""} (cap to ${cap.cap_to ?? "?"}%)</div>
+                    </div>`;
+                });
+            } else {
+                caps.innerHTML = "<div style='padding:10px; color:var(--text-sub); text-align:center;'>No caps applied.</div>";
+            }
+
+            const labels = data.axes.map(a => a.axis);
+            const declaredValues = (data.declared_vector || []).map(a => a.score);
+            const verifiedValues = (data.verified_vector || []).map(a => a.score);
+            const overlayToggle = document.getElementById('expanded-overlay-toggle');
+            if (overlayToggle) {
+                overlayToggle.onchange = () => {
+                    renderRadarChart(labels, declaredValues, verifiedValues, data.axes, data.expanded_axes, overlayToggle.checked);
+                };
+            }
+            renderRadarChart(labels, declaredValues, verifiedValues, data.axes, data.expanded_axes, overlayToggle?.checked);
+        } catch (e) { console.error(e); }
+    }
+
+    function renderRadarChart(labels, declaredValues, verifiedValues, axisData, expandedAxes, showExpanded) {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        const gridColor = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+        const pointLabelColor = isLight ? '#666' : '#b0c4de';
+        const ctx = document.getElementById('radarChart');
+        if (myRadarChart) myRadarChart.destroy();
+        const datasets = [
+            { 
+                label: 'Declared', 
+                data: declaredValues.length ? declaredValues : axisData.map(a => a.score), 
+                backgroundColor: 'rgba(232, 179, 115, 0.15)', 
+                borderColor: '#e8b373', 
+                pointBackgroundColor: '#011E3D',
+                borderWidth: 2 
+            },
+            { 
+                label: 'Verified', 
+                data: verifiedValues.length ? verifiedValues : axisData.map(a => a.score), 
+                backgroundColor: 'rgba(91, 192, 222, 0.15)', 
+                borderColor: '#5bc0de', 
+                pointBackgroundColor: '#5bc0de',
+                borderWidth: 2 
+            }
+        ];
+        if (showExpanded && Array.isArray(expandedAxes) && expandedAxes.length) {
+            datasets.push({
+                label: 'Expanded (override)',
+                data: expandedAxes.map(a => a.score),
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderColor: '#10b981',
+                pointBackgroundColor: '#10b981',
+                borderWidth: 2
+            });
+        }
+        myRadarChart = new Chart(ctx, { 
+            type: 'radar', 
+            data: { 
+                labels: labels,
+                datasets: datasets
+            }, 
+            options: { 
+                maintainAspectRatio: false, 
+                scales: { r: { min: 0, max: 100, ticks: { display: false, backdropColor: 'transparent' }, grid: { color: gridColor }, pointLabels: { font: { size: 12, family: "'Montserrat', sans-serif" }, color: pointLabelColor } } } 
+            } 
+        });
+    }
+
+    function renderBenchmarkTable() {
+        const table = document.getElementById('benchmark-table');
+        if (!table) return;
+        if (!benchmarkRows.length) {
+            table.innerHTML = "<div style='padding:10px; color:var(--text-sub); text-align:center;'>No benchmark data available yet.</div>";
+            return;
+        }
+        const rows = benchmarkRows.map(r => `
+            <tr>
+                <td style="padding:10px; border-bottom:1px solid var(--border-color); color:var(--text-main); font-weight:600;">${r.axis}</td>
+                <td style="padding:10px; border-bottom:1px solid var(--border-color); color:var(--text-sub); text-align:center;">${r.client}</td>
+                <td style="padding:10px; border-bottom:1px solid var(--border-color); color:var(--text-sub); text-align:center;">${r.benchmark}</td>
+                <td style="padding:10px; border-bottom:1px solid var(--border-color); color:var(--text-sub); text-align:center;">${r.delta}</td>
+            </tr>
+        `).join("");
+        table.innerHTML = `
+            <table style="width:100%; border-collapse:collapse; min-width:520px;">
+                <thead>
+                    <tr style="text-align:left; color:var(--text-sub); font-size:0.85em;">
+                        <th style="padding:8px 10px; border-bottom:1px solid var(--border-color);">Axis</th>
+                        <th style="padding:8px 10px; border-bottom:1px solid var(--border-color); text-align:center;">Client</th>
+                        <th style="padding:8px 10px; border-bottom:1px solid var(--border-color); text-align:center;">Benchmark</th>
+                        <th style="padding:8px 10px; border-bottom:1px solid var(--border-color); text-align:center;">Δ</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `;
+    }
+
+    function bindRadarControls() {
+        const toggle = document.getElementById('radar-expand-toggle');
+        const card = document.getElementById('radar-card');
+        const explainer = document.getElementById('radar-explainer');
+        if (!toggle || !card || !explainer) return;
+        toggle.onclick = () => {
+            const expanded = card.classList.toggle('radar-expanded');
+            card.style.height = expanded ? "720px" : "500px";
+            card.querySelector('div').style.height = expanded ? "650px" : "450px";
+            explainer.style.display = expanded ? "block" : "none";
+            toggle.innerText = expanded ? "Collapse" : "Expand";
+        };
+    }
+
+    function updateBenchmarkPlaceholders() {
+        const sector = document.getElementById('benchmark-sector')?.value || "all";
+        const size = document.getElementById('benchmark-size')?.value || "all";
+        const region = document.getElementById('benchmark-region')?.value || "all";
+        localStorage.setItem('benchmark_filter_sector', sector);
+        localStorage.setItem('benchmark_filter_size', size);
+        localStorage.setItem('benchmark_filter_region', region);
+        const base = 2.4 + (sector === "financial" ? 0.2 : 0) + (size === "enterprise" ? 0.15 : 0) + (region === "eu" ? 0.1 : 0);
+        benchmarkRows = (lastServerState?.axes || []).map(a => {
+            const client = Number(a.score || 0);
+            const benchmark = Math.min(100, Math.max(0, (base / 4) * 100 + (a.score % 7)));
+            const delta = Math.round((client - benchmark) * 10) / 10;
+            return {
+                axis: a.axis,
+                client: Math.round(client * 10) / 10,
+                benchmark: Math.round(benchmark * 10) / 10,
+                delta: delta
+            };
+        });
+        renderBenchmarkTable();
+    }
+
+    async function loadRisks() {
+        if (!assessmentId) return;
+        const heatmap = document.getElementById('risk-heatmap');
+        const topRisks = document.getElementById('top-risks');
+        const riskTable = document.getElementById('risk-table');
+        heatmap.innerHTML = "Loading...";
+        topRisks.innerHTML = "Loading...";
+        riskTable.innerHTML = "Loading...";
+        try {
+            const resp = await fetch(`${API_BASE.replace('/api/v1','')}/responses/analysis/${assessmentId}`);
+            const data = await resp.json();
+            heatmap.innerHTML = "";
+            topRisks.innerHTML = "";
+            riskTable.innerHTML = "";
+            if (Array.isArray(data.risk_heatmap) && data.risk_heatmap.length > 0) {
+                const levelColors = {
+                    RED: "#dc2626",
+                    AMBER: "#f59e0b",
+                    YELLOW: "#fcd34d",
+                    GREEN: "#10b981"
+                };
+                heatmap.innerHTML = `
+                    <div style="display:flex; flex-direction:column; justify-content:space-between; color:var(--text-sub); font-size:0.75em; padding:4px 0;">
+                        <span>5</span>
+                        <span>4</span>
+                        <span>3</span>
+                        <span>2</span>
+                        <span>1</span>
+                    </div>
+                    <div id="risk-heatmap-grid" style="position:relative; width:100%; aspect-ratio:1/1; border:1px solid var(--border-color); border-radius:10px; background:
+                        linear-gradient(to top right, rgba(16,185,129,0.3) 0%, rgba(252,211,77,0.32) 50%, rgba(220,38,38,0.35) 100%),
+                        repeating-linear-gradient(0deg, transparent, transparent 19.5%, rgba(255,255,255,0.05) 20%),
+                        repeating-linear-gradient(90deg, transparent, transparent 19.5%, rgba(255,255,255,0.05) 20%);">
+                    </div>
+                    <div></div>
+                    <div style="display:flex; justify-content:space-between; color:var(--text-sub); font-size:0.75em;">
+                        <span>1</span>
+                        <span>2</span>
+                        <span>3</span>
+                        <span>4</span>
+                        <span>5</span>
+                    </div>
+                `;
+                const grid = document.getElementById('risk-heatmap-grid');
+                const tooltip = document.createElement('div');
+                tooltip.style.position = "absolute";
+                tooltip.style.pointerEvents = "none";
+                tooltip.style.background = "rgba(0,0,0,0.7)";
+                tooltip.style.color = "var(--text-main)";
+                tooltip.style.padding = "4px 8px";
+                tooltip.style.borderRadius = "6px";
+                tooltip.style.fontSize = "0.75em";
+                tooltip.style.whiteSpace = "nowrap";
+                tooltip.style.opacity = "0";
+                tooltip.style.zIndex = "5";
+                tooltip.style.transition = "opacity 120ms ease";
+                grid.appendChild(tooltip);
+                requestAnimationFrame(() => {
+                    const size = grid.clientWidth;
+                    const dotRadius = Math.max(6, Math.min(10, size * 0.03));
+                    const collisions = {};
+                    data.risk_heatmap.forEach(r => {
+                        const likelihood = Number(r.likelihood || 1);
+                        const impact = Number(r.impact || 1);
+                        const key = `${likelihood}-${impact}`;
+                        const index = collisions[key] || 0;
+                        collisions[key] = index + 1;
+                        const x = (Math.min(5, Math.max(1, likelihood)) - 1) / 4;
+                        const y = (Math.min(5, Math.max(1, impact)) - 1) / 4;
+                        const jitterRadius = index * dotRadius * 0.7;
+                        const angle = index * (Math.PI / 3);
+                        const jitterX = Math.cos(angle) * jitterRadius;
+                        const jitterY = Math.sin(angle) * jitterRadius;
+                        const left = (x * size) - dotRadius + jitterX;
+                        const top = ((1 - y) * size) - dotRadius + jitterY;
+                        const dot = document.createElement('div');
+                        const color = levelColors[r.risk_level] || "#e74c3c";
+                        dot.dataset.label = `${r.scenario || r.name} (L${likelihood} × I${impact})`;
+                        dot.style.position = "absolute";
+                        dot.style.left = `${left}px`;
+                        dot.style.top = `${top}px`;
+                        dot.style.width = `${dotRadius * 2}px`;
+                        dot.style.height = `${dotRadius * 2}px`;
+                        dot.style.borderRadius = "50%";
+                        dot.style.background = color;
+                        dot.style.boxShadow = "0 0 0 2px rgba(0,0,0,0.4)";
+                        dot.addEventListener('mouseenter', (event) => {
+                            tooltip.textContent = event.currentTarget.dataset.label || "";
+                            tooltip.style.opacity = "1";
+                        });
+                        dot.addEventListener('mousemove', (event) => {
+                            const rect = grid.getBoundingClientRect();
+                            tooltip.style.left = `${event.clientX - rect.left + 12}px`;
+                            tooltip.style.top = `${event.clientY - rect.top - 12}px`;
+                        });
+                        dot.addEventListener('mouseleave', () => {
+                            tooltip.style.opacity = "0";
+                        });
+                        grid.appendChild(dot);
+
+                    });
+                });
+            } else {
+                heatmap.innerHTML = "<div style='grid-column:1 / -1; padding:10px; color:var(--text-sub); text-align:center;'>No risk data.</div>";
+            }
+            if (Array.isArray(data.top_risks) && data.top_risks.length > 0) {
+                data.top_risks.forEach(r => {
+                    topRisks.innerHTML += `<div style="border:1px solid var(--border-color); border-left:4px solid var(--warn); border-radius:8px; padding:10px;">
+                        <div style="color:var(--text-main); font-weight:600;">${r.scenario || r.name}</div>
+                        <div style="color:var(--text-sub); font-size:0.85em;">${r.description || r.rationale || ""}</div>
+                    </div>`;
+                });
+            } else {
+                topRisks.innerHTML = "<div style='padding:10px; color:var(--text-sub); text-align:center;'>No top risks.</div>";
+            }
+
+            if (Array.isArray(data.risk_heatmap) && data.risk_heatmap.length > 0) {
+                const rows = data.risk_heatmap.map(r => `
+                    <tr>
+                        <td style="padding:10px; border-bottom:1px solid var(--border-color); color:var(--text-main); font-weight:600;">${r.scenario || r.name}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border-color); color:var(--text-sub);">${r.category || ""}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border-color); color:var(--text-sub);">${r.description || ""}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border-color); color:var(--text-sub); text-align:center;">${r.likelihood}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border-color); color:var(--text-sub); text-align:center;">${r.impact}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border-color); color:var(--text-sub); text-align:center;">${r.risk_level}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border-color); color:var(--text-sub); text-align:center;">${r.risk_score}</td>
+                    </tr>
+                `).join("");
+                riskTable.innerHTML = `
+                    <table style="width:100%; border-collapse:collapse; min-width:700px;">
+                        <thead>
+                            <tr style="text-align:left; color:var(--text-sub); font-size:0.85em;">
+                                <th style="padding:8px 10px; border-bottom:1px solid var(--border-color);">Risk</th>
+                                <th style="padding:8px 10px; border-bottom:1px solid var(--border-color);">Category</th>
+                                <th style="padding:8px 10px; border-bottom:1px solid var(--border-color);">Description</th>
+                                <th style="padding:8px 10px; border-bottom:1px solid var(--border-color); text-align:center;">L</th>
+                                <th style="padding:8px 10px; border-bottom:1px solid var(--border-color); text-align:center;">I</th>
+                                <th style="padding:8px 10px; border-bottom:1px solid var(--border-color); text-align:center;">Level</th>
+                                <th style="padding:8px 10px; border-bottom:1px solid var(--border-color); text-align:center;">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                `;
+            } else {
+                riskTable.innerHTML = "<div style='padding:10px; color:var(--text-sub); text-align:center;'>No risk data.</div>";
+            }
+        } catch (e) {
+            console.error(e);
+            heatmap.innerHTML = "<div style='grid-column:1 / -1; padding:10px; color:var(--text-sub); text-align:center;'>Failed to load risks.</div>";
+            topRisks.innerHTML = "<div style='padding:10px; color:var(--text-sub); text-align:center;'>Failed to load risks.</div>";
+            riskTable.innerHTML = "<div style='padding:10px; color:var(--text-sub); text-align:center;'>Failed to load risks.</div>";
+        }
+    }
+
+    function bindBenchmarkFilters() {
+        const storedSector = localStorage.getItem('benchmark_filter_sector');
+        const storedSize = localStorage.getItem('benchmark_filter_size');
+        const storedRegion = localStorage.getItem('benchmark_filter_region');
+        const sector = document.getElementById('benchmark-sector');
+        const size = document.getElementById('benchmark-size');
+        const region = document.getElementById('benchmark-region');
+        if (sector && storedSector) sector.value = storedSector;
+        if (size && storedSize) size.value = storedSize;
+        if (region && storedRegion) region.value = storedRegion;
+        [sector, size, region].forEach(el => {
+            if (!el) return;
+            el.addEventListener('change', updateBenchmarkPlaceholders);
+        });
+    }
+
+    async function loadReviewTable() {
+        if (!assessmentId) return;
+        const container = document.getElementById('review-table-container');
+        container.innerHTML = "Loading...";
+        try {
+            const [resp, intakeResp] = await Promise.all([
+                fetch(`${API_BASE.replace('/api/v1','')}/responses/table/${assessmentId}`),
+                fetch(`${API_BASE}/intake/${assessmentId}`)
+            ]);
+            reviewRows = await resp.json();
+            intakeAnswers = await intakeResp.json();
+            if (!Array.isArray(reviewRows) || reviewRows.length === 0) {
+                container.innerHTML = "<div style='color:var(--text-sub); text-align:center;'>No responses yet.</div>";
+                return;
+            }
+            const grouped = {};
+            reviewRows.forEach(r => {
+                const key = r.domain || "Unassigned";
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(r);
+            });
+
+            const headers = ["Question", "Answer", "Evidence", "Flags"];
+            let html = "";
+            Object.keys(grouped).sort().forEach(domain => {
+                const items = grouped[domain];
+                html += `<details open style="margin-bottom:16px; border:1px solid var(--border-color); border-radius:10px; padding:10px; background:var(--bg-card);">`;
+                html += `<summary style="cursor:pointer; font-weight:700; color:var(--brand-gold); font-family:'League Spartan', sans-serif;">${domain} (${items.length})</summary>`;
+                html += `<div style="margin-top:12px;"><table style="width:100%; border-collapse:collapse; font-size:0.9em;">`;
+                html += `<thead><tr>${headers.map(h => `<th style="text-align:left; padding:8px; border-bottom:1px solid var(--border-color); color:var(--text-sub);">${h}</th>`).join('')}</tr></thead><tbody>`;
+                items.forEach(r => {
+                    const evidence = r.evidence_confidence != null ? `${Math.round(r.evidence_confidence * 100)}%` : "-";
+                    const flags = `${r.is_deferred ? 'Deferred' : ''}${r.is_flagged ? (r.is_deferred ? ', ' : '') + 'Review' : ''}` || '-';
+                    const q = allQuestions.find(x => x.q_id === r.q_id);
+                    const title = q ? (q.question_title || q.question_text) : (r.question_title || r.question);
+                    const safeTitle = String(title || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    const options = q ? q.options : [];
+                    const selectHtml = options.length ? `<select data-qid="${r.q_id}" class="review-answer" style="padding:6px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-main); width:100%;">
+                        ${options.map(o => `<option value="${o.a_id}" ${o.a_id === r.a_id ? "selected" : ""}>${String(o.answer_text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</option>`).join('')}
+                    </select>` : String(r.answer || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                html += `<tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-color);">${safeTitle}</td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-color);">${selectHtml}</td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-color);">${evidence}</td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-color);">${flags}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table></div></details>`;
+            });
+            const intakeHtml = intakeAnswers && intakeAnswers.length
+                ? `<div style="margin-bottom:18px;">
+                        <div style="color:var(--brand-gold); font-weight:700; margin-bottom:8px;">Intake Answers</div>
+                        <table style="width:100%; border-collapse:collapse; font-size:0.9em;">
+                            <thead>
+                                <tr style="text-align:left; color:var(--text-sub); font-size:0.85em;">
+                                    <th style="padding:8px; border-bottom:1px solid var(--border-color);">Question</th>
+                                    <th style="padding:8px; border-bottom:1px solid var(--border-color);">Answer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${intakeAnswers.map(i => `<tr>
+                                    <td style="padding:8px; border-bottom:1px solid var(--border-color);">${i.intake_q_id}</td>
+                                    <td style="padding:8px; border-bottom:1px solid var(--border-color);">${i.value}</td>
+                                </tr>`).join("")}
+                            </tbody>
+                        </table>
+                   </div>`
+                : "";
+            container.innerHTML = intakeHtml + html;
+            document.querySelectorAll('.review-answer').forEach(sel => {
+                sel.addEventListener('change', async (e) => {
+                    const qid = e.target.getAttribute('data-qid');
+                    const aId = e.target.value;
+                    await updateReviewAnswer(qid, aId);
+                    await loadReviewTable();
+                });
+            });
+        } catch (e) {
+            console.error(e);
+            container.innerHTML = "<div style='color:var(--text-sub); text-align:center;'>Failed to load table.</div>";
+        }
+    }
+
+    async function updateReviewAnswer(qId, aId) {
+        const q = allQuestions.find(x => x.q_id === qId);
+        if (!q) return;
+        const score = getScoreForAnswer(qId, aId);
+        const isFlagged = flaggedQIds.has(qId);
+        await fetch(`${API_BASE}/assessment/submit`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                assessment_id: assessmentId,
+                q_id: qId,
+                a_id: aId,
+                score: score,
+                pack_id: q.domain,
+                is_flagged: isFlagged,
+                is_deferred: false
+            })
+        });
+    }
+
+    function exportReviewCsv() {
+        if (!reviewRows || reviewRows.length === 0) return alert("No review data to export.");
+        const headers = ["q_id", "question", "answer", "evidence_confidence", "is_deferred", "is_flagged", "domain"];
+        const lines = [headers.join(",")];
+        reviewRows.forEach(r => {
+            const row = headers.map(h => {
+                const val = r[h] == null ? "" : String(r[h]).replace(/\"/g, '""');
+                return `"${val}"`;
+            });
+            lines.push(row.join(","));
+        });
+        const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `review-${assessmentId}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+</script>
+</body>
+</html>

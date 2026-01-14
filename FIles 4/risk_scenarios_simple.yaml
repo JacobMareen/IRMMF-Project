@@ -1,0 +1,271 @@
+# Risk Scenarios Configuration - Developer Version
+# 10 core insider risk scenarios for IRMMF platform
+# Format: YAML (easy to read, easy to maintain)
+
+risks:
+  - id: IP_Theft
+    name: "Intellectual Property Theft"
+    category: "Data Loss & Exfiltration"
+    description: "Malicious insider exfiltrates proprietary source code, trade secrets, or designs"
+    
+    # Axis weights (must sum to 1.0)
+    axes:
+      V: 0.40  # Visibility into crown jewels
+      T: 0.30  # Technical controls (DLP, CASB)
+      R: 0.15  # Resilience (forensics, legal)
+      W: 0.15  # Control lag (offboarding speed)
+    
+    # Curve types per axis
+    curves:
+      V: threshold
+      T: threshold
+      R: standard
+      W: logarithmic
+    
+    # Impact rules (checked in order)
+    impact_rules:
+      - condition: "High-IP OR Technology"
+        value: 5
+      - condition: "Manufacturing OR Pharma"
+        value: 4
+      - condition: "Enterprise (5000+)"
+        value: "+1"
+      - condition: "default"
+        value: 2
+
+  - id: Customer_Data_Breach
+    name: "Customer Data Breach (PII/PHI)"
+    category: "Data Loss & Exfiltration"
+    description: "Unauthorized access or disclosure of customer PII/PHI"
+    
+    axes:
+      V: 0.35
+      T: 0.25
+      L: 0.25
+      E: 0.10
+      H: 0.05
+    
+    curves:
+      V: standard
+      T: threshold
+      L: threshold
+      E: standard
+      H: logarithmic
+    
+    impact_rules:
+      - condition: "Healthcare OR Financial Services"
+        value: 5
+      - condition: "High-PII OR NIS2-Essential"
+        value: 5
+      - condition: "DORA-Inscope"
+        value: 4
+      - condition: "default"
+        value: 3
+
+  - id: Shadow_IT_Leakage
+    name: "Unapproved Tool Data Leakage (incl. GenAI)"
+    category: "Data Loss & Exfiltration"
+    description: "Employees paste sensitive data into unapproved SaaS/GenAI tools"
+    
+    axes:
+      F: 0.35  # Friction (approved alternatives)
+      V: 0.30  # Visibility into unapproved usage
+      E: 0.20  # Execution (training, policy)
+      T: 0.15  # Technical (CASB, DLP)
+    
+    curves:
+      F: threshold
+      V: standard
+      E: logarithmic
+      T: standard
+    
+    impact_rules:
+      - condition: "High-IP OR Technology"
+        value: 5
+      - condition: "Healthcare OR Legal"
+        value: 5
+      - condition: "Financial Services OR High-PII"
+        value: 4
+      - condition: "default"
+        value: 3
+
+  - id: Accidental_Exposure
+    name: "Accidental Data Exposure"
+    category: "Data Loss & Exfiltration"
+    description: "Non-malicious disclosure via misconfiguration or oversharing"
+    
+    axes:
+      H: 0.40  # Human awareness
+      T: 0.30  # Technical safeguards
+      E: 0.20  # Policy enforcement
+      V: 0.10  # Detection of misconfigs
+    
+    curves:
+      H: logarithmic
+      T: threshold
+      E: standard
+      V: standard
+    
+    impact_rules:
+      - condition: "High-PII OR Healthcare"
+        value: 5
+      - condition: "Financial Services"
+        value: 4
+      - condition: "default"
+        value: 3
+
+  - id: Privileged_Abuse
+    name: "Privileged Account Abuse"
+    category: "Access & Privilege Abuse"
+    description: "Sysadmins or DBAs access sensitive data without authorization"
+    
+    axes:
+      T: 0.35  # Technical (PAM, session recording)
+      E: 0.30  # Execution (reviews actually done)
+      V: 0.20  # Visibility (logging, alerting)
+      G: 0.15  # Governance (approval workflows)
+    
+    curves:
+      T: threshold
+      E: standard
+      V: standard
+      G: logarithmic
+    
+    impact_rules:
+      - condition: "Healthcare OR Financial Services"
+        value: 5
+      - condition: "NIS2-Essential OR DORA-Inscope"
+        value: 5
+      - condition: "High-PII"
+        value: 4
+      - condition: "default"
+        value: 3
+
+  - id: Post_Termination_Access
+    name: "Post-Termination Access Risk"
+    category: "Access & Privilege Abuse"
+    description: "Former employees retain active accounts after departure"
+    
+    axes:
+      E: 0.50  # Execution (JML automation)
+      T: 0.25  # Technical (automated revocation)
+      V: 0.15  # Visibility (orphan detection)
+      W: 0.10  # Control lag (offboarding speed)
+    
+    curves:
+      E: threshold
+      T: standard
+      V: standard
+      W: logarithmic
+    
+    impact_rules:
+      - condition: "Enterprise (5000+)"
+        value: 5
+      - condition: "Mid-Market (250-4999)"
+        value: 3
+      - condition: "default"
+        value: 2
+
+  - id: SoD_Violations
+    name: "Segregation of Duties Violations"
+    category: "Access & Privilege Abuse"
+    description: "Single individual can execute AND approve transactions"
+    
+    axes:
+      G: 0.40  # Governance (SoD policy)
+      E: 0.30  # Execution (maker-checker)
+      T: 0.20  # Technical (workflow enforcement)
+      V: 0.10  # Visibility (violation detection)
+    
+    curves:
+      G: standard
+      E: threshold
+      T: threshold
+      V: standard
+    
+    impact_rules:
+      - condition: "Financial Services OR NIS2-Essential"
+        value: 5
+      - condition: "Public-Company"
+        value: 4
+      - condition: "default"
+        value: 3
+
+  - id: Insider_Sabotage
+    name: "Insider Sabotage (Intentional)"
+    category: "Operational Disruption"
+    description: "Disgruntled employee intentionally damages systems or data"
+    
+    axes:
+      R: 0.35  # Resilience (backups, DR)
+      V: 0.25  # Visibility (anomaly detection)
+      T: 0.20  # Technical (immutable backups)
+      H: 0.15  # Human (early warning, sentiment)
+      E: 0.05  # Execution (mitigation)
+    
+    curves:
+      R: threshold
+      V: standard
+      T: threshold
+      H: logarithmic
+      E: standard
+    
+    impact_rules:
+      - condition: "NIS2-Essential OR Critical-Infrastructure"
+        value: 5
+      - condition: "Enterprise (5000+)"
+        value: 4
+      - condition: "default"
+        value: 3
+
+  - id: Regulatory_Compliance
+    name: "Regulatory Non-Compliance (Insider Risk)"
+    category: "Compliance & Legal Exposure"
+    description: "Failure to meet NIS2, DORA, or GDPR insider risk requirements"
+    
+    axes:
+      L: 0.40  # Legal (DPIAs, lawful basis)
+      G: 0.30  # Governance (policies, oversight)
+      E: 0.20  # Execution (consistent controls)
+      H: 0.10  # Human (transparency, works council)
+    
+    curves:
+      L: threshold
+      G: standard
+      E: standard
+      H: logarithmic
+    
+    impact_rules:
+      - condition: "NIS2-Essential OR DORA-Inscope"
+        value: 5
+      - condition: "NIS2-Important"
+        value: 4
+      - condition: "Public-Company OR Healthcare"
+        value: 4
+      - condition: "default"
+        value: 2
+
+  - id: Third_Party_Abuse
+    name: "Third-Party Access Abuse"
+    category: "Third-Party & Supply Chain"
+    description: "Contractors, vendors, or MSPs misuse access to systems/data"
+    
+    axes:
+      V: 0.35  # Visibility into third-party access
+      E: 0.30  # Execution (offboarding, reviews)
+      T: 0.20  # Technical (segregation, monitoring)
+      G: 0.15  # Governance (contracts, SLAs)
+    
+    curves:
+      V: standard
+      E: threshold
+      T: standard
+      G: standard
+    
+    impact_rules:
+      - condition: "Financial Services OR Healthcare"
+        value: 5
+      - condition: "NIS2-Essential"
+        value: 4
+      - condition: "default"
+        value: 3

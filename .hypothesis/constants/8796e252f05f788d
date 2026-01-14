@@ -1,0 +1,4 @@
+# file: /Users/jacobmareen/Documents/IRMMF Project/models.py
+# hypothesis_version: 6.150.0
+
+[0.0, 128, 255, 'Answer', 'Question', 'Single', 'all, delete-orphan', 'assessment_id', 'assessments', 'dim_answers', 'dim_answers.a_id', 'dim_intake_questions', 'dim_questions', 'dim_questions.id', 'dim_questions.q_id', 'domain', 'fact_response_audits', 'fact_responses', 'intake_q_id', 'list_ref', 'options', 'q_id', 'question', 'question_banks', 'report_snapshots', 'selectin', 'tier', 'value']

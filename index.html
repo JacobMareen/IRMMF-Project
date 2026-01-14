@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IRMMF Command Center</title>
+    <style>
+        :root {
+            --brand-navy: #011E3D;
+            --brand-gold: #e8b373;
+            --brand-bronze: #907054;
+            --success: #27ae60;
+            --warn: #f39c12;
+
+            --bg-page: #000f1f;
+            --bg-card: #011E3D;
+            --bg-sidebar: #01162e;
+            --bg-input: #02264d;
+
+            --text-main: #ffffff;
+            --text-sub: #b0c4de;
+            --border-color: #1a3a5c;
+
+            --shadow: rgba(0,0,0,0.5);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4 { font-family: 'League Spartan', sans-serif; font-weight: 700; letter-spacing: -0.5px; }
+
+        header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header h1 { margin: 0; font-size: 1.4rem; color: var(--brand-gold); }
+        header span { color: var(--text-sub); font-size: 0.95rem; }
+
+        .layout-wrap {
+            display: flex;
+            min-height: calc(100vh - 64px);
+        }
+
+        .left-nav {
+            width: 210px;
+            padding: 20px 12px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .left-nav .side-btn {
+            text-decoration: none;
+            color: var(--text-main);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .left-nav .side-btn:hover {
+            border-color: var(--brand-gold);
+            color: var(--brand-gold);
+        }
+        .left-nav .side-btn.active {
+            border-color: var(--brand-gold);
+            color: var(--brand-navy);
+            background: var(--brand-gold);
+        }
+
+        .page {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 36px 24px 72px;
+            flex: 1;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 28px;
+            align-items: center;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 40px var(--shadow);
+            padding: 28px;
+        }
+
+        .card p { color: var(--text-sub); line-height: 1.6; }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .meta-tile {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+        }
+
+        .meta-tile strong { display: block; font-size: 1.05rem; }
+        .meta-tile span { color: var(--text-sub); }
+
+        .dashboard-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(0,0,0,0.15);
+            margin-bottom: 12px;
+        }
+
+        .modules { margin-top: 42px; }
+
+        .section-title {
+            margin: 0 0 16px;
+            font-size: 1.4rem;
+            color: var(--brand-gold);
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .module-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 20px 22px;
+            position: relative;
+            box-shadow: 0 8px 30px var(--shadow);
+        }
+
+        .module-card h3 { margin: 8px 0; }
+        .module-card p { color: var(--text-sub); }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border: 1px solid var(--border-color);
+            color: var(--brand-gold);
+        }
+
+        .module-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn.primary { background: var(--brand-gold); color: var(--brand-navy); }
+        .btn.secondary { background: transparent; color: var(--brand-gold); }
+
+        .registry {
+            margin-top: 30px;
+            padding: 14px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-sub);
+            background: rgba(0,0,0,0.18);
+        }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IRMMF Command Center</h1>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <input type="text" id="home-user" placeholder="Username"
+                   style="padding:8px 10px; border-radius:6px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main);">
+            <input type="password" id="home-pass" placeholder="Password"
+                   style="padding:8px 10px; border-radius:6px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main);">
+            <button class="btn secondary" onclick="homeLogin()">Login</button>
+            <span id="home-status" style="color:var(--text-sub); font-size:0.9rem;">Not signed in</span>
+        </div>
+    </header>
+
+    <div class="layout-wrap">
+        <nav class="left-nav">
+            <a class="side-btn" href="index.html">Command Center</a>
+            <a class="side-btn" href="assessment.html#dashboard">Assessment Hub</a>
+            <details open>
+                <summary class="side-btn">Assessment Views ▾</summary>
+                <div style="display:flex; flex-direction:column; gap:8px; margin:8px 0 0 8px;">
+                    <a class="side-btn" href="assessment.html#dashboard">Assessment Dashboard</a>
+                    <a class="side-btn" href="assessment.html#intake">Intake</a>
+                    <a class="side-btn" href="assessment.html#assessment">Assessment</a>
+                    <a class="side-btn" href="assessment.html#results">Results</a>
+                    <a class="side-btn" href="assessment.html#risks">Risks</a>
+                    <a class="side-btn" href="assessment.html#review">Review</a>
+                </div>
+            </details>
+            <details>
+                <summary class="side-btn">Workforce ▾</summary>
+                <div style="display:flex; flex-direction:column; gap:8px; margin:8px 0 0 8px;">
+                    <a class="side-btn" href="dynamic_workforce.html">DWF Overview</a>
+                </div>
+            </details>
+        </nav>
+        <div class="page">
+        <section class="hero">
+            <div class="card">
+                <h2>Welcome</h2>
+                <p>Launch assessments, explore specialist modules, and gather executive-level signals. This page will evolve into a live dashboard as we add reporting and benchmarks.</p>
+                <div class="meta-grid">
+                    <div class="meta-tile">
+                        <strong>Modules</strong>
+                        <span id="module-count">2 active</span>
+                    </div>
+                    <div class="meta-tile">
+                        <strong>Latest update</strong>
+                        <span>Model v6.1</span>
+                    </div>
+                    <div class="meta-tile">
+                        <strong>Status</strong>
+                        <span>Local dev</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Executive Snapshot</h2>
+                <div class="dashboard-row"><span>Assessments in progress</span><strong>--</strong></div>
+                <div class="dashboard-row"><span>Top risk category</span><strong>--</strong></div>
+                <div class="dashboard-row"><span>Benchmark cohort</span><strong>--</strong></div>
+            </div>
+        </section>
+
+        <section class="modules">
+            <div class="section-title">Modules</div>
+            <div class="module-grid">
+                <div class="module-card">
+                    <div class="tag">Assessment</div>
+                    <h3>IRMMF Assessment</h3>
+                    <p>Adaptive maturity and resilience assessment with evidence confidence and risk outputs.</p>
+                    <div class="module-actions">
+                        <a class="btn primary" href="assessment.html#dashboard">Open Assessment Hub</a>
+                        <a class="btn secondary" href="assessment.html#dashboard">Assessment Dashboard</a>
+                    </div>
+                </div>
+
+                <div class="module-card">
+                    <div class="tag">DWF</div>
+                    <h3>Dynamic Workforce</h3>
+                    <p>Workforce risk module focused on culture, role impact, and resilience signals.</p>
+                    <div class="module-actions">
+                        <a class="btn primary" href="dynamic_workforce.html">Open DWF</a>
+                        <a class="btn secondary" href="dynamic_workforce.html#results">View Results</a>
+                    </div>
+                </div>
+
+                <div class="module-card">
+                    <div class="tag">Upcoming</div>
+                    <h3>Future Module</h3>
+                    <p>Reserved for new capabilities (vendor risk, regulatory readiness, executive reporting).</p>
+                    <div class="module-actions">
+                        <a class="btn secondary" href="#">Define Scope</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="registry">
+            <strong>Module Registry:</strong>
+            <span id="registry-text">Loading module metadata...</span>
+        </section>
+        </div>
+    </div>
+
+    <script>
+        const TEST_USER = "test";
+        const TEST_PASS = "test123";
+        const registryText = document.getElementById("registry-text");
+        const moduleCount = document.getElementById("module-count");
+        const apiBase = (location.hostname === "127.0.0.1" || location.hostname === "localhost")
+            ? "http://127.0.0.1:8000"
+            : "http://0.0.0.0:8000";
+
+        function updateHomeStatus() {
+            const status = document.getElementById("home-status");
+            const user = localStorage.getItem("irmmf_user");
+            status.textContent = user ? `Signed in: ${user}` : "Not signed in";
+        }
+
+        function homeLogin() {
+            const user = document.getElementById("home-user").value.trim();
+            const pass = document.getElementById("home-pass").value.trim();
+            if (user === TEST_USER && pass === TEST_PASS) {
+                localStorage.setItem("irmmf_user", user);
+                updateHomeStatus();
+                alert("Logged in.");
+                return;
+            }
+            alert("Invalid credentials. Use test / test123.");
+        }
+
+        fetch(`${apiBase}/api/v1/modules`)
+            .then((res) => res.ok ? res.json() : null)
+            .then((data) => {
+                if (!data) throw new Error("No data");
+                const entries = Object.values(data).map((m) => `${m.label}: ${m.description}`);
+                registryText.textContent = entries.join(" • ");
+                moduleCount.textContent = `${entries.length} active`;
+            })
+            .catch(() => {
+                registryText.textContent = "Registry unavailable (API offline).";
+            });
+
+        updateHomeStatus();
+    </script>
+<script>
+    (function highlightSidebar() {
+        const links = document.querySelectorAll('.left-nav a.side-btn');
+        const current = location.pathname.split('/').pop() + (location.hash || "");
+        links.forEach(link => {
+            link.classList.remove('active');
+            const href = link.getAttribute('href') || "";
+            if (href === current || (!location.hash && href.endsWith('index.html'))) {
+                link.classList.add('active');
+            }
+        });
+        try {
+            localStorage.setItem('irmmf_sidebar_last', current);
+        } catch (e) {}
+    })();
+</script>
+</body>
+</html>

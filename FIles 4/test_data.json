@@ -1,0 +1,283 @@
+{
+  "test_case_1": {
+    "description": "Technology company with high IP, good visibility, weak technical controls",
+    "intake_tags": [
+      "Technology",
+      "High-IP",
+      "Enterprise (5000+)",
+      "EU-Primary"
+    ],
+    "axis_scores": {
+      "G": 2.3,
+      "E": 2.8,
+      "T": 2.1,
+      "L": 2.5,
+      "H": 2.7,
+      "V": 2.9,
+      "R": 2.4,
+      "F": 2.2,
+      "W": 2.6
+    },
+    "expected_results": {
+      "IP_Theft": {
+        "likelihood": 2,
+        "likelihood_range": [
+          2,
+          3
+        ],
+        "impact": 5,
+        "risk_level": "YELLOW",
+        "notes": "High impact due to Technology + High-IP tags, moderate likelihood due to good visibility but weak technical"
+      },
+      "Privileged_Abuse": {
+        "likelihood": 3,
+        "likelihood_range": [
+          3,
+          4
+        ],
+        "impact": 3,
+        "risk_level": "YELLOW",
+        "notes": "Weak technical controls increase likelihood, moderate impact (not healthcare/finance)"
+      }
+    }
+  },
+  "test_case_2": {
+    "description": "Healthcare organization with high PII, mature controls across the board",
+    "intake_tags": [
+      "Healthcare",
+      "High-PII",
+      "NIS2-Essential",
+      "Mid-Market (250-4999)"
+    ],
+    "axis_scores": {
+      "G": 3.5,
+      "E": 3.8,
+      "T": 3.2,
+      "L": 3.6,
+      "H": 3.4,
+      "V": 3.7,
+      "R": 3.3,
+      "F": 3.1,
+      "W": 3.4
+    },
+    "expected_results": {
+      "Customer_Data_Breach": {
+        "likelihood": 2,
+        "likelihood_range": [
+          1,
+          2
+        ],
+        "impact": 5,
+        "risk_level": "YELLOW",
+        "notes": "High impact due to Healthcare + High-PII, low likelihood due to strong controls"
+      },
+      "Privileged_Abuse": {
+        "likelihood": 2,
+        "likelihood_range": [
+          1,
+          2
+        ],
+        "impact": 5,
+        "risk_level": "YELLOW",
+        "notes": "Strong PAM and reviews reduce likelihood, high impact due to healthcare"
+      },
+      "Regulatory_Compliance": {
+        "likelihood": 1,
+        "likelihood_range": [
+          1,
+          2
+        ],
+        "impact": 5,
+        "risk_level": "GREEN",
+        "notes": "Strong legal/governance controls, high impact if breach occurs"
+      }
+    }
+  },
+  "test_case_3": {
+    "description": "Financial services with immature insider risk program",
+    "intake_tags": [
+      "Financial Services",
+      "DORA-Inscope",
+      "Enterprise (5000+)",
+      "Public-Company"
+    ],
+    "axis_scores": {
+      "G": 1.8,
+      "E": 1.5,
+      "T": 1.9,
+      "L": 2.1,
+      "H": 1.7,
+      "V": 1.6,
+      "R": 1.8,
+      "F": 2.0,
+      "W": 1.4
+    },
+    "expected_results": {
+      "Privileged_Abuse": {
+        "likelihood": 4,
+        "likelihood_range": [
+          4,
+          5
+        ],
+        "impact": 5,
+        "risk_level": "RED",
+        "notes": "Very weak controls across the board, maximum impact for financial services"
+      },
+      "Regulatory_Compliance": {
+        "likelihood": 4,
+        "likelihood_range": [
+          4,
+          5
+        ],
+        "impact": 5,
+        "risk_level": "RED",
+        "notes": "DORA-inscope + weak legal/governance = audit failure risk"
+      },
+      "Post_Termination_Access": {
+        "likelihood": 4,
+        "likelihood_range": [
+          4,
+          5
+        ],
+        "impact": 5,
+        "risk_level": "RED",
+        "notes": "Enterprise scale + weak execution = orphaned accounts everywhere"
+      }
+    }
+  },
+  "sample_responses": {
+    "description": "Sample question responses for testing (abbreviated)",
+    "responses": {
+      "ADD-AI-Q01": 3,
+      "ADD-AI-Q02": 2,
+      "SEC-D2-Q04": 2,
+      "SEC-D4-Q10": 2,
+      "ITIAM-D1-Q01": 4,
+      "ITIAM-D2-Q03": 3,
+      "LEG-D1-Q01": 3,
+      "HR-D1-Q02": 3,
+      "EXCO-D1-Q01": 2
+    },
+    "notes": "In production, all 410 questions would be answered. This is abbreviated for testing."
+  },
+  "validation_rules": {
+    "axis_scores": {
+      "min": 0.0,
+      "max": 4.0,
+      "type": "float"
+    },
+    "likelihood": {
+      "min": 1,
+      "max": 5,
+      "type": "int"
+    },
+    "impact": {
+      "min": 1,
+      "max": 5,
+      "type": "int"
+    },
+    "risk_score": {
+      "min": 1,
+      "max": 25,
+      "type": "int"
+    },
+    "risk_level": {
+      "values": [
+        "RED",
+        "AMBER",
+        "YELLOW",
+        "GREEN"
+      ],
+      "type": "str"
+    },
+    "mitigation_score": {
+      "min": 0.0,
+      "max": 1.0,
+      "type": "float"
+    }
+  },
+  "curve_test_data": {
+    "threshold_curve": {
+      "inputs": [
+        0.0,
+        1.0,
+        1.9,
+        2.0,
+        2.5,
+        3.0,
+        4.0
+      ],
+      "expected_outputs": [
+        0.1,
+        0.1,
+        0.1,
+        0.5,
+        0.6,
+        0.7,
+        0.9
+      ]
+    },
+    "standard_curve": {
+      "inputs": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ],
+      "expected_range": [
+        [
+          0.0,
+          0.2
+        ],
+        [
+          0.2,
+          0.4
+        ],
+        [
+          0.45,
+          0.55
+        ],
+        [
+          0.6,
+          0.8
+        ],
+        [
+          0.8,
+          1.0
+        ]
+      ]
+    },
+    "logarithmic_curve": {
+      "inputs": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ],
+      "expected_range": [
+        [
+          0.0,
+          0.1
+        ],
+        [
+          0.35,
+          0.45
+        ],
+        [
+          0.6,
+          0.7
+        ],
+        [
+          0.75,
+          0.85
+        ],
+        [
+          0.85,
+          0.95
+        ]
+      ]
+    }
+  }
+}

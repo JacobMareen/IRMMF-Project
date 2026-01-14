@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"name": "IRMMF Project",
+			"path": "."
+		},
+		{
+			"name": "files 4",
+			"path": "../../Downloads/files 4"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "IRMMF Project",
+		"liveServer.settings.port": 5501
+	}
+}
