@@ -22,14 +22,14 @@
             --warn: #f39c12;
 
             /* DEFAULT THEME: DARK MODE */
-            --bg-page: #000f1f;       /* Very Dark Navy */
-            --bg-card: #011E3D;       /* Brand Navy */
-            --bg-sidebar: #01162e;    /* Slightly darker than card */
-            --bg-input: #02264d;
+            --bg-page: #0b1f35;       /* Lifted Navy */
+            --bg-card: #0f2a4d;       /* Softer Navy */
+            --bg-sidebar: #0a203c;    /* Slightly darker than card */
+            --bg-input: #12335d;
             
             --text-main: #ffffff;
-            --text-sub: #b0c4de;      /* Light Blue-Gray */
-            --border-color: #1a3a5c;
+            --text-sub: #c6d3e6;      /* Lifted Blue-Gray */
+            --border-color: #2a4d76;
             
             --shadow: rgba(0,0,0,0.5);
             --chart-grid: rgba(255,255,255,0.1);
@@ -71,14 +71,28 @@
         header {
             background: var(--bg-card); /* Adaptive Header */
             border-bottom: 1px solid var(--border-color);
-            padding: 15px 30px;
+            padding: 12px 22px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 1000;
         }
         
-        .logo-area { font-family: 'League Spartan', sans-serif; font-size: 1.4em; color: var(--brand-gold); letter-spacing: 1px; }
+        .logo-area {
+            font-family: 'League Spartan', sans-serif;
+            font-size: 1.4em;
+            color: var(--brand-gold);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-area img {
+            height: 34px;
+            max-width: 180px;
+            object-fit: contain;
+            display: none;
+        }
 
         .nav-link {
             background: transparent;
@@ -108,8 +122,8 @@
         /* --- LAYOUT --- */
         .main-layout { display: flex; flex: 1; overflow: hidden; }
         .left-nav {
-            width: 210px;
-            padding: 20px 12px;
+            width: 200px;
+            padding: 16px 10px;
             background: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
             display: flex;
@@ -221,8 +235,16 @@
         }
         .sb-item.locked span {filter: grayscale(1); }        
         .sb-item.locked:hover::after { content: attr(data-reason); position: absolute; left: 105%; top: 0; width: 200px; background: var(--brand-navy); color: white; padding: 10px; border-radius: 4px; font-size: 0.8em; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .content-area { flex: 1; overflow-y: auto; padding: 50px; position: relative; }
-        .view-container { max-width: 900px; margin: auto; display: none; }
+        .content-area { flex: 1; overflow-y: auto; padding: 32px; position: relative; }
+        .app-footer {
+            margin-top: 40px;
+            padding: 18px 24px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        .view-container { max-width: 860px; margin: auto; display: none; }
 
         /* --- CARDS & DASHBOARD --- */
         .dash-header { 
@@ -312,7 +334,10 @@
 <body>
 
 <header id="app-header" style="display:none;">
-    <div class="logo-area">IRMMF <span style="font-weight:400; font-size:0.8em; color:var(--text-sub);">Command</span></div>
+    <div class="logo-area" id="brand-header">
+        <img id="brand-logo" alt="IRMMF logo">
+        <div id="brand-text">IRMMF <span style="font-weight:400; font-size:0.8em; color:var(--text-sub);">Command</span></div>
+    </div>
     <div style="display:flex; align-items:center;">
         <nav class="nav-group">
             <a class="nav-link" href="index.html" style="text-decoration:none;">Command Center</a>
@@ -331,7 +356,9 @@
                     <button onclick="openDwf()">Open Workforce</button>
                 </div>
             </div>
+            <a id="btn-settings" class="nav-link" href="settings.html" style="text-decoration:none;">Settings</a>
         </nav>
+        <button id="btn-logout" class="nav-link" onclick="logoutUser()">Logout</button>
         <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
             <span id="theme-icon">☀️</span>
         </button>
@@ -342,6 +369,7 @@
     <div id="left-menu" class="left-nav">
         <a class="side-btn" href="index.html">Command Center</a>
         <a class="side-btn" href="assessment.html#dashboard">Assessment Hub</a>
+        <a class="side-btn" href="settings.html">Settings</a>
         <div style="display:flex; flex-direction:column; gap:8px; margin:8px 0 0 8px;">
             <a class="side-btn" href="assessment.html#dashboard">Assessments</a>
             <a class="side-btn" href="assessment.html#results">Results</a>
@@ -651,11 +679,14 @@
                 <div id="review-table-container" style="overflow:auto; max-height:70vh;"></div>
             </div>
         </div>
+
+        <footer class="app-footer">© 2026 Belfort Advisory. All rights reserved.</footer>
     </div>
 </div>
 
 <script>
     const API_BASE = "http://127.0.0.1:8000/api/v1";
+    const BRAND_LOGO_KEY = "irmmf_logo_data";
     let currentUser = localStorage.getItem('irmmf_user') || "";
     let allQuestions = [], userResponses = {}, assessmentId = "", currentQIndex = 0, reachablePath = [];
     let activeLogicReason = null, deferredQIds = new Set(), flaggedQIds = new Set(), myRadarChart = null, pendingResponse = null;
@@ -722,6 +753,40 @@
     }
     
     initTheme(); // Run on load
+    window.addEventListener('storage', (event) => {
+        if (event.key !== 'theme') return;
+        const theme = event.newValue || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        updateThemeIcon(theme);
+        if (myRadarChart) loadResults();
+    });
+
+    function applyBranding() {
+        const logoData = localStorage.getItem(BRAND_LOGO_KEY);
+        const logoImg = document.getElementById('brand-logo');
+        const logoText = document.getElementById('brand-text');
+        if (!logoImg || !logoText) return;
+        if (logoData) {
+            logoImg.src = logoData;
+            logoImg.style.display = 'block';
+            logoText.style.display = 'none';
+        } else {
+            logoImg.removeAttribute('src');
+            logoImg.style.display = 'none';
+            logoText.style.display = 'block';
+        }
+    }
+
+    function logoutUser() {
+        localStorage.removeItem('irmmf_user');
+        window.location.href = 'index.html';
+    }
+
+    function initBranding() {
+        applyBranding();
+    }
+
+    initBranding();
 
     function setupSidebarControls() {
         const sidebar = document.getElementById('sidebar');
@@ -917,6 +982,7 @@ async function prepareMode(mode) {
         const hasIntakeProgress = (intakeAnswers || []).some(a => a.value != null && a.value !== "");
         const hasAssessmentProgress = Object.keys(userResponses || {}).length > 0;
         const isFresh = hasAssessment && !hasIntakeProgress && !hasAssessmentProgress;
+        const hasQuestionBank = (allQuestions || []).length > 0;
         const intakeSection = document.getElementById('dashboard-intake');
         const intakeTile = document.getElementById('intake-tile');
         const overrideBox = document.getElementById('override-controls');
@@ -960,14 +1026,18 @@ async function prepareMode(mode) {
             return;
         }
 
+        const warningLine = !hasQuestionBank
+            ? `<div style="color:var(--warn); margin-top:8px;">Question bank not loaded. You can still complete intake, but assessment questions will remain unavailable.</div>`
+            : "";
         status.innerHTML = `
             <div class="id-card" style="margin-bottom:0; display:flex; align-items:center; justify-content:space-between; gap:16px;">
                 <div>
                     <h2 style="margin:0 0 6px 0;">Assessment Ready</h2>
                     <p style="color:var(--text-sub); margin:0;">Continue where you left off or review progress.</p>
+                    ${warningLine}
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="main-btn" style="background:var(--brand-gold); color:var(--brand-navy);" onclick="switchTab('assessment')">${isFresh ? 'Start Assessment' : 'Continue Assessment'}</button>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+                    <button class="main-btn" style="background:var(--brand-gold); color:var(--brand-navy);" onclick="handleStartAssessment()">${(requiresIntake || !hasQuestionBank) ? 'Start Intake' : (isFresh ? 'Start Assessment' : 'Continue Assessment')}</button>
                     <button class="main-btn" style="background:var(--bg-card); color:var(--text-main); border:1px solid var(--border-color);" onclick="switchTab('results')">View Dashboard</button>
                 </div>
             </div>
@@ -1109,6 +1179,29 @@ async function prepareMode(mode) {
         return decodeURIComponent(qidPart.replace("qid=", ""));
     }
 
+    function handleStartAssessment() {
+        const hasQuestionBank = (allQuestions || []).length > 0;
+        if (requiresIntake || !hasQuestionBank) {
+            switchTab('intake');
+            return;
+        }
+        switchTab('assessment');
+    }
+
+    async function fetchLatestAssessmentForUser(userId) {
+        if (!userId) return null;
+        try {
+            const resp = await fetch(`${API_BASE}/assessment/user/${encodeURIComponent(userId)}/latest`);
+            if (!resp.ok) return null;
+            const data = await resp.json();
+            return data.assessment_id || null;
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    }
+
+
     function switchTab(tab) {
         document.querySelectorAll('.view-container').forEach(v => v.style.display = 'none');
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
@@ -1118,7 +1211,8 @@ async function prepareMode(mode) {
             return;
         }
         view.style.display = 'block';
-        document.getElementById('btn-seg-maturity').classList.add('active');
+        const maturityBtn = document.getElementById('btn-seg-maturity');
+        if (maturityBtn) maturityBtn.classList.add('active');
         const showSidebar = (tab === 'assessment');
         document.getElementById('sidebar').style.display = showSidebar ? 'flex' : 'none';
         document.getElementById('sidebar-handle').style.display = showSidebar ? 'block' : 'none';
@@ -1155,10 +1249,10 @@ async function prepareMode(mode) {
                     reachablePath = [lastServerState.next_best_qid];
                     currentQIndex = 0;
                 } else if (!allQuestions.length) {
-                    if (lockMsg) lockMsg.style.display = 'block';
-                    if (lockText) lockText.innerText = "No questions found. Run the question bank ingest and refresh.";
-                    return;
-                } else {
+                if (lockMsg) lockMsg.style.display = 'block';
+                if (lockText) lockText.innerText = "No questions found. Run the question bank ingest and refresh, or complete intake while the bank is loading.";
+                return;
+            } else {
                     if (lockMsg) lockMsg.style.display = 'block';
                     if (lockText) lockText.innerText = "No reachable questions yet. Please refresh or restart the assessment.";
                     return;
@@ -1826,7 +1920,7 @@ async function prepareMode(mode) {
         applyState(state);
     }
 
-    window.addEventListener('load', () => {
+    window.addEventListener('load', async () => {
         setupSidebarControls();
         const params = new URLSearchParams(window.location.search);
         if (params.get('new') === '1') {
@@ -1841,6 +1935,16 @@ async function prepareMode(mode) {
             idInput.value = saved;
             initSession();
             return;
+        }
+        if (currentUser) {
+            const latest = await fetchLatestAssessmentForUser(currentUser);
+            if (latest) {
+                const idInput = document.getElementById('assessment-id-input');
+                idInput.value = latest;
+                setSavedAssessmentId(latest);
+                initSession();
+                return;
+            }
         }
         showDashboardEntry();
         setActiveSidebarLink();
@@ -2341,6 +2445,8 @@ async function prepareMode(mode) {
                 };
                 heatmap.innerHTML = `
                     <div style="display:flex; flex-direction:column; justify-content:space-between; color:var(--text-sub); font-size:0.75em; padding:4px 0;">
+                        <span>7</span>
+                        <span>6</span>
                         <span>5</span>
                         <span>4</span>
                         <span>3</span>
@@ -2349,8 +2455,8 @@ async function prepareMode(mode) {
                     </div>
                     <div id="risk-heatmap-grid" style="position:relative; width:100%; aspect-ratio:1/1; border:1px solid var(--border-color); border-radius:10px; background:
                         linear-gradient(to top right, rgba(16,185,129,0.3) 0%, rgba(252,211,77,0.32) 50%, rgba(220,38,38,0.35) 100%),
-                        repeating-linear-gradient(0deg, transparent, transparent 19.5%, rgba(255,255,255,0.05) 20%),
-                        repeating-linear-gradient(90deg, transparent, transparent 19.5%, rgba(255,255,255,0.05) 20%);">
+                        repeating-linear-gradient(0deg, transparent, transparent 14.2%, rgba(255,255,255,0.05) 14.3%),
+                        repeating-linear-gradient(90deg, transparent, transparent 14.2%, rgba(255,255,255,0.05) 14.3%);">
                     </div>
                     <div></div>
                     <div style="display:flex; justify-content:space-between; color:var(--text-sub); font-size:0.75em;">
@@ -2359,6 +2465,8 @@ async function prepareMode(mode) {
                         <span>3</span>
                         <span>4</span>
                         <span>5</span>
+                        <span>6</span>
+                        <span>7</span>
                     </div>
                 `;
                 const grid = document.getElementById('risk-heatmap-grid');
@@ -2385,14 +2493,17 @@ async function prepareMode(mode) {
                         const key = `${likelihood}-${impact}`;
                         const index = collisions[key] || 0;
                         collisions[key] = index + 1;
-                        const x = (Math.min(5, Math.max(1, likelihood)) - 1) / 4;
-                        const y = (Math.min(5, Math.max(1, impact)) - 1) / 4;
+                        const x = (Math.min(7, Math.max(1, likelihood)) - 1) / 6;
+                        const y = (Math.min(7, Math.max(1, impact)) - 1) / 6;
                         const jitterRadius = index * dotRadius * 0.7;
                         const angle = index * (Math.PI / 3);
                         const jitterX = Math.cos(angle) * jitterRadius;
                         const jitterY = Math.sin(angle) * jitterRadius;
-                        const left = (x * size) - dotRadius + jitterX;
-                        const top = ((1 - y) * size) - dotRadius + jitterY;
+                        const rawLeft = (x * size) - dotRadius + jitterX;
+                        const rawTop = ((1 - y) * size) - dotRadius + jitterY;
+                        const maxPos = size - (dotRadius * 2);
+                        const left = Math.max(0, Math.min(maxPos, rawLeft));
+                        const top = Math.max(0, Math.min(maxPos, rawTop));
                         const dot = document.createElement('div');
                         const color = levelColors[r.risk_level] || "#e74c3c";
                         dot.dataset.label = `${r.scenario || r.name} (L${likelihood} × I${impact})`;

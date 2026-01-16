@@ -92,6 +92,29 @@ def start_assessment(payload: dict | None = Body(default=None), service: Assessm
     return {"assessment_id": new_key}
 
 
+@router.get("/api/v1/assessment/user/{user_id}")
+def list_assessments_for_user(user_id: str, service: AssessmentService = Depends(get_service)):
+    return service.list_assessments_for_user(user_id)
+
+
+@router.get("/api/v1/assessment/user/{user_id}/latest")
+def get_latest_assessment_for_user(user_id: str, service: AssessmentService = Depends(get_service)):
+    latest = service.get_latest_assessment_for_user(user_id)
+    if not latest:
+        raise HTTPException(status_code=404, detail="No assessments found for user.")
+    return latest
+
+
+@router.post("/api/v1/assessment/{assessment_id}/reset")
+def reset_assessment_data(assessment_id: str, service: AssessmentService = Depends(get_service)):
+    try:
+        return service.reset_assessment_data(assessment_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal Server Error during reset")
+
+
 @router.get("/api/v1/intake/options")
 def get_intake_options(service: AssessmentService = Depends(get_service)):
     return service.get_intake_options()

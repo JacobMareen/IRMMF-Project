@@ -25,13 +25,13 @@ risks:
     # Impact rules (checked in order)
     impact_rules:
       - condition: "High-IP OR Technology"
-        value: 5
+        value: 7
       - condition: "Manufacturing OR Pharma"
-        value: 4
+        value: 6
       - condition: "Enterprise (5000+)"
         value: "+1"
       - condition: "default"
-        value: 2
+        value: 3
 
   - id: Customer_Data_Breach
     name: "Customer Data Breach (PII/PHI)"
@@ -54,13 +54,13 @@ risks:
     
     impact_rules:
       - condition: "Healthcare OR Financial Services"
-        value: 5
+        value: 7
       - condition: "High-PII OR NIS2-Essential"
-        value: 5
+        value: 7
       - condition: "DORA-Inscope"
-        value: 4
+        value: 6
       - condition: "default"
-        value: 3
+        value: 4
 
   - id: Shadow_IT_Leakage
     name: "Unapproved Tool Data Leakage (incl. GenAI)"
@@ -81,13 +81,13 @@ risks:
     
     impact_rules:
       - condition: "High-IP OR Technology"
-        value: 5
+        value: 7
       - condition: "Healthcare OR Legal"
-        value: 5
+        value: 7
       - condition: "Financial Services OR High-PII"
-        value: 4
+        value: 6
       - condition: "default"
-        value: 3
+        value: 4
 
   - id: Accidental_Exposure
     name: "Accidental Data Exposure"
@@ -108,11 +108,11 @@ risks:
     
     impact_rules:
       - condition: "High-PII OR Healthcare"
-        value: 5
+        value: 7
       - condition: "Financial Services"
-        value: 4
+        value: 6
       - condition: "default"
-        value: 3
+        value: 4
 
   - id: Privileged_Abuse
     name: "Privileged Account Abuse"
@@ -133,13 +133,13 @@ risks:
     
     impact_rules:
       - condition: "Healthcare OR Financial Services"
-        value: 5
+        value: 7
       - condition: "NIS2-Essential OR DORA-Inscope"
-        value: 5
+        value: 7
       - condition: "High-PII"
-        value: 4
+        value: 6
       - condition: "default"
-        value: 3
+        value: 4
 
   - id: Post_Termination_Access
     name: "Post-Termination Access Risk"
@@ -160,11 +160,11 @@ risks:
     
     impact_rules:
       - condition: "Enterprise (5000+)"
-        value: 5
+        value: 7
       - condition: "Mid-Market (250-4999)"
-        value: 3
+        value: 4
       - condition: "default"
-        value: 2
+        value: 3
 
   - id: SoD_Violations
     name: "Segregation of Duties Violations"
@@ -185,11 +185,11 @@ risks:
     
     impact_rules:
       - condition: "Financial Services OR NIS2-Essential"
-        value: 5
+        value: 7
       - condition: "Public-Company"
-        value: 4
+        value: 6
       - condition: "default"
-        value: 3
+        value: 4
 
   - id: Insider_Sabotage
     name: "Insider Sabotage (Intentional)"
@@ -212,11 +212,11 @@ risks:
     
     impact_rules:
       - condition: "NIS2-Essential OR Critical-Infrastructure"
-        value: 5
+        value: 7
       - condition: "Enterprise (5000+)"
-        value: 4
+        value: 6
       - condition: "default"
-        value: 3
+        value: 4
 
   - id: Regulatory_Compliance
     name: "Regulatory Non-Compliance (Insider Risk)"
@@ -237,13 +237,13 @@ risks:
     
     impact_rules:
       - condition: "NIS2-Essential OR DORA-Inscope"
-        value: 5
+        value: 7
       - condition: "NIS2-Important"
-        value: 4
+        value: 6
       - condition: "Public-Company OR Healthcare"
-        value: 4
+        value: 6
       - condition: "default"
-        value: 2
+        value: 3
 
   - id: Third_Party_Abuse
     name: "Third-Party Access Abuse"
@@ -264,8 +264,8 @@ risks:
     
     impact_rules:
       - condition: "Financial Services OR Healthcare"
-        value: 5
+        value: 7
       - condition: "NIS2-Essential"
-        value: 4
+        value: 6
       - condition: "default"
-        value: 3
+        value: 4

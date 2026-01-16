@@ -229,6 +229,72 @@ class AssessmentStateService:
         self.db.commit()
         return {"assessment_id": assessment_id, "override_depth": record.override_depth}
 
+    def list_assessments_for_user(self, user_id: str) -> List[Dict[str, Any]]:
+        rows = (
+            self.db.query(models.Assessment)
+            .filter_by(user_id=user_id)
+            .order_by(models.Assessment.updated_at.desc(), models.Assessment.created_at.desc())
+            .all()
+        )
+        return [
+            {
+                "assessment_id": r.assessment_id,
+                "created_at": r.created_at,
+                "updated_at": r.updated_at,
+                "is_active": r.is_active,
+            }
+            for r in rows
+        ]
+
+    def get_latest_assessment_for_user(self, user_id: str) -> Dict[str, Any] | None:
+        rows = self.list_assessments_for_user(user_id)
+        return rows[0] if rows else None
+
+    def reset_assessment_data(self, assessment_id: str) -> Dict[str, Any]:
+        record = self.db.query(models.Assessment).filter_by(assessment_id=assessment_id).first()
+        if not record:
+            raise ValueError(f"Assessment {assessment_id} not found.")
+
+        responses_deleted = (
+            self.db.query(models.Response)
+            .filter_by(assessment_id=assessment_id)
+            .delete(synchronize_session=False)
+        )
+        evidence_deleted = (
+            self.db.query(models.EvidenceResponse)
+            .filter_by(assessment_id=assessment_id)
+            .delete(synchronize_session=False)
+        )
+        intake_deleted = (
+            self.db.query(models.IntakeResponse)
+            .filter_by(assessment_id=assessment_id)
+            .delete(synchronize_session=False)
+        )
+        audits_deleted = (
+            self.db.query(models.ResponseAudit)
+            .filter_by(assessment_id=assessment_id)
+            .delete(synchronize_session=False)
+        )
+        snapshots_deleted = (
+            self.db.query(models.ReportSnapshot)
+            .filter_by(assessment_id=assessment_id)
+            .delete(synchronize_session=False)
+        )
+
+        record.override_depth = False
+        record.benchmark_tags = None
+        record.is_active = True
+        self.db.commit()
+
+        return {
+            "assessment_id": assessment_id,
+            "responses_deleted": responses_deleted,
+            "evidence_deleted": evidence_deleted,
+            "intake_deleted": intake_deleted,
+            "audits_deleted": audits_deleted,
+            "snapshots_deleted": snapshots_deleted,
+        }
+
     def get_context(self, assessment_id: str) -> Dict[str, Any]:
         """Compatibility wrapper for older API route."""
         return self.get_resumption_state(assessment_id)

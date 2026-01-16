@@ -11,6 +11,9 @@ import yaml
 
 AXES = ("G", "E", "T", "L", "H", "V", "R", "F", "W")
 CURVE_TYPES = {"threshold", "standard", "logarithmic"}
+RISK_SCALE_MAX = 7
+IMPACT_BASE_MAX = RISK_SCALE_MAX
+AXIS_SCALE_MAX = 6.0
 
 
 def _default_config_path() -> str:
@@ -56,18 +59,25 @@ def _validate_scenarios(scenarios: Iterable[Dict[str, Any]]) -> None:
 
 
 def _clip_score(score: float) -> float:
-    return max(0.0, min(4.0, score))
+    return max(0.0, min(AXIS_SCALE_MAX, score))
+
+
+def _scale_impact(value: int) -> int:
+    if IMPACT_BASE_MAX == RISK_SCALE_MAX:
+        return value
+    scaled = round(((value - 1) / (IMPACT_BASE_MAX - 1)) * (RISK_SCALE_MAX - 1) + 1)
+    return int(max(1, min(RISK_SCALE_MAX, scaled)))
 
 
 def apply_curve(axis_score: float, curve_type: str) -> float:
     score = _clip_score(axis_score)
     if curve_type == "threshold":
-        if score < 2.0:
+        if score < 3.0:
             return 0.1
-        return 0.5 + (score - 2.0) * 0.2
+        return 0.5 + (score - 3.0) * 0.15
     if curve_type == "logarithmic":
         return 1.0 - math.exp(-0.5 * score)
-    return 1.0 / (1.0 + math.exp(-1.5 * (score - 2.0)))
+    return 1.0 / (1.0 + math.exp(-1.2 * (score - 3.0)))
 
 
 def evaluate_condition(condition: str, intake_tags: Iterable[str]) -> bool:
@@ -99,12 +109,13 @@ def calculate_impact(scenario: Dict[str, Any], intake_tags: Iterable[str]) -> in
             continue
         value = rule.get("value")
         if value == "+1":
-            impact = min(5, impact + 1)
+            impact = min(IMPACT_BASE_MAX, impact + 1)
             continue
         impact = int(value)
         break
 
-    return max(1, min(5, impact))
+    impact = max(1, min(IMPACT_BASE_MAX, impact))
+    return _scale_impact(impact)
 
 
 def calculate_mitigation_score(scenario: Dict[str, Any], axis_scores: Dict[str, float]) -> float:
@@ -120,17 +131,17 @@ def calculate_mitigation_score(scenario: Dict[str, Any], axis_scores: Dict[str, 
 
 
 def calculate_likelihood(mitigation_score: float) -> int:
-    raw_likelihood = 5 - (mitigation_score * 4)
-    return max(1, min(5, int(round(raw_likelihood))))
+    raw_likelihood = RISK_SCALE_MAX - (mitigation_score * (RISK_SCALE_MAX - 1))
+    return max(1, min(RISK_SCALE_MAX, int(round(raw_likelihood))))
 
 
 def determine_risk_level(likelihood: int, impact: int) -> Tuple[str, int]:
     risk_score = likelihood * impact
-    if risk_score >= 20:
+    if risk_score >= 39:
         return "RED", risk_score
-    if risk_score >= 12:
+    if risk_score >= 24:
         return "AMBER", risk_score
-    if risk_score >= 6:
+    if risk_score >= 12:
         return "YELLOW", risk_score
     return "GREEN", risk_score
 
@@ -180,8 +191,8 @@ def _identify_key_gaps(scenario: Dict[str, Any], axis_scores: Dict[str, float]) 
         if weight < 0.15:
             continue
         score = axis_scores.get(axis, 0.0)
-        if score < 3.0:
-            gaps.append(f"{axis_names.get(axis, axis)}: {score:.1f}/4")
+        if score < 4.5:
+            gaps.append(f"{axis_names.get(axis, axis)}: {score:.1f}/6")
     return gaps[:3]
 
 

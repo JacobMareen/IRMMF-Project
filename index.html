@@ -12,16 +12,28 @@
             --success: #27ae60;
             --warn: #f39c12;
 
-            --bg-page: #000f1f;
-            --bg-card: #011E3D;
-            --bg-sidebar: #01162e;
-            --bg-input: #02264d;
+            --bg-page: #0b1f35;
+            --bg-card: #0f2a4d;
+            --bg-sidebar: #0a203c;
+            --bg-input: #12335d;
 
             --text-main: #ffffff;
-            --text-sub: #b0c4de;
-            --border-color: #1a3a5c;
+            --text-sub: #c6d3e6;
+            --border-color: #2a4d76;
 
             --shadow: rgba(0,0,0,0.5);
+        }
+        [data-theme="light"] {
+            --bg-page: #f4f7f6;
+            --bg-card: #ffffff;
+            --bg-sidebar: #ffffff;
+            --bg-input: #ffffff;
+
+            --text-main: #011E3D;
+            --text-sub: #5d6b7a;
+            --border-color: #dfe6ee;
+
+            --shadow: rgba(0,0,0,0.08);
         }
 
         * { box-sizing: border-box; }
@@ -39,23 +51,39 @@
         header {
             background: var(--bg-card);
             border-bottom: 1px solid var(--border-color);
-            padding: 16px 28px;
+            padding: 12px 22px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        header h1 { margin: 0; font-size: 1.4rem; color: var(--brand-gold); }
+        .logo-area {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--brand-gold);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'League Spartan', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .logo-area img {
+            height: 34px;
+            max-width: 180px;
+            object-fit: contain;
+            display: none;
+        }
         header span { color: var(--text-sub); font-size: 0.95rem; }
 
         .layout-wrap {
             display: flex;
-            min-height: calc(100vh - 64px);
+            min-height: calc(100vh - 56px);
         }
 
         .left-nav {
             width: 210px;
-            padding: 20px 12px;
+            padding: 16px 10px;
             background: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
             display: flex;
@@ -87,14 +115,14 @@
         .page {
             max-width: 1180px;
             margin: 0 auto;
-            padding: 36px 24px 72px;
+            padding: 24px 20px 48px;
             flex: 1;
         }
 
         .hero {
             display: grid;
             grid-template-columns: 1.2fr 0.8fr;
-            gap: 28px;
+            gap: 18px;
             align-items: center;
         }
 
@@ -103,7 +131,7 @@
             border-radius: 12px;
             border: 1px solid var(--border-color);
             box-shadow: 0 10px 40px var(--shadow);
-            padding: 28px;
+            padding: 22px;
         }
 
         .card p { color: var(--text-sub); line-height: 1.6; }
@@ -111,14 +139,14 @@
         .meta-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 14px;
+            gap: 10px;
             margin-top: 18px;
         }
 
         .meta-tile {
             background: rgba(0,0,0,0.2);
             border-radius: 10px;
-            padding: 12px 14px;
+            padding: 10px 12px;
             border: 1px solid var(--border-color);
         }
 
@@ -136,10 +164,10 @@
             margin-bottom: 12px;
         }
 
-        .modules { margin-top: 42px; }
+        .modules { margin-top: 28px; }
 
         .section-title {
-            margin: 0 0 16px;
+            margin: 0 0 12px;
             font-size: 1.4rem;
             color: var(--brand-gold);
         }
@@ -147,14 +175,14 @@
         .module-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 18px;
+            gap: 14px;
         }
 
         .module-card {
             background: var(--bg-card);
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            padding: 20px 22px;
+            padding: 18px;
             position: relative;
             box-shadow: 0 8px 30px var(--shadow);
         }
@@ -193,14 +221,31 @@
 
         .btn.primary { background: var(--brand-gold); color: var(--brand-navy); }
         .btn.secondary { background: transparent; color: var(--brand-gold); }
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--brand-gold);
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
 
         .registry {
-            margin-top: 30px;
-            padding: 14px 18px;
+            margin-top: 22px;
+            padding: 12px 14px;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             color: var(--text-sub);
             background: rgba(0,0,0,0.18);
+        }
+        .app-footer {
+            margin-top: 32px;
+            padding: 18px 24px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            text-align: center;
         }
 
         @media (max-width: 900px) {
@@ -210,13 +255,19 @@
 </head>
 <body>
     <header>
-        <h1>IRMMF Command Center</h1>
+        <div class="logo-area" id="brand-header">
+            <img id="brand-logo" alt="IRMMF logo">
+            <span id="brand-text">IRMMF Command Center</span>
+        </div>
         <div style="display:flex; align-items:center; gap:12px;">
             <input type="text" id="home-user" placeholder="Username"
                    style="padding:8px 10px; border-radius:6px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main);">
             <input type="password" id="home-pass" placeholder="Password"
                    style="padding:8px 10px; border-radius:6px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main);">
             <button class="btn secondary" onclick="homeLogin()">Login</button>
+            <button class="btn secondary" onclick="logoutUser()">Logout</button>
+            <a class="btn secondary" href="settings.html">Settings</a>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode"><span id="theme-icon">☀️</span></button>
             <span id="home-status" style="color:var(--text-sub); font-size:0.9rem;">Not signed in</span>
         </div>
     </header>
@@ -225,6 +276,7 @@
         <nav class="left-nav">
             <a class="side-btn" href="index.html">Command Center</a>
             <a class="side-btn" href="assessment.html#dashboard">Assessment Hub</a>
+            <a class="side-btn" href="settings.html">Settings</a>
             <details open>
                 <summary class="side-btn">Assessment Views ▾</summary>
                 <div style="display:flex; flex-direction:column; gap:8px; margin:8px 0 0 8px;">
@@ -295,6 +347,15 @@
                 </div>
 
                 <div class="module-card">
+                    <div class="tag">Settings</div>
+                    <h3>Platform Settings</h3>
+                    <p>Manage environment-wide configuration, branding, access, and integrations.</p>
+                    <div class="module-actions">
+                        <a class="btn primary" href="settings.html">Open Settings</a>
+                    </div>
+                </div>
+
+                <div class="module-card">
                     <div class="tag">Upcoming</div>
                     <h3>Future Module</h3>
                     <p>Reserved for new capabilities (vendor risk, regulatory readiness, executive reporting).</p>
@@ -309,17 +370,48 @@
             <strong>Module Registry:</strong>
             <span id="registry-text">Loading module metadata...</span>
         </section>
+        <footer class="app-footer">© 2026 Belfort Advisory. All rights reserved.</footer>
+
         </div>
     </div>
 
     <script>
         const TEST_USER = "test";
         const TEST_PASS = "test123";
+        const BRAND_LOGO_KEY = "irmmf_logo_data";
         const registryText = document.getElementById("registry-text");
         const moduleCount = document.getElementById("module-count");
         const apiBase = (location.hostname === "127.0.0.1" || location.hostname === "localhost")
             ? "http://127.0.0.1:8000"
             : "http://0.0.0.0:8000";
+
+        function initTheme() {
+            const stored = localStorage.getItem("theme");
+            if (stored) {
+                document.documentElement.setAttribute("data-theme", stored);
+                updateThemeIcon(stored);
+            }
+        }
+        window.addEventListener("storage", (event) => {
+            if (event.key !== "theme") return;
+            const theme = event.newValue || "dark";
+            document.documentElement.setAttribute("data-theme", theme);
+            updateThemeIcon(theme);
+        });
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute("data-theme") || "dark";
+            const next = current === "light" ? "dark" : "light";
+            html.setAttribute("data-theme", next);
+            localStorage.setItem("theme", next);
+            updateThemeIcon(next);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById("theme-icon");
+            if (icon) icon.textContent = theme === "light" ? "🌙" : "☀️";
+        }
 
         function updateHomeStatus() {
             const status = document.getElementById("home-status");
@@ -339,6 +431,27 @@
             alert("Invalid credentials. Use test / test123.");
         }
 
+        function logoutUser() {
+            localStorage.removeItem("irmmf_user");
+            updateHomeStatus();
+        }
+
+        function applyBranding() {
+            const logoData = localStorage.getItem(BRAND_LOGO_KEY);
+            const logoImg = document.getElementById("brand-logo");
+            const logoText = document.getElementById("brand-text");
+            if (!logoImg || !logoText) return;
+            if (logoData) {
+                logoImg.src = logoData;
+                logoImg.style.display = "block";
+                logoText.style.display = "none";
+            } else {
+                logoImg.removeAttribute("src");
+                logoImg.style.display = "none";
+                logoText.style.display = "block";
+            }
+        }
+
         fetch(`${apiBase}/api/v1/modules`)
             .then((res) => res.ok ? res.json() : null)
             .then((data) => {
@@ -352,6 +465,8 @@
             });
 
         updateHomeStatus();
+        applyBranding();
+        initTheme();
     </script>
 <script>
     (function highlightSidebar() {

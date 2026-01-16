@@ -299,9 +299,9 @@ class V6_1ScoringEngine:
         caps_applied.extend(declared_caps)
         caps_applied.extend(verified_caps)
 
-        # Risk engine expects axis scores normalized to 0-4.
+        # Risk engine expects axis scores normalized to 0-6.
         axis_score_map = {
-            a.get("code"): max(0.0, min(4.0, (a.get("score", 0.0) / 100.0) * 4.0))
+            a.get("code"): max(0.0, min(6.0, (a.get("score", 0.0) / 100.0) * 6.0))
             for a in final_axes
             if a.get("code")
         }

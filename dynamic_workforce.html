@@ -9,23 +9,34 @@
         :root {
             --brand-navy: #011E3D;
             --brand-gold: #E8B373;
-            --bg-main: #08192B;
-            --bg-card: #0F253D;
+            --bg-main: #0b1f35;
+            --bg-card: #0f2a4d;
             --text-main: #F5F5F5;
-            --text-sub: #91A3B0;
-            --border-color: rgba(255, 255, 255, 0.12);
+            --text-sub: #c6d3e6;
+            --border-color: rgba(42, 77, 118, 0.7);
             --shadow: rgba(0, 0, 0, 0.4);
             --success: #2ecc71;
+        }
+        [data-theme="light"] {
+            --bg-main: #f4f7f6;
+            --bg-card: #ffffff;
+            --text-main: #011E3D;
+            --text-sub: #5d6b7a;
+            --border-color: rgba(223, 230, 238, 0.9);
+            --shadow: rgba(0,0,0,0.08);
         }
         body {
             margin: 0;
             font-family: "Hind", sans-serif;
-            background: radial-gradient(circle at top left, #0B2747, #08192B 50%, #071627);
+            background: radial-gradient(circle at top left, #123a63, #0b1f35 50%, #0a1b2c);
             color: var(--text-main);
+        }
+        [data-theme="light"] body {
+            background: radial-gradient(circle at top left, #ffffff, #f4f7f6 45%, #eef2f6);
         }
         header {
             background: rgba(1, 30, 61, 0.95);
-            padding: 15px 40px;
+            padding: 12px 26px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -39,6 +50,15 @@
             font-weight: 700;
             color: var(--brand-gold);
             font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo img {
+            height: 34px;
+            max-width: 180px;
+            object-fit: contain;
+            display: none;
         }
         .nav-link {
             background: transparent;
@@ -75,8 +95,8 @@
         .layout {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 24px;
-            padding: 30px 40px 60px;
+            gap: 16px;
+            padding: 20px 26px 40px;
         }
         .shell {
             display: flex;
@@ -84,7 +104,7 @@
         }
         .left-nav {
             width: 210px;
-            padding: 20px 12px;
+            padding: 16px 10px;
             background: rgba(1, 22, 46, 0.95);
             border-right: 1px solid var(--border-color);
             display: flex;
@@ -113,11 +133,19 @@
         .content-wrap {
             flex: 1;
         }
+        .app-footer {
+            margin: 30px 40px 50px;
+            padding: 18px 24px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            text-align: center;
+        }
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 20px;
+            padding: 18px;
             box-shadow: 0 10px 30px var(--shadow);
         }
         .section-title {
@@ -165,6 +193,15 @@
             font-weight: 700;
             cursor: pointer;
         }
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--brand-gold);
+            border-radius: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
         .btn-outline {
             background: transparent;
             border: 1px solid var(--brand-gold);
@@ -192,7 +229,10 @@
 </head>
 <body>
 <header>
-    <div class="logo">IRMMF Dynamic Workforce</div>
+    <div class="logo" id="brand-header">
+        <img id="brand-logo" alt="IRMMF logo">
+        <span id="brand-text">IRMMF Dynamic Workforce</span>
+    </div>
     <div class="nav-group">
         <div class="nav-dropdown">
             <button class="nav-link" onclick="toggleNavMenu('maturity-menu')">Maturity Assessment ▾</button>
@@ -210,6 +250,9 @@
                 <button onclick="scrollToSection('dwf-analysis')">Analysis</button>
             </div>
         </div>
+        <button class="nav-link" onclick="goSettings()">Settings</button>
+        <button class="nav-link" onclick="logoutUser()">Logout</button>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode"><span id="theme-icon">☀️</span></button>
     </div>
 </header>
 
@@ -217,6 +260,7 @@
     <nav class="left-nav">
         <a class="side-btn" href="index.html">Command Center</a>
         <a class="side-btn" href="assessment.html#dashboard">Assessment Hub</a>
+        <a class="side-btn" href="settings.html">Settings</a>
         <details open>
             <summary class="side-btn">Assessment Views ▾</summary>
             <div style="display:flex; flex-direction:column; gap:8px; margin:8px 0 0 8px;">
@@ -254,14 +298,69 @@
         <div id="analysis-output" class="analysis-output">Run analysis to view DWF scores.</div>
     </div>
         </div>
+        <footer class="app-footer">© 2026 Belfort Advisory. All rights reserved.</footer>
     </div>
 </div>
 
 <script>
     const API_BASE = "http://127.0.0.1:8000/api/v1";
+    const BRAND_LOGO_KEY = "irmmf_logo_data";
     let assessmentId = "";
     let questions = [];
     let optionMap = {};
+
+    function initTheme() {
+        const stored = localStorage.getItem("theme");
+        if (stored) {
+            document.documentElement.setAttribute("data-theme", stored);
+            updateThemeIcon(stored);
+        }
+    }
+    window.addEventListener("storage", (event) => {
+        if (event.key !== "theme") return;
+        const theme = event.newValue || "dark";
+        document.documentElement.setAttribute("data-theme", theme);
+        updateThemeIcon(theme);
+    });
+
+    function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute("data-theme") || "dark";
+        const next = current === "light" ? "dark" : "light";
+        html.setAttribute("data-theme", next);
+        localStorage.setItem("theme", next);
+        updateThemeIcon(next);
+    }
+
+    function updateThemeIcon(theme) {
+        const icon = document.getElementById("theme-icon");
+        if (icon) icon.textContent = theme === "light" ? "🌙" : "☀️";
+    }
+
+    function applyBranding() {
+        const logoData = localStorage.getItem(BRAND_LOGO_KEY);
+        const logoImg = document.getElementById("brand-logo");
+        const logoText = document.getElementById("brand-text");
+        if (!logoImg || !logoText) return;
+        if (logoData) {
+            logoImg.src = logoData;
+            logoImg.style.display = "block";
+            logoText.style.display = "none";
+        } else {
+            logoImg.removeAttribute("src");
+            logoImg.style.display = "none";
+            logoText.style.display = "block";
+        }
+    }
+
+    function logoutUser() {
+        localStorage.removeItem("irmmf_user");
+        window.location.href = "index.html";
+    }
+
+    function goSettings() {
+        window.location.href = "settings.html";
+    }
 
     function getAidFromHash() {
         const raw = (location.hash || "").replace("#", "");
@@ -312,6 +411,9 @@
             document.querySelectorAll('.nav-menu').forEach(m => m.style.display = 'none');
         }
     });
+
+    applyBranding();
+    initTheme();
 
     function registerAssessment() {
         const input = document.getElementById("aid-input");
