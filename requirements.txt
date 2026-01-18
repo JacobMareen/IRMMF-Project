@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+beautifulsoup4
+requests
+openai
+python-dotenv
+pandas
+openpyxl
+litellm
+groq
+
+# Added for local LLM support
+transformers
+torch
+torchvision
+torchaudio
+accelerate

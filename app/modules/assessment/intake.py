@@ -33,6 +33,9 @@ class AssessmentIntakeService:
         self.db.commit()
         # Intake answers are stored before kick-start, so depth suggestion can work without responses.
         depth_suggestion = self._suggest_depth(record, None)
+        if not record.depth:
+            record.depth = self._normalize_depth(depth_suggestion) if hasattr(self, "_normalize_depth") else depth_suggestion
+            self.db.commit()
         return {
             "assessment_id": assessment_id,
             "benchmark_tags": benchmark_tags,

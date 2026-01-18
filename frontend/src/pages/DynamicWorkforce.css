@@ -1,0 +1,142 @@
+.dwf-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dwf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.dwf-subtitle {
+  color: var(--text-sub);
+}
+
+.dwf-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.dwf-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 10px 30px var(--shadow);
+}
+
+.dwf-title {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  color: var(--brand-gold);
+  margin-bottom: 12px;
+}
+
+.dwf-title.spaced {
+  margin-top: 24px;
+}
+
+.dwf-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dwf-input {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.dwf-btn {
+  background: var(--brand-gold);
+  color: var(--brand-navy);
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dwf-btn.outline {
+  background: transparent;
+  border: 1px solid var(--brand-gold);
+  color: var(--brand-gold);
+}
+
+.dwf-status {
+  color: var(--text-sub);
+  font-size: 0.9rem;
+}
+
+.dwf-muted {
+  color: var(--text-sub);
+}
+
+.dwf-section {
+  margin-top: 16px;
+}
+
+.dwf-section-title {
+  font-family: 'League Spartan', sans-serif;
+  color: var(--brand-gold);
+  margin-bottom: 10px;
+}
+
+.dwf-question {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: rgba(8, 25, 43, 0.4);
+}
+
+[data-theme='light'] .dwf-question {
+  background: rgba(223, 230, 238, 0.4);
+}
+
+.dwf-question-title {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.dwf-question-text {
+  color: var(--text-sub);
+  margin-bottom: 12px;
+}
+
+.dwf-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.dwf-select {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.dwf-analysis {
+  margin-top: 12px;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  color: var(--text-sub);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 980px) {
+  .dwf-grid {
+    grid-template-columns: 1fr;
+  }
+}

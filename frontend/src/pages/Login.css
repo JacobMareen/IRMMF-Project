@@ -1,0 +1,75 @@
+.login-page {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background:
+    radial-gradient(circle at top, rgba(232, 179, 115, 0.2), transparent 55%),
+    linear-gradient(135deg, rgba(1, 30, 61, 0.9), rgba(1, 30, 61, 0.6));
+}
+
+[data-theme='light'] .login-page {
+  background:
+    radial-gradient(circle at top, rgba(232, 179, 115, 0.2), transparent 55%),
+    linear-gradient(135deg, rgba(240, 245, 250, 0.9), rgba(255, 255, 255, 0.9));
+}
+
+.login-card {
+  width: min(520px, 100%);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 20px 50px var(--shadow);
+}
+
+.login-header h1 {
+  margin: 0 0 8px;
+  color: var(--brand-gold);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+}
+
+.login-header p {
+  margin: 0;
+  color: var(--text-sub);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.login-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-sub);
+  font-size: 0.9rem;
+}
+
+.login-form input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.login-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: var(--brand-gold);
+  color: var(--brand-navy);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.login-status {
+  color: var(--text-sub);
+  font-size: 0.9rem;
+}

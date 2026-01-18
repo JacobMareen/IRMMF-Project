@@ -1,13 +1,14 @@
 """Assessment module API routes."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.db import get_db
 from app.modules.assessment.service import AssessmentService
+from app.modules.assessment.scraper import scrape_and_analyze_website, suggest_intake_answers
 
 
 router = APIRouter()
@@ -18,8 +19,17 @@ def get_service(db: Session = Depends(get_db)) -> AssessmentService:
 
 
 @router.get("/api/v1/questions/all", response_model=list[schemas.QuestionOut])
-def get_all_questions(db: Session = Depends(get_db)):
-    """Returns the full static Question Bank."""
+def get_all_questions(
+    assessment_id: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
+    """Returns the full static Question Bank or the depth-eligible set."""
+    if assessment_id:
+        try:
+            return service.get_questions_for_assessment(assessment_id)
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=str(e))
     return db.query(models.Question).all()
 
 
@@ -157,6 +167,150 @@ def submit_intake(payload: dict, service: AssessmentService = Depends(get_servic
         raise HTTPException(status_code=500, detail="Internal Server Error during intake submit")
 
 
+@router.post("/api/v1/intake/scrape")
+async def scrape_intake(payload: dict, service: AssessmentService = Depends(get_service)):
+    base_url = payload.get("base_url")
+    assessment_id = payload.get("assessment_id")
+    persist = bool(payload.get("persist"))
+    if not base_url:
+        raise HTTPException(status_code=400, detail="base_url is required")
+    result = await scrape_and_analyze_website(base_url)
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    intake_options = service.get_intake_options()
+    suggested = suggest_intake_answers(result, intake_options)
+    if persist and assessment_id:
+        service.submit_intake(assessment_id, suggested)
+    return {
+        "analysis": result,
+        "suggested_intake": suggested,
+        "persisted": bool(persist and assessment_id),
+    }
+
+
 @router.get("/api/v1/intake/{assessment_id}")
 def get_intake_responses(assessment_id: str, service: AssessmentService = Depends(get_service)):
     return service.get_intake_responses(assessment_id)
+
+
+# --- RECOMMENDATION ENDPOINTS ---
+
+from typing import Optional
+from app.modules.assessment.recommendations import RecommendationService
+
+
+def get_rec_service(db: Session = Depends(get_db)) -> RecommendationService:
+    return RecommendationService(db)
+
+
+@router.get("/api/v1/assessment/{assessment_id}/recommendations")
+def get_recommendations(
+    assessment_id: str,
+    status: Optional[str] = None,
+    service: RecommendationService = Depends(get_rec_service)
+):
+    """Get all recommendations for an assessment."""
+    try:
+        return service.get_recommendations_for_assessment(assessment_id, status)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/api/v1/assessment/{assessment_id}/recommendations/{rec_id}")
+def update_recommendation(
+    assessment_id: str,
+    rec_id: str,
+    payload: dict,
+    service: RecommendationService = Depends(get_rec_service)
+):
+    """Update a recommendation (status, priority, assignment, etc.)."""
+    try:
+        user_id = payload.pop("user_id", None)
+        return service.update_recommendation(assessment_id, rec_id, payload, user_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/api/v1/assessment/{assessment_id}/recommendations/{rec_id}/history")
+def get_recommendation_history(
+    assessment_id: str,
+    rec_id: str,
+    service: RecommendationService = Depends(get_rec_service)
+):
+    """Get change history for a recommendation."""
+    history = service.rec_repo.get_recommendation_history(assessment_id, rec_id)
+    return [
+        {
+            "field_changed": h.field_changed,
+            "old_value": h.old_value,
+            "new_value": h.new_value,
+            "change_reason": h.change_reason,
+            "changed_by": h.changed_by,
+            "changed_at": h.changed_at.isoformat()
+        }
+        for h in history
+    ]
+
+
+# --- LIBRARY MANAGEMENT ENDPOINTS ---
+
+@router.get("/api/v1/recommendations/library")
+def get_recommendation_library(
+    category: Optional[str] = None,
+    service: RecommendationService = Depends(get_rec_service)
+):
+    """Browse the master recommendation library."""
+    if category:
+        recs = service.rec_repo.search_recommendations(category=category)
+    else:
+        recs = service.rec_repo.get_all_recommendations()
+
+    return [
+        {
+            "rec_id": r.rec_id,
+            "title": r.title,
+            "description": r.description,
+            "category": r.category,
+            "subcategory": r.subcategory,
+            "priority": r.default_priority,
+            "timeline": r.typical_timeline,
+            "effort": r.estimated_effort,
+            "target_axes": r.target_axes,
+            "relevant_scenarios": r.relevant_scenarios
+        }
+        for r in recs
+    ]
+
+
+@router.get("/api/v1/recommendations/library/{rec_id}")
+def get_recommendation_details(
+    rec_id: str,
+    service: RecommendationService = Depends(get_rec_service)
+):
+    """Get full details of a recommendation from library."""
+    rec = service.rec_repo.get_recommendation_by_id(rec_id)
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recommendation not found")
+
+    return {
+        "rec_id": rec.rec_id,
+        "title": rec.title,
+        "description": rec.description,
+        "rationale": rec.rationale,
+        "category": rec.category,
+        "subcategory": rec.subcategory,
+        "implementation_steps": rec.implementation_steps,
+        "success_criteria": rec.success_criteria,
+        "prerequisites": rec.prerequisites,
+        "estimated_effort": rec.estimated_effort,
+        "typical_timeline": rec.typical_timeline,
+        "default_priority": rec.default_priority,
+        "vendor_suggestions": rec.vendor_suggestions,
+        "external_resources": rec.external_resources,
+        "target_axes": rec.target_axes,
+        "relevant_scenarios": rec.relevant_scenarios,
+        "trigger_rules": rec.trigger_rules,
+        "version": rec.version
+    }

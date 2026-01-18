@@ -72,6 +72,13 @@ def ensure_indexes() -> None:
                 CREATE INDEX IF NOT EXISTS ix_fact_responses_assessment_q_id ON fact_responses(assessment_id, q_id);
                 CREATE INDEX IF NOT EXISTS ix_fact_responses_assessment_id ON fact_responses(assessment_id);
                 CREATE INDEX IF NOT EXISTS ix_fact_intake_responses_assessment_id ON fact_intake_responses(assessment_id);
+
+                -- Recommendation table indexes (GIN for array fields)
+                CREATE INDEX IF NOT EXISTS ix_dim_recs_category ON dim_recommendations(category);
+                CREATE INDEX IF NOT EXISTS ix_dim_recs_target_axes ON dim_recommendations USING GIN(target_axes);
+                CREATE INDEX IF NOT EXISTS ix_dim_recs_scenarios ON dim_recommendations USING GIN(relevant_scenarios);
+                CREATE INDEX IF NOT EXISTS ix_fact_assessment_recs_status ON fact_assessment_recommendations(status);
+                CREATE INDEX IF NOT EXISTS ix_fact_assessment_recs_priority ON fact_assessment_recommendations(priority);
                 """
             )
         )

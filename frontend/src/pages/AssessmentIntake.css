@@ -1,0 +1,246 @@
+.ai-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.ai-subtitle {
+  color: var(--text-sub);
+}
+
+.ai-progress {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--text-sub);
+}
+
+.ai-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 8px 24px var(--shadow);
+}
+
+.ai-section {
+  color: var(--brand-gold);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.6px;
+}
+
+.ai-question {
+  margin: 10px 0 8px;
+}
+
+.ai-guidance {
+  color: var(--text-sub);
+  font-style: italic;
+  margin-bottom: 16px;
+}
+
+.ai-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-text {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.ai-option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-option {
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.ai-option.active {
+  background: var(--brand-gold);
+  color: var(--brand-navy);
+  border-color: var(--brand-gold);
+}
+
+.ai-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 12px;
+}
+
+.ai-btn {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--brand-gold);
+  cursor: pointer;
+}
+
+.ai-btn.primary {
+  background: var(--brand-gold);
+  color: var(--brand-navy);
+  border-color: var(--brand-gold);
+}
+
+.ai-status {
+  margin-top: 14px;
+  color: var(--text-sub);
+}
+
+.ai-scrape {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ai-scrape-row h2 {
+  margin: 0;
+}
+
+.ai-scrape-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.ai-scrape-input {
+  flex: 1;
+}
+
+.ai-scrape-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-scrape-suggestions {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-scrape-suggestions-header {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-sub);
+  font-size: 0.9rem;
+}
+
+.ai-scrape-hint {
+  font-style: italic;
+}
+
+.ai-scrape-suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-scrape-suggestion {
+  display: grid;
+  grid-template-columns: auto 140px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.ai-scrape-key {
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-size: 0.7rem;
+  color: var(--text-sub);
+}
+
+.ai-scrape-value {
+  color: var(--text-main);
+}
+
+.ai-scrape-apply {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.ai-scrape-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ai-scrape-label {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.6px;
+  color: var(--text-sub);
+}
+
+.ai-scrape-pill-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ai-scrape-pill {
+  background: rgba(224, 169, 108, 0.18);
+  border: 1px solid rgba(224, 169, 108, 0.4);
+  color: var(--brand-gold);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 900px) {
+  .ai-header {
+    flex-direction: column;
+  }
+  .ai-actions {
+    flex-direction: column;
+  }
+  .ai-scrape-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ai-scrape-suggestions-header {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ai-scrape-suggestion {
+    grid-template-columns: auto 1fr;
+  }
+  .ai-scrape-apply {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

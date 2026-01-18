@@ -69,7 +69,7 @@ This script supports two modes:
    - The script can keep multiple banks side-by-side.
 """
 
-    excel_file = os.getenv("IRMMF_EXCEL_FILE", "IRMMF_QuestionBank_v6_with_IntakeModule_v2.4_P0P1.xlsx")
+    excel_file = os.getenv("IRMMF_EXCEL_FILE", "IRMMF_QuestionBank_v10_StreamlinedIntake_20260117.xlsx")
     if not os.path.exists(excel_file):
         raise FileNotFoundError(f"{excel_file} not found. Set IRMMF_EXCEL_FILE.")
 
@@ -144,8 +144,7 @@ This script supports two modes:
             
             # Reporting
             axis1=_clean_str(row.get("Axis1")),
-            cw=float(row["CW"]) if _clean_str(row.get("CW")) else 1.0
-            ,
+            cw=float(row["CW"]) if _clean_str(row.get("CW")) else 1.0,
             pts_g=_to_float(row.get("Pts_G")),
             pts_e=_to_float(row.get("Pts_E")),
             pts_t=_to_float(row.get("Pts_T")),
@@ -169,6 +168,23 @@ This script supports two modes:
 
         # 2) Answers
         print("➡️ Ingesting Answers...")
+        # Create question lookup for pts_* values
+        q_pts_lookup = {}
+        for _, q_row in q_df.iterrows():
+            qid = _clean_str(q_row.get("Q-ID"))
+            if qid:
+                q_pts_lookup[qid] = {
+                    'pts_g': _to_float(q_row.get('Pts_G')),
+                    'pts_e': _to_float(q_row.get('Pts_E')),
+                    'pts_t': _to_float(q_row.get('Pts_T')),
+                    'pts_l': _to_float(q_row.get('Pts_L')),
+                    'pts_h': _to_float(q_row.get('Pts_H')),
+                    'pts_v': _to_float(q_row.get('Pts_V')),
+                    'pts_r': _to_float(q_row.get('Pts_R')),
+                    'pts_f': _to_float(q_row.get('Pts_F')),
+                    'pts_w': _to_float(q_row.get('Pts_W')),
+                }
+
         a_objects: List[models.Answer] = []
         for _, row in a_df.iterrows():
             aid = _clean_str(row.get("A-ID"))
@@ -178,6 +194,12 @@ This script supports two modes:
             q_db_id = q_lookup.get(qid)
             if not q_db_id:
                 continue
+
+            # Get question's pts weights
+            q_pts = q_pts_lookup.get(qid, {})
+            base_score = float(_clean_str(row.get("BaseScore")) or 0.0)
+
+            # Calculate pts_* for this answer (base_score * question's pts weight)
             a_objects.append(
                 models.Answer(
                     a_id=aid,
@@ -185,7 +207,16 @@ This script supports two modes:
                     question_id=q_db_id,
                     option_number=int(row["Option #"]) if _clean_str(row.get("Option #")) else None,
                     answer_text=_clean_str(row.get("Answer Option Text")),
-                    base_score=float(_clean_str(row.get("BaseScore")) or 0.0),
+                    base_score=base_score,
+                    pts_g=base_score * (q_pts.get('pts_g') or 0.0) if q_pts.get('pts_g') else None,
+                    pts_e=base_score * (q_pts.get('pts_e') or 0.0) if q_pts.get('pts_e') else None,
+                    pts_t=base_score * (q_pts.get('pts_t') or 0.0) if q_pts.get('pts_t') else None,
+                    pts_l=base_score * (q_pts.get('pts_l') or 0.0) if q_pts.get('pts_l') else None,
+                    pts_h=base_score * (q_pts.get('pts_h') or 0.0) if q_pts.get('pts_h') else None,
+                    pts_v=base_score * (q_pts.get('pts_v') or 0.0) if q_pts.get('pts_v') else None,
+                    pts_r=base_score * (q_pts.get('pts_r') or 0.0) if q_pts.get('pts_r') else None,
+                    pts_f=base_score * (q_pts.get('pts_f') or 0.0) if q_pts.get('pts_f') else None,
+                    pts_w=base_score * (q_pts.get('pts_w') or 0.0) if q_pts.get('pts_w') else None,
                     tags=_clean_str(row.get("Tags")) or None,
                     fracture_type=_clean_str(row.get("FractureType")) or None,
                     follow_up_trigger=_clean_str(row.get("FollowUpTrigger")) or None,

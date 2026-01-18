@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations - IRMMF</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: white;
+            border-bottom: 2px solid var(--gray-200);
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .filters {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        select, input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            background: white;
+            min-width: 180px;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .recommendations-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .rec-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--gray-300);
+            transition: all 0.2s;
+        }
+
+        .rec-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .rec-card.priority-critical {
+            border-left-color: var(--danger-color);
+        }
+
+        .rec-card.priority-high {
+            border-left-color: var(--warning-color);
+        }
+
+        .rec-card.priority-medium {
+            border-left-color: var(--primary-color);
+        }
+
+        .rec-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .rec-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .rec-meta {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-critical {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-high {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-medium {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-low {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .badge-status {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .badge-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-status.in_progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-status.completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .rec-description {
+            color: var(--gray-600);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .rec-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .detail-item {
+            font-size: 0.875rem;
+        }
+
+        .detail-label {
+            color: var(--gray-600);
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            color: var(--gray-900);
+            font-weight: 500;
+        }
+
+        .triggered-by {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .trigger-tag {
+            padding: 0.25rem 0.5rem;
+            background: var(--gray-100);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--gray-700);
+        }
+
+        .rec-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.813rem;
+        }
+
+        .expandable-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .expandable-content.expanded {
+            max-height: 2000px;
+        }
+
+        .implementation-steps {
+            margin-top: 1rem;
+        }
+
+        .step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: var(--gray-50);
+            border-radius: 0.375rem;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-action {
+            font-weight: 500;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .step-owner {
+            font-size: 0.813rem;
+            color: var(--gray-600);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray-600);
+        }
+
+        .empty-state svg {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto 1rem;
+            opacity: 0.3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: start;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            max-width: 800px;
+            width: 100%;
+            margin: 2rem auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+        }
+
+        textarea {
+            min-height: 100px;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 0.375rem;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .rec-details {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            select, input {
+                width: 100%;
+                min-width: unset;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>📋 Recommendations</h1>
+            <div>
+                <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Back to Home</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Recommendations</div>
+                <div class="stat-value" id="stat-total">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Critical Priority</div>
+                <div class="stat-value" id="stat-critical" style="color: var(--danger-color);">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">In Progress</div>
+                <div class="stat-value" id="stat-progress" style="color: var(--primary-color);">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Completed</div>
+                <div class="stat-value" id="stat-completed" style="color: var(--success-color);">-</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Assessment</label>
+                    <select id="filter-assessment">
+                        <option value="">All Assessments</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Priority</label>
+                    <select id="filter-priority">
+                        <option value="">All Priorities</option>
+                        <option value="Critical">Critical</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="filter-status">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Category</label>
+                    <select id="filter-category">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="justify-content: flex-end;">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations Grid -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading recommendations...</p>
+        </div>
+
+        <div id="empty-state" class="empty-state" style="display: none;">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h3>No Recommendations Found</h3>
+            <p>Try adjusting your filters or complete an assessment to generate recommendations.</p>
+        </div>
+
+        <div class="recommendations-grid" id="recommendations-grid"></div>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div id="update-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Update Recommendation</h3>
+                <button class="btn btn-secondary btn-sm" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="update-form">
+                    <input type="hidden" id="modal-rec-id">
+                    <input type="hidden" id="modal-assessment-id">
+
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="modal-status">
+                            <option value="pending">Pending</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="modal-priority">
+                            <option value="Critical">Critical</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Assigned To</label>
+                        <input type="text" id="modal-assigned" placeholder="Enter name or email">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Due Date</label>
+                        <input type="date" id="modal-due-date">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="modal-notes" placeholder="Add any additional notes..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveUpdate()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let allRecommendations = [];
+        let assessments = {};
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAssessments();
+            loadRecommendations();
+            loadLibraryCategories();
+        });
+
+        async function loadAssessments() {
+            try {
+                // For now, we'll use a placeholder. In production, fetch from API
+                const assessmentSelect = document.getElementById('filter-assessment');
+                assessmentSelect.innerHTML = '<option value="">All Assessments</option>';
+
+                // Add current assessment from localStorage if available
+                const currentAssessment = localStorage.getItem('currentAssessmentId');
+                if (currentAssessment) {
+                    assessmentSelect.innerHTML += `<option value="${currentAssessment}">Current Assessment</option>`;
+                }
+            } catch (error) {
+                console.error('Error loading assessments:', error);
+            }
+        }
+
+        async function loadLibraryCategories() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/recommendations/library`);
+                if (response.ok) {
+                    const recommendations = await response.json();
+                    const categories = [...new Set(recommendations.map(r => r.category))];
+
+                    const categorySelect = document.getElementById('filter-category');
+                    categories.forEach(cat => {
+                        categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        async function loadRecommendations() {
+            const assessmentId = document.getElementById('filter-assessment').value;
+
+            if (!assessmentId) {
+                // Show library view
+                await loadLibrary();
+            } else {
+                // Show assessment-specific recommendations
+                await loadAssessmentRecommendations(assessmentId);
+            }
+        }
+
+        async function loadLibrary() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/recommendations/library`);
+                if (!response.ok) throw new Error('Failed to load recommendations');
+
+                const recommendations = await response.json();
+                allRecommendations = recommendations.map(r => ({
+                    ...r,
+                    status: 'pending',
+                    isLibraryView: true
+                }));
+
+                displayRecommendations(allRecommendations);
+                updateStats(allRecommendations);
+            } catch (error) {
+                console.error('Error loading library:', error);
+                showError('Failed to load recommendations library');
+            }
+        }
+
+        async function loadAssessmentRecommendations(assessmentId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/assessment/${assessmentId}/recommendations`);
+                if (!response.ok) throw new Error('Failed to load recommendations');
+
+                allRecommendations = await response.json();
+                displayRecommendations(allRecommendations);
+                updateStats(allRecommendations);
+            } catch (error) {
+                console.error('Error loading recommendations:', error);
+                showError('Failed to load recommendations');
+            }
+        }
+
+        function displayRecommendations(recommendations) {
+            const loading = document.getElementById('loading');
+            const emptyState = document.getElementById('empty-state');
+            const grid = document.getElementById('recommendations-grid');
+
+            loading.style.display = 'none';
+
+            if (recommendations.length === 0) {
+                emptyState.style.display = 'block';
+                grid.innerHTML = '';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            grid.innerHTML = recommendations.map(rec => createRecommendationCard(rec)).join('');
+        }
+
+        function createRecommendationCard(rec) {
+            const priorityClass = rec.priority.toLowerCase();
+            const statusClass = rec.status ? rec.status.replace('_', '-') : 'pending';
+
+            const triggeredBy = [];
+            if (rec.triggered_by?.axes?.length) {
+                triggeredBy.push(...rec.triggered_by.axes.map(a => `Axis: ${a}`));
+            }
+            if (rec.triggered_by?.risks?.length) {
+                triggeredBy.push(...rec.triggered_by.risks.map(r => `Risk: ${r}`));
+            }
+
+            const hasSteps = rec.implementation_steps && rec.implementation_steps.steps;
+            const stepsHtml = hasSteps ? `
+                <div class="implementation-steps expandable-content" id="steps-${rec.rec_id}">
+                    <h4 style="margin-bottom: 1rem; color: var(--gray-900);">Implementation Steps:</h4>
+                    ${rec.implementation_steps.steps.map(step => `
+                        <div class="step">
+                            <div class="step-number">${step.step}</div>
+                            <div class="step-content">
+                                <div class="step-action">${step.action}</div>
+                                <div class="step-owner">Owner: ${step.owner}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
+
+            return `
+                <div class="rec-card priority-${priorityClass}">
+                    <div class="rec-header">
+                        <div style="flex: 1;">
+                            <h3 class="rec-title">${rec.title}</h3>
+                            <div class="rec-meta">
+                                <span class="badge badge-${priorityClass}">${rec.priority}</span>
+                                ${rec.status ? `<span class="badge badge-status ${statusClass}">${rec.status.replace('_', ' ').toUpperCase()}</span>` : ''}
+                                <span class="badge">${rec.category}</span>
+                                ${rec.effort ? `<span class="badge">${rec.effort} Effort</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="rec-description">${rec.description}</p>
+
+                    ${rec.rationale ? `
+                        <div style="padding: 0.75rem; background: var(--gray-50); border-radius: 0.375rem; margin-top: 1rem;">
+                            <strong style="color: var(--gray-900);">Why this matters:</strong>
+                            <p style="margin-top: 0.5rem; color: var(--gray-600);">${rec.rationale}</p>
+                        </div>
+                    ` : ''}
+
+                    ${triggeredBy.length > 0 ? `
+                        <div class="triggered-by">
+                            <strong style="font-size: 0.875rem; color: var(--gray-700); width: 100%; margin-bottom: 0.25rem;">Triggered by:</strong>
+                            ${triggeredBy.map(t => `<span class="trigger-tag">${t}</span>`).join('')}
+                        </div>
+                    ` : ''}
+
+                    <div class="rec-details">
+                        ${rec.timeline ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Timeline</div>
+                                <div class="detail-value">${rec.timeline}</div>
+                            </div>
+                        ` : ''}
+                        ${rec.subcategory ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Subcategory</div>
+                                <div class="detail-value">${rec.subcategory}</div>
+                            </div>
+                        ` : ''}
+                        ${rec.assigned_to ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Assigned To</div>
+                                <div class="detail-value">${rec.assigned_to}</div>
+                            </div>
+                        ` : ''}
+                        ${rec.due_date ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Due Date</div>
+                                <div class="detail-value">${new Date(rec.due_date).toLocaleDateString()}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${stepsHtml}
+
+                    <div class="rec-actions">
+                        ${hasSteps ? `<button class="btn btn-secondary btn-sm" onclick="toggleSteps('${rec.rec_id}')">
+                            <span id="toggle-text-${rec.rec_id}">View Implementation Steps</span>
+                        </button>` : ''}
+                        ${!rec.isLibraryView ? `
+                            <button class="btn btn-primary btn-sm" onclick="openUpdateModal('${rec.rec_id}', '${rec.assessment_id || ''}')">
+                                Update Status
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleSteps(recId) {
+            const stepsEl = document.getElementById(`steps-${recId}`);
+            const textEl = document.getElementById(`toggle-text-${recId}`);
+
+            if (stepsEl.classList.contains('expanded')) {
+                stepsEl.classList.remove('expanded');
+                textEl.textContent = 'View Implementation Steps';
+            } else {
+                stepsEl.classList.add('expanded');
+                textEl.textContent = 'Hide Implementation Steps';
+            }
+        }
+
+        function updateStats(recommendations) {
+            const total = recommendations.length;
+            const critical = recommendations.filter(r => r.priority === 'Critical').length;
+            const inProgress = recommendations.filter(r => r.status === 'in_progress').length;
+            const completed = recommendations.filter(r => r.status === 'completed').length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-critical').textContent = critical;
+            document.getElementById('stat-progress').textContent = inProgress;
+            document.getElementById('stat-completed').textContent = completed;
+        }
+
+        function applyFilters() {
+            const assessmentId = document.getElementById('filter-assessment').value;
+            const priority = document.getElementById('filter-priority').value;
+            const status = document.getElementById('filter-status').value;
+            const category = document.getElementById('filter-category').value;
+
+            let filtered = allRecommendations;
+
+            if (priority) {
+                filtered = filtered.filter(r => r.priority === priority);
+            }
+            if (status) {
+                filtered = filtered.filter(r => r.status === status);
+            }
+            if (category) {
+                filtered = filtered.filter(r => r.category === category);
+            }
+
+            displayRecommendations(filtered);
+            updateStats(filtered);
+        }
+
+        function openUpdateModal(recId, assessmentId) {
+            const rec = allRecommendations.find(r => r.rec_id === recId);
+            if (!rec) return;
+
+            document.getElementById('modal-rec-id').value = recId;
+            document.getElementById('modal-assessment-id').value = assessmentId;
+            document.getElementById('modal-status').value = rec.status || 'pending';
+            document.getElementById('modal-priority').value = rec.priority;
+            document.getElementById('modal-assigned').value = rec.assigned_to || '';
+            document.getElementById('modal-due-date').value = rec.due_date ? rec.due_date.split('T')[0] : '';
+            document.getElementById('modal-notes').value = rec.custom_notes || '';
+
+            document.getElementById('update-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('update-modal').classList.remove('active');
+        }
+
+        async function saveUpdate() {
+            const recId = document.getElementById('modal-rec-id').value;
+            const assessmentId = document.getElementById('modal-assessment-id').value;
+
+            const updates = {
+                status: document.getElementById('modal-status').value,
+                priority: document.getElementById('modal-priority').value,
+                assigned_to: document.getElementById('modal-assigned').value,
+                due_date: document.getElementById('modal-due-date').value,
+                custom_notes: document.getElementById('modal-notes').value,
+                user_id: 'current_user' // In production, get from auth
+            };
+
+            try {
+                const response = await fetch(
+                    `${API_BASE}/api/v1/assessment/${assessmentId}/recommendations/${recId}`,
+                    {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updates)
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to update recommendation');
+
+                closeModal();
+                loadRecommendations();
+                alert('Recommendation updated successfully!');
+            } catch (error) {
+                console.error('Error updating recommendation:', error);
+                alert('Failed to update recommendation. Please try again.');
+            }
+        }
+
+        function showError(message) {
+            const loading = document.getElementById('loading');
+            loading.innerHTML = `
+                <div style="color: var(--danger-color);">
+                    <p>${message}</p>
+                    <button class="btn btn-primary" onclick="location.reload()">Retry</button>
+                </div>
+            `;
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('update-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'update-modal') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.settings-title {
+  font-size: 1.6rem;
+  color: var(--brand-gold);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.settings-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  padding: 18px;
+  box-shadow: 0 10px 40px var(--shadow);
+}
+
+.settings-card h4 {
+  margin: 0 0 10px;
+  color: var(--brand-gold);
+}
+
+.settings-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--text-sub);
+}
+
+.settings-card input[type='text'],
+.settings-card input[type='password'],
+.settings-card input[type='email'],
+.settings-card select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  color: var(--text-sub);
+  font-size: 0.9rem;
+}
+
+.mini-note {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+}
+
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.logo-row img {
+  height: 40px;
+  max-width: 200px;
+  object-fit: contain;
+}
+
+.btn-row {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--brand-gold);
+  cursor: pointer;
+}
+
+.btn.secondary {
+  background: transparent;
+  color: var(--brand-gold);
+}
+
+.btn.secondary.danger {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.status-note {
+  margin-top: 10px;
+  color: var(--text-sub);
+  font-size: 0.85rem;
+}

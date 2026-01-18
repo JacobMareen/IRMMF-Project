@@ -3,269 +3,1382 @@
 # Format: YAML (easy to read, easy to maintain)
 
 risks:
-  - id: IP_Theft
-    name: "Intellectual Property Theft"
-    category: "Data Loss & Exfiltration"
-    description: "Malicious insider exfiltrates proprietary source code, trade secrets, or designs"
-    
-    # Axis weights (must sum to 1.0)
-    axes:
-      V: 0.40  # Visibility into crown jewels
-      T: 0.30  # Technical controls (DLP, CASB)
-      R: 0.15  # Resilience (forensics, legal)
-      W: 0.15  # Control lag (offboarding speed)
-    
-    # Curve types per axis
-    curves:
-      V: threshold
-      T: threshold
-      R: standard
-      W: logarithmic
-    
-    # Impact rules (checked in order)
-    impact_rules:
-      - condition: "High-IP OR Technology"
-        value: 7
-      - condition: "Manufacturing OR Pharma"
-        value: 6
-      - condition: "Enterprise (5000+)"
-        value: "+1"
-      - condition: "default"
-        value: 3
-
-  - id: Customer_Data_Breach
-    name: "Customer Data Breach (PII/PHI)"
-    category: "Data Loss & Exfiltration"
-    description: "Unauthorized access or disclosure of customer PII/PHI"
-    
-    axes:
-      V: 0.35
-      T: 0.25
-      L: 0.25
-      E: 0.10
-      H: 0.05
-    
-    curves:
-      V: standard
-      T: threshold
-      L: threshold
-      E: standard
-      H: logarithmic
-    
-    impact_rules:
-      - condition: "Healthcare OR Financial Services"
-        value: 7
-      - condition: "High-PII OR NIS2-Essential"
-        value: 7
-      - condition: "DORA-Inscope"
-        value: 6
-      - condition: "default"
-        value: 4
-
-  - id: Shadow_IT_Leakage
-    name: "Unapproved Tool Data Leakage (incl. GenAI)"
-    category: "Data Loss & Exfiltration"
-    description: "Employees paste sensitive data into unapproved SaaS/GenAI tools"
-    
-    axes:
-      F: 0.35  # Friction (approved alternatives)
-      V: 0.30  # Visibility into unapproved usage
-      E: 0.20  # Execution (training, policy)
-      T: 0.15  # Technical (CASB, DLP)
-    
-    curves:
-      F: threshold
-      V: standard
-      E: logarithmic
-      T: standard
-    
-    impact_rules:
-      - condition: "High-IP OR Technology"
-        value: 7
-      - condition: "Healthcare OR Legal"
-        value: 7
-      - condition: "Financial Services OR High-PII"
-        value: 6
-      - condition: "default"
-        value: 4
-
-  - id: Accidental_Exposure
-    name: "Accidental Data Exposure"
-    category: "Data Loss & Exfiltration"
-    description: "Non-malicious disclosure via misconfiguration or oversharing"
-    
-    axes:
-      H: 0.40  # Human awareness
-      T: 0.30  # Technical safeguards
-      E: 0.20  # Policy enforcement
-      V: 0.10  # Detection of misconfigs
-    
-    curves:
-      H: logarithmic
-      T: threshold
-      E: standard
-      V: standard
-    
-    impact_rules:
-      - condition: "High-PII OR Healthcare"
-        value: 7
-      - condition: "Financial Services"
-        value: 6
-      - condition: "default"
-        value: 4
-
-  - id: Privileged_Abuse
-    name: "Privileged Account Abuse"
-    category: "Access & Privilege Abuse"
-    description: "Sysadmins or DBAs access sensitive data without authorization"
-    
-    axes:
-      T: 0.35  # Technical (PAM, session recording)
-      E: 0.30  # Execution (reviews actually done)
-      V: 0.20  # Visibility (logging, alerting)
-      G: 0.15  # Governance (approval workflows)
-    
-    curves:
-      T: threshold
-      E: standard
-      V: standard
-      G: logarithmic
-    
-    impact_rules:
-      - condition: "Healthcare OR Financial Services"
-        value: 7
-      - condition: "NIS2-Essential OR DORA-Inscope"
-        value: 7
-      - condition: "High-PII"
-        value: 6
-      - condition: "default"
-        value: 4
-
-  - id: Post_Termination_Access
-    name: "Post-Termination Access Risk"
-    category: "Access & Privilege Abuse"
-    description: "Former employees retain active accounts after departure"
-    
-    axes:
-      E: 0.50  # Execution (JML automation)
-      T: 0.25  # Technical (automated revocation)
-      V: 0.15  # Visibility (orphan detection)
-      W: 0.10  # Control lag (offboarding speed)
-    
-    curves:
-      E: threshold
-      T: standard
-      V: standard
-      W: logarithmic
-    
-    impact_rules:
-      - condition: "Enterprise (5000+)"
-        value: 7
-      - condition: "Mid-Market (250-4999)"
-        value: 4
-      - condition: "default"
-        value: 3
-
-  - id: SoD_Violations
-    name: "Segregation of Duties Violations"
-    category: "Access & Privilege Abuse"
-    description: "Single individual can execute AND approve transactions"
-    
-    axes:
-      G: 0.40  # Governance (SoD policy)
-      E: 0.30  # Execution (maker-checker)
-      T: 0.20  # Technical (workflow enforcement)
-      V: 0.10  # Visibility (violation detection)
-    
-    curves:
-      G: standard
-      E: threshold
-      T: threshold
-      V: standard
-    
-    impact_rules:
-      - condition: "Financial Services OR NIS2-Essential"
-        value: 7
-      - condition: "Public-Company"
-        value: 6
-      - condition: "default"
-        value: 4
-
-  - id: Insider_Sabotage
-    name: "Insider Sabotage (Intentional)"
-    category: "Operational Disruption"
-    description: "Disgruntled employee intentionally damages systems or data"
-    
-    axes:
-      R: 0.35  # Resilience (backups, DR)
-      V: 0.25  # Visibility (anomaly detection)
-      T: 0.20  # Technical (immutable backups)
-      H: 0.15  # Human (early warning, sentiment)
-      E: 0.05  # Execution (mitigation)
-    
-    curves:
-      R: threshold
-      V: standard
-      T: threshold
-      H: logarithmic
-      E: standard
-    
-    impact_rules:
-      - condition: "NIS2-Essential OR Critical-Infrastructure"
-        value: 7
-      - condition: "Enterprise (5000+)"
-        value: 6
-      - condition: "default"
-        value: 4
-
-  - id: Regulatory_Compliance
-    name: "Regulatory Non-Compliance (Insider Risk)"
-    category: "Compliance & Legal Exposure"
-    description: "Failure to meet NIS2, DORA, or GDPR insider risk requirements"
-    
-    axes:
-      L: 0.40  # Legal (DPIAs, lawful basis)
-      G: 0.30  # Governance (policies, oversight)
-      E: 0.20  # Execution (consistent controls)
-      H: 0.10  # Human (transparency, works council)
-    
-    curves:
-      L: threshold
-      G: standard
-      E: standard
-      H: logarithmic
-    
-    impact_rules:
-      - condition: "NIS2-Essential OR DORA-Inscope"
-        value: 7
-      - condition: "NIS2-Important"
-        value: 6
-      - condition: "Public-Company OR Healthcare"
-        value: 6
-      - condition: "default"
-        value: 3
-
-  - id: Third_Party_Abuse
-    name: "Third-Party Access Abuse"
-    category: "Third-Party & Supply Chain"
-    description: "Contractors, vendors, or MSPs misuse access to systems/data"
-    
-    axes:
-      V: 0.35  # Visibility into third-party access
-      E: 0.30  # Execution (offboarding, reviews)
-      T: 0.20  # Technical (segregation, monitoring)
-      G: 0.15  # Governance (contracts, SLAs)
-    
-    curves:
-      V: standard
-      E: threshold
-      T: standard
-      G: standard
-    
-    impact_rules:
-      - condition: "Financial Services OR Healthcare"
-        value: 7
-      - condition: "NIS2-Essential"
-        value: 6
-      - condition: "default"
-        value: 4
+- id: IP_Theft
+  name: Intellectual Property Theft
+  category: Data Loss & Exfiltration
+  description: Malicious insider exfiltrates proprietary source code, trade secrets,
+    or designs
+  axes:
+    V: 0.4
+    T: 0.3
+    R: 0.15
+    W: 0.15
+  curves:
+    V: {type: enhanced_sigmoid, k: 1.5}
+    T: {type: enhanced_sigmoid, k: 1.5}
+    R: {type: standard}
+    W: {type: logarithmic}
+  impact_rules:
+  - condition: High-IP OR Technology
+    value: 7
+  - condition: Manufacturing OR Pharma
+    value: 6
+  - condition: Enterprise (5000+)
+    value: '+1'
+  - condition: default
+    value: 3
+  impact_modifiers:
+    V-05: # Placeholder for question about data classification
+    - {lt: 3, adjust: '+1'}
+    T-12: # Placeholder for question about egress filtering
+    - {lt: 3, adjust: '+1'}
+- id: Customer_Data_Breach
+  name: Customer Data Breach (PII/PHI)
+  category: Data Loss & Exfiltration
+  description: Unauthorized access or disclosure of customer PII/PHI
+  axes:
+    V: 0.35
+    T: 0.25
+    L: 0.25
+    E: 0.1
+    H: 0.05
+  curves:
+    V: standard
+    T: threshold
+    L: threshold
+    E: standard
+    H: logarithmic
+  impact_rules:
+  - condition: Healthcare OR Financial Services
+    value: 7
+  - condition: High-PII OR NIS2-Essential
+    value: 7
+  - condition: DORA-Inscope
+    value: 6
+  - condition: default
+    value: 4
+- id: Shadow_IT_Leakage
+  name: Unapproved Tool Data Leakage (incl. GenAI)
+  category: Data Loss & Exfiltration
+  description: Employees paste sensitive data into unapproved SaaS/GenAI tools
+  axes:
+    F: 0.35
+    V: 0.3
+    E: 0.2
+    T: 0.15
+  curves:
+    F: threshold
+    V: standard
+    E: logarithmic
+    T: standard
+  impact_rules:
+  - condition: High-IP OR Technology
+    value: 7
+  - condition: Healthcare OR Legal
+    value: 7
+  - condition: Financial Services OR High-PII
+    value: 6
+  - condition: default
+    value: 4
+- id: Accidental_Exposure
+  name: Accidental Data Exposure
+  category: Data Loss & Exfiltration
+  description: Non-malicious disclosure via misconfiguration or oversharing
+  axes:
+    H: 0.4
+    T: 0.3
+    E: 0.2
+    V: 0.1
+  curves:
+    H: logarithmic
+    T: threshold
+    E: standard
+    V: standard
+  impact_rules:
+  - condition: High-PII OR Healthcare
+    value: 7
+  - condition: Financial Services
+    value: 6
+  - condition: default
+    value: 4
+- id: Privileged_Abuse
+  name: Privileged Account Abuse
+  category: Access & Privilege Abuse
+  description: Sysadmins or DBAs access sensitive data without authorization
+  axes:
+    T: 0.35
+    E: 0.3
+    V: 0.2
+    G: 0.15
+  curves:
+    T: threshold
+    E: standard
+    V: standard
+    G: logarithmic
+  impact_rules:
+  - condition: Healthcare OR Financial Services
+    value: 7
+  - condition: NIS2-Essential OR DORA-Inscope
+    value: 7
+  - condition: High-PII
+    value: 6
+  - condition: default
+    value: 4
+- id: Post_Termination_Access
+  name: Post-Termination Access Risk
+  category: Access & Privilege Abuse
+  description: Former employees retain active accounts after departure
+  axes:
+    E: 0.5
+    T: 0.25
+    V: 0.15
+    W: 0.1
+  curves:
+    E: threshold
+    T: standard
+    V: standard
+    W: logarithmic
+  impact_rules:
+  - condition: Enterprise (5000+)
+    value: 7
+  - condition: Mid-Market (250-4999)
+    value: 4
+  - condition: default
+    value: 3
+- id: SoD_Violations
+  name: Segregation of Duties Violations
+  category: Access & Privilege Abuse
+  description: Single individual can execute AND approve transactions
+  axes:
+    G: 0.4
+    E: 0.3
+    T: 0.2
+    V: 0.1
+  curves:
+    G: standard
+    E: threshold
+    T: threshold
+    V: standard
+  impact_rules:
+  - condition: Financial Services OR NIS2-Essential
+    value: 7
+  - condition: Public-Company
+    value: 6
+  - condition: default
+    value: 4
+- id: Insider_Sabotage
+  name: Insider Sabotage (Intentional)
+  category: Operational Disruption
+  description: Disgruntled employee intentionally damages systems or data
+  axes:
+    R: 0.35
+    V: 0.25
+    T: 0.2
+    H: 0.15
+    E: 0.05
+  curves:
+    R: threshold
+    V: standard
+    T: threshold
+    H: logarithmic
+    E: standard
+  impact_rules:
+  - condition: NIS2-Essential OR Critical-Infrastructure
+    value: 7
+  - condition: Enterprise (5000+)
+    value: 6
+  - condition: default
+    value: 4
+- id: Regulatory_Compliance
+  name: Regulatory Non-Compliance (Insider Risk)
+  category: Compliance & Legal Exposure
+  description: Failure to meet NIS2, DORA, or GDPR insider risk requirements
+  axes:
+    L: 0.4
+    G: 0.3
+    E: .2
+    H: 0.1
+  curves:
+    L: threshold
+    G: standard
+    E: standard
+    H: logarithmic
+  impact_rules:
+  - condition: NIS2-Essential OR DORA-Inscope
+    value: 7
+  - condition: NIS2-Important
+    value: 6
+  - condition: Public-Company OR Healthcare
+    value: 6
+  - condition: default
+    value: 3
+- id: Third_Party_Abuse
+  name: Third-Party Access Abuse
+  category: Third-Party & Supply Chain
+  description: Contractors, vendors, or MSPs misuse access to systems/data
+  axes:
+    V: 0.35
+    E: 0.3
+    T: 0.2
+    G: 0.15
+  curves:
+    V: standard
+    E: threshold
+    T: standard
+    G: standard
+  impact_rules:
+  - condition: Financial Services OR Healthcare
+    value: 7
+  - condition: NIS2-Essential
+    value: 6
+  - condition: default
+    value: 4
+- id: NEW-001
+  name: Intellectual Property Theft for a New Venture
+  category: Malicious Insider (Financial Gain)
+  description: An employee planning to start a competing business exfiltrates product
+    designs, customer lists, and strategic plans.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-002
+  name: Selling Access to Outside Criminals
+  category: Malicious Insider (Financial Gain)
+  description: An employee sells their login credentials or provides physical access
+    to a third party for financial gain.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-003
+  name: Cryptocurrency Mining on Corporate Servers
+  category: Malicious Insider (Financial Gain)
+  description: An employee installs mining software on company servers, consuming
+    resources and creating security vulnerabilities.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-004
+  name: Data Ransom and Extortion
+  category: Malicious Insider (Financial Gain)
+  description: An employee encrypts critical data and demands a ransom from the company.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-005
+  name: Insider Trading
+  category: Malicious Insider (Financial Gain)
+  description: An employee uses confidential knowledge of company performance (e.g.,
+    upcoming earnings, M&A) to make illegal stock trades.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-006
+  name: Customer Data Theft for Identity Fraud
+  category: Malicious Insider (Financial Gain)
+  description: An employee steals personally identifiable information (PII) from customer
+    databases to sell on the dark web.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-007
+  name: Sabotage of Critical Systems before Departure
+  category: Malicious Insider (Sabotage/Revenge)
+  description: A disgruntled employee about to be terminated deletes key databases,
+    alters configurations, or plants logic bombs.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-008
+  name: Targeted Deletion of Project Files
+  category: Malicious Insider (Sabotage/Revenge)
+  description: An employee, feeling unfairly treated, deletes critical files from
+    a project they were removed from.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-009
+  name: Planting Backdoors for Future Access
+  category: Malicious Insider (Sabotage/Revenge)
+  description: An employee embeds hidden backdoors in the codebase to maintain access
+    after they leave the company.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-010
+  name: Reputational Damage via Social Media
+  category: Malicious Insider (Sabotage/Revenge)
+  description: An employee uses their internal knowledge to post damaging, confidential,
+    or embarrassing information about the company online.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-011
+  name: Intentional Introduction of Vulnerabilities
+  category: Malicious Insider (Sabotage/Revenge)
+  description: A developer intentionally writes insecure code or disables security
+    controls to create vulnerabilities for later exploitation.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-012
+  name: Phishing Attack Victim
+  category: Negligent/Accidental Insider
+  description: An employee clicks on a malicious link in a phishing email, compromising
+    their credentials and giving attackers access.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-013
+  name: Loss of Company Device
+  category: Negligent/Accidental Insider
+  description: An employee loses a company laptop or phone that contains sensitive,
+    unencrypted data.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-014
+  name: Accidental Data Sharing with Unauthorized Recipients
+  category: Negligent/Accidental Insider
+  description: An employee accidentally emails a confidential spreadsheet to an external
+    party instead of an internal colleague.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-015
+  name: Use of Unapproved, Insecure Software/SaaS
+  category: Negligent/Accidental Insider
+  description: An employee uses a 'shadow IT' application to handle sensitive data,
+    bypassing security controls.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-016
+  name: Misconfiguration of Cloud Services
+  category: Negligent/Accidental Insider
+  description: An engineer accidentally configures a cloud storage bucket (like AWS
+    S3) to be publicly accessible.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-017
+  name: Failure to Patch Personal Devices
+  category: Negligent/Accidental Insider
+  description: A remote employee using a personal device for work fails to apply
+    security patches, leading to a compromise that spreads to the corporate network.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-018
+  name: Data Hoarding Before Resignation
+  category: Departing Employee Risks
+  description: An employee leaving for a competitor downloads large amounts of data
+    from systems they had access to.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-019
+  name: '"Orphaned" Cloud Accounts and Services'
+  category: Departing Employee Risks
+  description: A departing employee was the sole owner of a critical cloud service
+    or social media account, and access is now lost.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-020
+  name: Retention of Access Post-Termination
+  category: Departing Employee Risks
+  description: An employee's access rights to various systems are not revoked in a
+    timely manner after their last day.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-021
+  name: Poaching of Former Colleagues
+  category: Departing Employee Risks
+  description: A departed employee uses their knowledge of internal team dynamics
+    and salaries to aggressively recruit former coworkers.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-022
+  name: Insufficient Vetting of New Hires
+  category: Recruitment & Onboarding Risks
+  description: A new employee with a criminal history or ties to competitors is hired
+    for a sensitive position due to a weak background check process.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-023
+  name: '"Access Creep" during Onboarding'
+  category: Recruitment & Onboarding Risks
+  description: A new employee is granted a wide set of default permissions that far
+    exceed what their role requires.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-024
+  name: Social Engineering of HR/IT during Onboarding
+  category: Recruitment & Onboarding Risks
+  description: A malicious actor impersonates a new hire to trick HR or IT into provisioning
+    them with accounts and access.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-025
+  name: Unsecured Home Wi-Fi Network
+  category: Remote & Hybrid Work Risks
+  description: An employee's home Wi-Fi is poorly secured, allowing a neighbor or
+    attacker to intercept company data.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-026
+  name: '"Shoulder Surfing" in Public Spaces'
+  category: Remote & Hybrid Work Risks
+  description: An employee works with sensitive data on their laptop in a coffee
+    shop, allowing others to view the screen.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-027
+  name: Mixing of Personal and Company Data on Devices
+  category: Remote & Hybrid Work Risks
+  description: An employee stores sensitive client data in a personal cloud storage
+    account (e.g., personal Dropbox) for convenience.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-028
+  name: Lack of Physical Security for Devices at Home
+  category: Remote & Hybrid Work Risks
+  description: A company laptop is stolen from an employee's home during a burglary.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-029
+  name: Reduced Oversight and Monitoring
+  category: Remote & Hybrid Work Risks
+  description: Malicious or negligent activities go unnoticed for longer periods
+    due to the lack of direct physical supervision.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-030
+  name: Contractor with Multiple Clients
+  category: Third-Party/Contractor Risks
+  description: A contractor inadvertently exposes one client's data to another due
+    to poor data hygiene or shared development environments.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-031
+  name: Incomplete Offboarding of Contractors
+  category: Third-Party/Contractor Risks
+  description: A short-term contractor's access is not fully revoked after their
+    contract ends, leaving a dormant but active account.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-032
+  name: Supply Chain Compromise via Contractor
+  category: Third-Party/Contractor Risks
+  description: A contractor's own development environment is compromised, and malicious
+    code is injected into the company's software via a code commit.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-033
+  name: Lack of NDAs or Security Training
+  category: Third-Party/Contractor Risks
+  description: A contractor is not required to sign a non-disclosure agreement or
+    complete the same security awareness training as full-time employees.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-034
+  name: Illegal Monitoring of Employees
+  category: Program, Legal, & Compliance Risks
+  description: The program monitors employee communications or activities in a way
+    that violates local privacy laws (e.g., GDPR, CCPA) or specific national labor
+    laws (e.g., relating to private investigation).
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-035
+  name: Overly Broad Data Collection
+  category: Program, Legal, & Compliance Risks
+  description: The program collects more data than is necessary for its stated purpose
+    (e.g., capturing keystrokes, off-hours activity) leading to privacy violations
+    and employee distrust.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-036
+  name: Lack of Transparency with Employees
+  category: Program, Legal, & Compliance Risks
+  description: The company fails to inform employees about the nature and purpose
+    of the insider threat monitoring program, violating legal transparency requirements.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-037
+  name: Bias and Discrimination in Monitoring
+  category: Program, Legal, & Compliance Risks
+  description: Monitoring tools or analysts disproportionately target specific groups
+    of employees based on demographics or other protected characteristics, leading
+    to discrimination claims.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-038
+  name: Misinterpretation of Monitoring Data
+  category: Program, Legal, & Compliance Risks
+  description: An analyst misinterprets benign employee activity as malicious, leading
+    to false accusations, damage to an employee's career, and potential legal action.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-039
+  name: Inadequate Security of Monitoring Data
+  category: Program, Legal, & Compliance Risks
+  description: The highly sensitive data collected by the monitoring program is not
+    properly secured, leading to a breach of the program's own database.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-040
+  name: Failure to Follow Investigative Protocols
+  category: Program, Legal, & Compliance Risks
+  description: An investigation is handled improperly, failing to respect employee
+    rights, preserve evidence correctly, or follow established legal/HR procedures.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3
+- id: NEW-041
+  name: Cross-Border Data Transfer Violations
+  category: Program, Legal, & Compliance Risks
+  description: Monitoring data for employees in one country is transferred to or
+    analyzed in another without a valid legal basis, violating data sovereignty laws.
+  axes:
+    G: 0.11
+    E: 0.11
+    T: 0.11
+    L: 0.11
+    H: 0.11
+    V: 0.11
+    R: 0.11
+    F: 0.11
+    W: 0.12
+  curves:
+    G: standard
+    E: standard
+    T: standard
+    L: standard
+    H: standard
+    V: standard
+    R: standard
+    F: standard
+    W: standard
+  impact_rules:
+  - condition: default
+    value: 3

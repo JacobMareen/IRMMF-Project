@@ -44,7 +44,7 @@ class ResponseCreate(BaseModel):
 
     
 class ResumptionState(BaseModel):
-    responses: Dict[str, str]      # Maps Q_ID to the selected A_ID
+    responses: Dict[str, str | List[str]]  # Maps Q_ID to A_ID (single) or [A_ID, ...] (multi-select)
     next_best_qid: Optional[str]   # The ID of the first unanswered question in the path
     reachable_path: List[str]      # The calculated logic path based on current answers
     deferred_ids: Optional[List[str]] = None

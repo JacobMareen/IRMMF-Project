@@ -1,0 +1,120 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: 'League Spartan', sans-serif;
+  color: var(--brand-gold);
+}
+
+.brand-logo {
+  height: 34px;
+  max-width: 160px;
+  object-fit: contain;
+}
+
+.brand-mark {
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+.brand-sub {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--text-sub);
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.top-link {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  color: var(--text-sub);
+  font-size: 0.9rem;
+}
+
+.top-link.theme-toggle {
+  background: transparent;
+  cursor: pointer;
+}
+
+.top-link.active {
+  background: var(--brand-gold);
+  color: var(--brand-navy);
+  border-color: var(--brand-gold);
+  font-weight: 600;
+}
+
+.app-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 210px 1fr;
+}
+
+.side-nav {
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.side-link {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.side-link.active {
+  background: var(--brand-gold);
+  color: var(--brand-navy);
+  border-color: var(--brand-gold);
+}
+
+.app-content {
+  padding: 24px 20px 48px;
+}
+
+.app-footer {
+  margin-top: auto;
+  padding: 18px 24px;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-sub);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  .app-body {
+    grid-template-columns: 1fr;
+  }
+  .side-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}

@@ -12,6 +12,12 @@ def allowed_origins() -> List[str]:
         "http://127.0.0.1:5501",
         "http://localhost:5501",
         "http://0.0.0.0:5500",
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+        "http://127.0.0.1:5174",
+        "http://localhost:5174",
+        "http://127.0.0.1:5175",
+        "http://localhost:5175",
         "null",
     ]
     allow_origins = os.getenv("IRMMF_ALLOWED_ORIGINS")

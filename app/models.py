@@ -1,10 +1,11 @@
 import uuid
 from typing import List, Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 
 from sqlalchemy import (
     BigInteger,
     Boolean,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -13,8 +14,10 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    case,
+    text,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 # --- UTILITIES ---
@@ -107,7 +110,18 @@ class Answer(Base):
 
     option_number: Mapped[int] = mapped_column(Integer, nullable=True)
     answer_text: Mapped[str] = mapped_column(Text, nullable=False)
-    base_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    base_score: Mapped[float] = mapped_column(Float, nullable=True)
+    
+    pts_g: Mapped[float] = mapped_column(Float, nullable=True)
+    pts_e: Mapped[float] = mapped_column(Float, nullable=True)
+    pts_t: Mapped[float] = mapped_column(Float, nullable=True)
+    pts_l: Mapped[float] = mapped_column(Float, nullable=True)
+    pts_h: Mapped[float] = mapped_column(Float, nullable=True)
+    pts_v: Mapped[float] = mapped_column(Float, nullable=True)
+    pts_r: Mapped[float] = mapped_column(Float, nullable=True)
+    pts_f: Mapped[float] = mapped_column(Float, nullable=True)
+    pts_w: Mapped[float] = mapped_column(Float, nullable=True)
+
     tags: Mapped[str] = mapped_column(String, nullable=True)
     fracture_type: Mapped[str] = mapped_column(String, nullable=True)
     follow_up_trigger: Mapped[str] = mapped_column(String, nullable=True)
@@ -236,3 +250,133 @@ class ReportSnapshot(Base):
 
     top_findings: Mapped[dict] = mapped_column(JSONB, nullable=True)
     benchmark_tags: Mapped[dict] = mapped_column(JSONB, nullable=True)
+
+
+# --- RECOMMENDATION TABLES ---
+
+class Recommendation(Base):
+    """Master library of reusable recommendations."""
+    __tablename__ = "dim_recommendations"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    rec_id: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+
+    # Categorization
+    category = mapped_column(String(64), nullable=False)
+    subcategory = mapped_column(String(64), nullable=True)
+
+    # Content
+    title = mapped_column(String(255), nullable=False)
+    description = mapped_column(Text, nullable=False)
+    rationale = mapped_column(Text, nullable=True)
+
+    # Actionable Details (JSONB for flexibility)
+    implementation_steps = mapped_column(JSONB, nullable=True)
+    success_criteria = mapped_column(JSONB, nullable=True)
+    prerequisites = mapped_column(ARRAY(String), nullable=True)
+
+    # Effort & Timeline
+    estimated_effort = mapped_column(String(32), nullable=True)
+    typical_timeline = mapped_column(String(64), nullable=True)
+    default_priority = mapped_column(String(16), nullable=False, default="Medium")
+
+    # Resources
+    vendor_suggestions = mapped_column(JSONB, nullable=True)
+    external_resources = mapped_column(JSONB, nullable=True)
+
+    # Linking Fields (for matching logic)
+    target_axes = mapped_column(ARRAY(String(16)), nullable=True)
+    relevant_scenarios = mapped_column(ARRAY(String(64)), nullable=True)
+    relevant_questions = mapped_column(ARRAY(String(64)), nullable=True)
+
+    # Triggering Logic
+    trigger_rules = mapped_column(JSONB, nullable=True)
+
+    # Metadata
+    created_at = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    is_active = mapped_column(Boolean, default=True, nullable=False)
+    version = mapped_column(String(16), nullable=True, default="1.0")
+
+    __table_args__ = (
+        Index("ix_dim_recs_category", "category"),
+        Index("ix_dim_recs_target_axes", "target_axes", postgresql_using="gin"),
+        Index("ix_dim_recs_scenarios", "relevant_scenarios", postgresql_using="gin"),
+        Index("ix_dim_recs_active", "is_active", postgresql_where=text("is_active = TRUE")),
+    )
+
+
+class AssessmentRecommendation(Base):
+    """Assessment-specific recommendation instance with status tracking."""
+    __tablename__ = "fact_assessment_recommendations"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    assessment_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("assessments.assessment_id", ondelete="CASCADE"),
+        nullable=False, index=True
+    )
+    rec_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("dim_recommendations.rec_id", ondelete="CASCADE"),
+        nullable=False
+    )
+
+    # Personalization
+    priority = mapped_column(String(16), nullable=False, default="Medium")
+    custom_timeline = mapped_column(String(64), nullable=True)
+    custom_notes = mapped_column(Text, nullable=True)
+
+    # Status Tracking
+    status = mapped_column(String(32), nullable=False, default="pending")
+
+    # Linkage to Findings
+    triggered_by_axes = mapped_column(ARRAY(String(16)), nullable=True)
+    triggered_by_risks = mapped_column(ARRAY(String(64)), nullable=True)
+    triggered_by_questions = mapped_column(ARRAY(String(64)), nullable=True)
+
+    # Progress Tracking
+    assigned_to = mapped_column(String(128), nullable=True)
+    due_date = mapped_column(Date, nullable=True)
+    started_at = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Audit Trail
+    created_at = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    created_by = mapped_column(String(128), nullable=True)
+
+    # Relationships
+    recommendation: Mapped["Recommendation"] = relationship(
+        "Recommendation", lazy="joined"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("assessment_id", "rec_id", name="uq_fact_assessment_rec"),
+        Index("ix_fact_assessment_recs_status", "status"),
+        Index("ix_fact_assessment_recs_priority", "priority"),
+        Index("ix_fact_assessment_recs_due_date", "due_date",
+              postgresql_where=text("due_date IS NOT NULL")),
+    )
+
+
+class RecommendationHistory(Base):
+    """Audit trail for recommendation changes."""
+    __tablename__ = "fact_recommendation_history"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    assessment_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    rec_id: Mapped[str] = mapped_column(String(64), nullable=False)
+
+    # What Changed
+    field_changed = mapped_column(String(64), nullable=False)
+    old_value = mapped_column(Text, nullable=True)
+    new_value = mapped_column(Text, nullable=True)
+    change_reason = mapped_column(Text, nullable=True)
+
+    # Who & When
+    changed_by = mapped_column(String(128), nullable=True)
+    changed_at = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    __table_args__ = (
+        Index("ix_fact_rec_history_assessment_rec", "assessment_id", "rec_id"),
+        Index("ix_fact_rec_history_timestamp", "changed_at"),
+    )

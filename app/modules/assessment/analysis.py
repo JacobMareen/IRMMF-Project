@@ -19,6 +19,7 @@ class AssessmentAnalysisService:
             if r.q_id in reachable and not r.is_deferred and (r.origin or "adaptive") != "override"
         ]
         result = self.scoring_engine.compute_analysis(all_qs, valid_responses, evidence, intake_tags)
+        result["assessment_id"] = assessment_id  # Add assessment_id for recommendation matching
         result["recommendations"] = self._build_recommendations(result)
         # Expanded includes override answers for a deeper maturity snapshot.
         expanded_responses = [
@@ -48,7 +49,33 @@ class AssessmentAnalysisService:
         return result
 
     def _build_recommendations(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Placeholder recommendations until rec library is defined."""
+        """Generate recommendations using the matching engine."""
+        from app.modules.assessment.recommendations import RecommendationMatchingEngine
+
+        # Check if recommendation library is populated
+        rec_count = self.db.query(models.Recommendation).filter_by(is_active=True).count()
+
+        if rec_count == 0:
+            # Fallback to simple recommendations if library is empty
+            return self._build_simple_recommendations(result)
+
+        # Use the intelligent matching engine
+        matcher = RecommendationMatchingEngine(self.db)
+        assessment_id = result.get("assessment_id")
+
+        if not assessment_id:
+            # If assessment_id not available, return simple recs
+            return self._build_simple_recommendations(result)
+
+        try:
+            return matcher.generate_recommendations(assessment_id, result)
+        except Exception as e:
+            # Fallback on error
+            print(f"Recommendation matching failed: {e}")
+            return self._build_simple_recommendations(result)
+
+    def _build_simple_recommendations(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Original simple recommendation logic as fallback."""
         axes = result.get("axes") or []
         if not axes:
             return []

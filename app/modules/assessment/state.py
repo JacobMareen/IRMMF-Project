@@ -126,12 +126,70 @@ class AssessmentStateService:
         checks = evidence.get("checks") or {}
         if not isinstance(checks, dict):
             checks = {}
+
+        policy_id = (question.evidence_policy_id or "").strip().upper()
+        policy_rules = {
+            "GOV_STD": {"base_no_evidence": 0.5, "required": ["freshness", "scope"], "min_ratio": 0.6},
+            "RISK_STD": {"base_no_evidence": 0.5, "required": ["scope"], "min_ratio": 0.6},
+            "OPS_STD": {"base_no_evidence": 0.45, "required": ["ops_usage"], "min_ratio": 0.6},
+            "CULT_SOFT": {"base_no_evidence": 0.6, "required": [], "min_ratio": 0.5},
+            "LEG_STRICT": {"base_no_evidence": 0.3, "required": ["freshness", "traceability"], "min_ratio": 0.7},
+            "HUMAN_BIO": {"base_no_evidence": 0.35, "required": ["scope", "sampling"], "min_ratio": 0.7},
+            "FRICTION_AI": {"base_no_evidence": 0.35, "required": ["sampling", "traceability"], "min_ratio": 0.7},
+            "TECH_STRICT": {"base_no_evidence": 0.35, "required": ["sampling", "traceability"], "min_ratio": 0.7},
+        }
+        rule = policy_rules.get(policy_id, {"base_no_evidence": 0.4, "required": [], "min_ratio": 0.5})
+
         total = len(checks)
         passed = sum(1 for v in checks.values() if bool(v))
         ratio = (passed / total) if total > 0 else 1.0
-        base = 1.0 if has_evidence else 0.4
+        base = 1.0 if has_evidence else rule["base_no_evidence"]
         confidence = base * ratio
+
+        if has_evidence and rule["required"]:
+            required_passed = sum(1 for key in rule["required"] if checks.get(key))
+            if required_passed < len(rule["required"]):
+                confidence *= 0.6
+        if has_evidence and ratio < rule["min_ratio"]:
+            confidence *= 0.7
+
         return max(0.1, min(1.0, round(confidence, 2)))
+
+    def _normalize_depth(self, depth: str | None) -> str:
+        if not depth:
+            return "Lightweight"
+        norm = depth.strip().lower()
+        if norm in {"core", "light", "lightweight"}:
+            return "Lightweight"
+        if norm in {"standard"}:
+            return "Standard"
+        if norm in {"deep"}:
+            return "Deep"
+        return "Standard"
+
+    def _allowed_tiers_by_maturity(self, readiness: float | None, override_depth: bool) -> set[str]:
+        if override_depth:
+            return {"T1", "T2", "T3", "T4"}
+        readiness = readiness if readiness is not None else 0.0
+        if readiness < 40.0:
+            return {"T1"}
+        if readiness < 70.0:
+            return {"T1", "T2", "T3"}
+        return {"T1", "T2", "T3", "T4"}
+
+    def _filter_questions_for_maturity(
+        self,
+        questions: List[models.Question],
+        readiness: float | None,
+        override_depth: bool,
+    ) -> List[models.Question]:
+        allowed = self._allowed_tiers_by_maturity(readiness, override_depth)
+        filtered = []
+        for q in questions:
+            tier = (q.tier or "").strip().upper()
+            if not tier or tier in allowed:
+                filtered.append(q)
+        return filtered
 
     def get_resumption_state(self, assessment_id: str) -> Dict[str, Any]:
         """Security + Next Best + Sidebar Builder."""
@@ -148,13 +206,21 @@ class AssessmentStateService:
         evidence = self.db.query(models.EvidenceResponse).filter_by(assessment_id=assessment_id).all()
         valid_map = {r.q_id: r.score_achieved for r in responses if not r.is_deferred}
 
-        reachable = self.branch_engine.calculate_reachable_path(all_qs, valid_map)
+        kickstart = self.scoring_engine.compute_kickstart_diagnostic(all_qs, responses, evidence)
+        eligible_qs = self._filter_questions_for_maturity(
+            all_qs,
+            kickstart.get("readiness"),
+            record.override_depth,
+        )
+        eligible_qs_map = {q.q_id: q for q in eligible_qs}
+
+        reachable = self.branch_engine.calculate_reachable_path(eligible_qs, valid_map)
         reachable_set = set(reachable)
 
         sidebar_context = []
-        active_domains = {all_qs_map[qid].domain for qid in reachable if qid in all_qs_map}
+        active_domains = {eligible_qs_map[qid].domain for qid in reachable if qid in eligible_qs_map}
 
-        for q in all_qs:
+        for q in eligible_qs:
             status = "hidden"
             reason = None
 
@@ -201,12 +267,25 @@ class AssessmentStateService:
 
         total_potential = len(reachable)
         progress = int((len(answered_ids) / total_potential * 100)) if total_potential > 0 else 0
-        kickstart = self.scoring_engine.compute_kickstart_diagnostic(all_qs, responses, evidence)
-        dashboard_soft = self.scoring_engine.compute_soft_vector(all_qs, responses, evidence)
-        depth_suggestion = self._suggest_depth(record, kickstart)
+        dashboard_soft = self.scoring_engine.compute_soft_vector(eligible_qs, responses, evidence)
+
+        # Convert multi-select responses (comma-separated a_ids) back to arrays
+        responses_dict = {}
+        for r in responses:
+            # Check if this is a multi-select question by looking at answer options
+            q = all_qs_map.get(r.q_id)
+            is_multiselect = False
+            if q and q.options:
+                is_multiselect = any(opt.tags == 'multiselect' for opt in q.options)
+
+            if is_multiselect and ',' in r.a_id:
+                # Split comma-separated IDs into array
+                responses_dict[r.q_id] = r.a_id.split(',')
+            else:
+                responses_dict[r.q_id] = r.a_id
 
         return {
-            "responses": {r.q_id: r.a_id for r in responses},
+            "responses": responses_dict,
             "deferred_ids": list(deferred_ids),
             "flagged_ids": list(flagged_ids),
             "marked_for_review": list(flagged_ids),
@@ -218,8 +297,23 @@ class AssessmentStateService:
             "kickstart": kickstart,
             "dashboard_soft": dashboard_soft,
             "override_depth": bool(record.override_depth),
-            "depth_suggestion": depth_suggestion,
+            "depth_suggestion": self._suggest_depth(record, kickstart),
+            "depth_mode": self._normalize_depth(record.depth or self._suggest_depth(record, kickstart)),
         }
+
+    def get_questions_for_assessment(self, assessment_id: str) -> List[models.Question]:
+        record = self.db.query(models.Assessment).filter_by(assessment_id=assessment_id).first()
+        if not record:
+            raise ValueError(f"Assessment {assessment_id} not found.")
+        all_qs = self.q_repo.get_all()
+        responses = self.r_repo.get_by_assessment(assessment_id)
+        evidence = self.db.query(models.EvidenceResponse).filter_by(assessment_id=assessment_id).all()
+        kickstart = self.scoring_engine.compute_kickstart_diagnostic(all_qs, responses, evidence)
+        return self._filter_questions_for_maturity(
+            all_qs,
+            kickstart.get("readiness"),
+            record.override_depth,
+        )
 
     def set_override_depth(self, assessment_id: str, override_depth: bool) -> Dict[str, Any]:
         record = self.db.query(models.Assessment).filter_by(assessment_id=assessment_id).first()
