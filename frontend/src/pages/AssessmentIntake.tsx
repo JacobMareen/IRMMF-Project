@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../lib/api'
 import './AssessmentIntake.css'
 import { getStoredAssessmentId } from '../utils/assessment'
 
@@ -14,8 +15,6 @@ type IntakeQuestion = {
 }
 
 type IntakeAnswerRow = { intake_q_id: string; value?: string | null }
-
-const API_BASE = 'http://127.0.0.1:8000/api/v1'
 
 const AssessmentIntake = () => {
   const navigate = useNavigate()
@@ -46,8 +45,8 @@ const AssessmentIntake = () => {
     setLoading(true)
     setStatus('')
     Promise.all([
-      fetch(`${API_BASE}/intake/start`, { signal: controller.signal }),
-      fetch(`${API_BASE}/intake/${assessmentId}`, { signal: controller.signal }),
+      apiFetch(`/intake/start`, { signal: controller.signal }),
+      apiFetch(`/intake/${assessmentId}`, { signal: controller.signal }),
     ])
       .then(async ([questionsResp, intakeResp]) => {
         if (!questionsResp.ok) {
@@ -103,7 +102,7 @@ const AssessmentIntake = () => {
 
   const submitDraft = async (payload?: Record<string, string>) => {
     if (!assessmentId) return
-    await fetch(`${API_BASE}/intake/submit`, {
+    await apiFetch(`/intake/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ assessment_id: assessmentId, answers: payload || draft }),
@@ -149,7 +148,7 @@ const AssessmentIntake = () => {
     setScrapeLoading(true)
     setScrapeStatus('')
     try {
-      const resp = await fetch(`${API_BASE}/intake/scrape`, {
+      const resp = await apiFetch(`/intake/scrape`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -41,6 +41,9 @@
 .settings-card input[type='text'],
 .settings-card input[type='password'],
 .settings-card input[type='email'],
+.settings-card input[type='number'],
+.settings-card input[type='date'],
+.settings-card textarea,
 .settings-card select {
   padding: 8px 10px;
   border-radius: 8px;
@@ -112,4 +115,58 @@
   margin-top: 10px;
   color: var(--text-sub);
   font-size: 0.85rem;
+}
+
+.settings-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme='light'] .settings-row {
+  background: rgba(223, 230, 238, 0.35);
+}
+
+.settings-row-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.settings-row-actions select {
+  min-width: 160px;
+}
+
+.settings-divider {
+  height: 1px;
+  background: var(--border-color);
+  opacity: 0.6;
+  margin: 10px 0;
+}
+
+.settings-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.settings-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-sub);
 }

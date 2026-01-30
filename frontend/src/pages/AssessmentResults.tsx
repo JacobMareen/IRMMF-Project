@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Chart from 'chart.js/auto'
 import './AssessmentResults.css'
 import { getStoredAssessmentId } from '../utils/assessment'
+import { apiFetchRoot, API_BASE } from '../lib/api'
 
 type AxisScore = { axis?: string; code?: string; score?: number }
 type Recommendation = {
@@ -43,8 +44,6 @@ type ResultsPayload = {
   risk_heatmap?: unknown[]
 }
 
-const API_BASE = 'http://127.0.0.1:8000'
-
 const AssessmentResults = () => {
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
   const [assessmentId, setAssessmentId] = useState('')
@@ -72,7 +71,7 @@ const AssessmentResults = () => {
       return
     }
     setStatus('Loading results...')
-    fetch(`${API_BASE}/responses/analysis/${assessmentId}`)
+    apiFetchRoot(`/responses/analysis/${assessmentId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!data) throw new Error('No data')
@@ -195,7 +194,7 @@ const AssessmentResults = () => {
 
   const handleExport = (type: 'csv' | 'json') => {
     if (!assessmentId) return
-    window.open(`${API_BASE}/api/v1/assessment/${assessmentId}/export/${type}`, '_blank')
+    window.open(`${API_BASE}/assessment/${assessmentId}/export/${type}`, '_blank')
   }
 
   return (
@@ -262,7 +261,7 @@ const AssessmentResults = () => {
                   {recommendations.map((rec) => (
                     <div key={rec.title} className="ar-list-item ar-accent">
                       <div className="ar-list-title">{rec.title}</div>
-                      <div className="ar-list-sub">{rec.rationale || 'Recommendation pending.'}</div>
+                      <div className="ar-list-sub">{rec.rationale || 'Action pending.'}</div>
                       <div className="ar-list-meta">
                         {rec.priority ? `Priority: ${rec.priority}` : 'Priority: —'}
                         {rec.timeline ? ` · ${rec.timeline}` : ''}
@@ -271,7 +270,7 @@ const AssessmentResults = () => {
                   ))}
                 </div>
               ) : (
-                <div className="ar-muted">Recommendations pending.</div>
+                <div className="ar-muted">Program actions pending.</div>
               )}
             </div>
           </section>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './DynamicWorkforce.css'
 import { getStoredAssessmentId, storeAssessmentId } from '../utils/assessment'
+import { apiFetch, apiJson } from '../lib/api'
 
 type DwfOption = { a_id: string; answer_text: string; base_score: number }
 type DwfQuestion = {
@@ -10,8 +11,6 @@ type DwfQuestion = {
   question_text: string
   options?: DwfOption[]
 }
-
-const API_BASE = 'http://127.0.0.1:8000/api/v1'
 
 const DynamicWorkforce = () => {
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
@@ -33,7 +32,7 @@ const DynamicWorkforce = () => {
 
   const registerAssessment = (aid: string) => {
     if (!aid) return
-    fetch(`${API_BASE}/dwf/assessment/register`, {
+    apiFetch(`/dwf/assessment/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ assessment_id: aid }),
@@ -48,8 +47,7 @@ const DynamicWorkforce = () => {
   }
 
   const loadQuestions = () => {
-    fetch(`${API_BASE}/dwf/questions/all`)
-      .then((r) => (r.ok ? r.json() : []))
+    apiJson<DwfQuestion[]>('/dwf/questions/all')
       .then((data: DwfQuestion[]) => {
         setQuestions(data || [])
       })
@@ -75,7 +73,7 @@ const DynamicWorkforce = () => {
     const q = questions.find((item) => item.q_id === qid)
     const opt = q?.options?.find((o) => o.a_id === selected)
     const score = opt?.base_score ?? 0
-    fetch(`${API_BASE}/dwf/submit`, {
+    apiFetch(`/dwf/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -95,8 +93,7 @@ const DynamicWorkforce = () => {
 
   const runAnalysis = () => {
     if (!assessmentId) return
-    fetch(`${API_BASE}/dwf/assessment/${encodeURIComponent(assessmentId)}/analysis`)
-      .then((r) => (r.ok ? r.json() : null))
+    apiJson(`/dwf/assessment/${encodeURIComponent(assessmentId)}/analysis`)
       .then((data) => {
         if (!data) throw new Error('No analysis')
         setAnalysis(JSON.stringify(data, null, 2))

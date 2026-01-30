@@ -1,11 +1,12 @@
 """FastAPI entrypoint: routing + startup wiring for IRMMF services."""
 from __future__ import annotations
-from fastapi import FastAPI, Depends
-import os
+from fastapi import FastAPI, Depends, Request
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from auth import resolve_principal_from_headers
 from app import models
 from app.core.bootstrap import register_modules, init_database
 from app.core.config import allowed_origins
@@ -13,6 +14,11 @@ from app.db import get_db
 from app.modules.assessment import service as services_module
 from app.modules.assessment.routes import router as assessment_router
 from app.modules.dwf.routes import router as dwf_router
+from app.modules.pia.routes import router as pia_router
+from app.modules.tenant.routes import router as tenant_router
+from app.modules.users.routes import router as users_router
+from app.modules.cases.routes import router as cases_router
+from app.modules.insider_program.routes import router as insider_program_router
 
 # 1. Initialize Database Tables (safe to run on restart)
 init_database()
@@ -32,9 +38,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=()"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+
+class PrincipalContextMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        principal = resolve_principal_from_headers(request.headers, allow_anonymous=True)
+        if principal is not None:
+            request.state.principal = principal
+        return await call_next(request)
+
+
+app.add_middleware(PrincipalContextMiddleware)
+
 # 3. Register module routers
 app.include_router(assessment_router)
 app.include_router(dwf_router)
+app.include_router(pia_router)
+app.include_router(tenant_router)
+app.include_router(users_router)
+app.include_router(cases_router)
+app.include_router(insider_program_router)
 
 
 @app.get("/")

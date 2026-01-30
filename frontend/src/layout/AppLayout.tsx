@@ -40,6 +40,9 @@ const AppLayout = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('irmmf_user')
+    localStorage.removeItem('irmmf_token')
+    localStorage.removeItem('irmmf_roles')
+    localStorage.removeItem('irmmf_tenant')
     localStorage.removeItem('assessment_id')
     if (currentUser) {
       localStorage.removeItem(`assessment_id_${currentUser}`)
@@ -63,11 +66,14 @@ const AppLayout = () => {
           <NavLink to="/assessment" className="top-link">
             Assessment Hub
           </NavLink>
-          <NavLink to="/recommendations" className="top-link">
-            Recommendations
+          <NavLink to="/insider-risk-program" className="top-link">
+            Insider Risk Program
           </NavLink>
           <NavLink to="/workforce" className="top-link">
             Workforce
+          </NavLink>
+          <NavLink to="/case-management" className="top-link">
+            Case Management
           </NavLink>
           <NavLink to="/settings" className="top-link">
             Settings
@@ -88,11 +94,14 @@ const AppLayout = () => {
           <NavLink to="/assessment" className="side-link">
             Assessment Hub
           </NavLink>
-          <NavLink to="/recommendations" className="side-link">
-            Recommendations
+          <NavLink to="/insider-risk-program" className="side-link">
+            Insider Risk Program
           </NavLink>
           <NavLink to="/workforce" className="side-link">
             Dynamic Workforce
+          </NavLink>
+          <NavLink to="/case-management" className="side-link">
+            Case Management
           </NavLink>
           <NavLink to="/settings" className="side-link">
             Platform Settings

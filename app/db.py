@@ -6,7 +6,7 @@ This project is still in alpha, so we keep configuration frictionless:
 - Falls back to a local Postgres default suitable for development
 
 Example:
-    export DATABASE_URL='postgresql+psycopg://irmmf_app:secure_password@localhost:5432/irmmf_db'
+    export DATABASE_URL='postgresql+psycopg://localhost:5432/irmmf_db'
 """
 
 from __future__ import annotations
@@ -15,10 +15,11 @@ import os
 from typing import Generator
 
 from sqlalchemy import create_engine, text
+
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 
-DEFAULT_DATABASE_URL = "postgresql+psycopg://irmmf_app:secure_password@localhost:5432/irmmf_db"
+DEFAULT_DATABASE_URL = "postgresql+psycopg://localhost:5432/irmmf_db"
 
 
 def _database_url() -> str:
@@ -82,3 +83,4 @@ def ensure_indexes() -> None:
                 """
             )
         )
+

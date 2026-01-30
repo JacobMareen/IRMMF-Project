@@ -12,10 +12,10 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
 from app.db import SessionLocal
-from app.models import Question, Answer
+from app.models import Question
 
 
-def test_multiselect_detection():
+def _run_multiselect_detection() -> bool:
     """Test that multi-select questions are correctly identified."""
     print("=" * 80)
     print("MULTI-SELECT DETECTION TEST")
@@ -96,8 +96,11 @@ def test_multiselect_detection():
     finally:
         db.close()
 
+def test_multiselect_detection():
+    """Pytest wrapper."""
+    assert _run_multiselect_detection()
 
-def test_multiselect_answer_structure():
+def _run_multiselect_answer_structure() -> bool:
     """Test that multi-select answer options have correct structure."""
     print()
     print("=" * 80)
@@ -147,8 +150,11 @@ def test_multiselect_answer_structure():
     finally:
         db.close()
 
+def test_multiselect_answer_structure():
+    """Pytest wrapper."""
+    assert _run_multiselect_answer_structure()
 
-def test_comma_separated_storage():
+def _run_comma_separated_storage() -> bool:
     """Test that comma-separated a_ids can be properly split."""
     print()
     print("=" * 80)
@@ -180,8 +186,11 @@ def test_comma_separated_storage():
 
     return all_passed
 
+def test_comma_separated_storage():
+    """Pytest wrapper."""
+    assert _run_comma_separated_storage()
 
-def test_score_calculation():
+def _run_score_calculation() -> bool:
     """Test score calculation logic."""
     print()
     print("=" * 80)
@@ -230,6 +239,9 @@ def test_score_calculation():
 
     return all_passed
 
+def test_score_calculation():
+    """Pytest wrapper."""
+    assert _run_score_calculation()
 
 def main():
     """Run all tests."""
@@ -242,25 +254,25 @@ def main():
     results = []
 
     try:
-        results.append(("Multi-Select Detection", test_multiselect_detection()))
+        results.append(("Multi-Select Detection", _run_multiselect_detection()))
     except Exception as e:
         print(f"❌ Test failed with error: {e}")
         results.append(("Multi-Select Detection", False))
 
     try:
-        results.append(("Answer Structure", test_multiselect_answer_structure()))
+        results.append(("Answer Structure", _run_multiselect_answer_structure()))
     except Exception as e:
         print(f"❌ Test failed with error: {e}")
         results.append(("Answer Structure", False))
 
     try:
-        results.append(("Comma-Separated Storage", test_comma_separated_storage()))
+        results.append(("Comma-Separated Storage", _run_comma_separated_storage()))
     except Exception as e:
         print(f"❌ Test failed with error: {e}")
         results.append(("Comma-Separated Storage", False))
 
     try:
-        results.append(("Score Calculation", test_score_calculation()))
+        results.append(("Score Calculation", _run_score_calculation()))
     except Exception as e:
         print(f"❌ Test failed with error: {e}")
         results.append(("Score Calculation", False))

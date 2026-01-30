@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { apiJson } from '../lib/api'
 import './CommandCenter.css'
 
 type ModuleEntry = {
@@ -6,28 +7,72 @@ type ModuleEntry = {
   description: string
 }
 
+type DashboardData = {
+  total_cases: number
+  status_counts: Record<string, number>
+  stage_counts: Record<string, number>
+  serious_cause_enabled: number
+  avg_days_open: number
+  avg_days_in_stage: number
+  gate_completion: Record<string, { completed: number; total_cases: number; rate: number }>
+  recent_case_count: number
+  recent_window_days: number
+  alert_threshold_cases: number
+  alerts: { alert_key: string; severity: string; message: string; created_at: string }[]
+  serious_cause_cases: {
+    case_id: string
+    title: string
+    decision_due_at?: string | null
+    dismissal_due_at?: string | null
+    facts_confirmed_at?: string | null
+  }[]
+}
+
 const CommandCenter = () => {
   const [registryText, setRegistryText] = useState('Loading module metadata...')
   const [moduleCount, setModuleCount] = useState('4 active')
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null)
+  const [dashboardStatus, setDashboardStatus] = useState('Loading dashboard...')
 
   useEffect(() => {
-    const apiBase =
-      location.hostname === '127.0.0.1' || location.hostname === 'localhost'
-        ? 'http://127.0.0.1:8000'
-        : 'http://0.0.0.0:8000'
-
-    fetch(`${apiBase}/api/v1/modules`)
-      .then((res) => (res.ok ? res.json() : null))
+    apiJson<Record<string, ModuleEntry>>('/modules')
       .then((data) => {
-        if (!data) throw new Error('No data')
-        const entries = Object.values(data) as ModuleEntry[]
+        const entries = Object.values(data || {}) as ModuleEntry[]
         setRegistryText(entries.map((m) => `${m.label}: ${m.description}`).join(' • '))
         setModuleCount(`${entries.length} active`)
       })
       .catch(() => {
         setRegistryText('Registry unavailable (API offline).')
       })
+
+    apiJson<DashboardData>('/dashboard')
+      .then((data) => {
+        setDashboard(data)
+        setDashboardStatus('Live')
+      })
+      .catch(() => {
+        setDashboardStatus('Dashboard unavailable (API offline).')
+      })
   }, [])
+
+  const openCases = dashboard?.status_counts?.OPEN ?? 0
+  const onHoldCases = dashboard?.status_counts?.ON_HOLD ?? 0
+  const investigationCases = dashboard?.stage_counts?.INVESTIGATION ?? 0
+  const legitimacyRate = dashboard?.gate_completion?.legitimacy?.rate ?? 0
+  const credentialingRate = dashboard?.gate_completion?.credentialing?.rate ?? 0
+  const adversarialRate = dashboard?.gate_completion?.adversarial?.rate ?? 0
+  const alerts = dashboard?.alerts ?? []
+  const seriousCauseCases = dashboard?.serious_cause_cases ?? []
+
+  const formatCountdown = (iso?: string | null) => {
+    if (!iso) return '--'
+    const diffMs = new Date(iso).getTime() - Date.now()
+    const hours = Math.ceil(diffMs / 36e5)
+    if (hours <= 0) return 'Overdue'
+    if (hours < 24) return `${hours}h`
+    const days = Math.ceil(hours / 24)
+    return `${days}d`
+  }
 
   return (
     <section className="cc-page">
@@ -55,21 +100,89 @@ const CommandCenter = () => {
           </div>
         </div>
         <div className="cc-card">
-          <h2>Executive Snapshot</h2>
+          <h2>Case Operations</h2>
           <div className="cc-row">
-            <span>Assessments in progress</span>
-            <strong>--</strong>
+            <span>Total cases</span>
+            <strong>{dashboard ? dashboard.total_cases : '--'}</strong>
           </div>
           <div className="cc-row">
-            <span>Top risk category</span>
-            <strong>--</strong>
+            <span>Open / On hold</span>
+            <strong>{dashboard ? `${openCases} / ${onHoldCases}` : '--'}</strong>
           </div>
           <div className="cc-row">
-            <span>Benchmark cohort</span>
-            <strong>--</strong>
+            <span>In investigation</span>
+            <strong>{dashboard ? investigationCases : '--'}</strong>
+          </div>
+          <div className="cc-row">
+            <span>Serious cause enabled</span>
+            <strong>{dashboard ? dashboard.serious_cause_enabled : '--'}</strong>
+          </div>
+          <div className="cc-row">
+            <span>Avg days open</span>
+            <strong>{dashboard ? dashboard.avg_days_open : '--'}</strong>
+          </div>
+          <div className="cc-row">
+            <span>Avg days in stage</span>
+            <strong>{dashboard ? dashboard.avg_days_in_stage : '--'}</strong>
+          </div>
+          <div className="cc-row">
+            <span>Gate completion (L/C/A)</span>
+            <strong>{dashboard ? `${legitimacyRate}% / ${credentialingRate}% / ${adversarialRate}%` : '--'}</strong>
+          </div>
+          <div className="cc-row">
+            <span>Dashboard status</span>
+            <strong>{dashboardStatus}</strong>
           </div>
         </div>
       </div>
+
+      {alerts.length ? (
+        <section className="cc-alerts">
+          {alerts.map((alert) => (
+            <div key={alert.alert_key} className={`cc-alert ${alert.severity}`}>
+              <strong>Alert:</strong> {alert.message}
+            </div>
+          ))}
+        </section>
+      ) : null}
+
+      <section className="cc-alerts-grid">
+        <div className="cc-card">
+          <h2>Serious Cause Countdown</h2>
+          {seriousCauseCases.length === 0 ? (
+            <p className="cc-muted">No active serious-cause clocks.</p>
+          ) : (
+            <div className="cc-list">
+              {seriousCauseCases.map((item) => (
+                <div key={item.case_id} className="cc-row">
+                  <div>
+                    <strong>{item.case_id}</strong>
+                    <div className="cc-muted">{item.title}</div>
+                  </div>
+                  <div className="cc-countdown">
+                    <span>Decision: {formatCountdown(item.decision_due_at)}</span>
+                    <span>Dismissal: {formatCountdown(item.dismissal_due_at)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="cc-card">
+          <h2>HR Exemption Drift</h2>
+          <p className="cc-muted">
+            Rolling {dashboard?.recent_window_days ?? 30} day case volume vs. threshold.
+          </p>
+          <div className="cc-row">
+            <span>Cases opened (window)</span>
+            <strong>{dashboard ? dashboard.recent_case_count : '--'}</strong>
+          </div>
+          <div className="cc-row">
+            <span>Threshold</span>
+            <strong>{dashboard ? dashboard.alert_threshold_cases : '--'}</strong>
+          </div>
+        </div>
+      </section>
 
       <section className="cc-modules">
         <div className="cc-section-title">Modules</div>
@@ -98,6 +211,34 @@ const CommandCenter = () => {
               </a>
               <a className="cc-btn secondary" href="/workforce">
                 View Results
+              </a>
+            </div>
+          </div>
+
+          <div className="cc-module-card">
+            <div className="cc-tag">Case Mgmt</div>
+            <h3>Case Management</h3>
+            <p>Compliance governance, investigation workflows, and case operations in one workspace.</p>
+            <div className="cc-actions">
+              <a className="cc-btn primary" href="/case-management/compliance">
+                Compliance Overview
+              </a>
+              <a className="cc-btn secondary" href="/case-management/cases">
+                Open Cases
+              </a>
+            </div>
+          </div>
+
+          <div className="cc-module-card">
+            <div className="cc-tag">Investigations</div>
+            <h3>Cases</h3>
+            <p>Core case object, lifecycle status, evidence register, and task checklists.</p>
+            <div className="cc-actions">
+              <a className="cc-btn primary" href="/case-management/cases">
+                View Case List
+              </a>
+              <a className="cc-btn secondary" href="/case-management/notifications">
+                Notifications
               </a>
             </div>
           </div>

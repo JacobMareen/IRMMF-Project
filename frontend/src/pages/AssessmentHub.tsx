@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './AssessmentHub.css'
 import { getStoredAssessmentId, storeAssessmentId } from '../utils/assessment'
+import { apiFetch, apiFetchRoot } from '../lib/api'
 
 type ResumptionState = {
   completion_pct?: number
@@ -17,8 +18,6 @@ type RiskEntry = {
   likelihood?: number
   impact?: number
 }
-
-const API_BASE = 'http://127.0.0.1:8000/api/v1'
 
 const AssessmentHub = () => {
   const [assessmentId, setAssessmentId] = useState<string>('')
@@ -46,7 +45,7 @@ const AssessmentHub = () => {
     const controller = new AbortController()
     const resolveAssessment = async () => {
       try {
-        const latestResp = await fetch(`${API_BASE}/assessment/user/${currentUser}/latest`, {
+        const latestResp = await apiFetch(`/assessment/user/${currentUser}/latest`, {
           signal: controller.signal,
         })
         if (latestResp.ok) {
@@ -58,7 +57,7 @@ const AssessmentHub = () => {
           }
         }
         if (latestResp.status !== 404) return
-        const createResp = await fetch(`${API_BASE}/assessment/new`, {
+        const createResp = await apiFetch(`/assessment/new`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_id: currentUser || null }),
@@ -83,7 +82,7 @@ const AssessmentHub = () => {
 
   useEffect(() => {
     if (!assessmentId) return
-    fetch(`${API_BASE}/questions/all?assessment_id=${assessmentId}`)
+    apiFetch(`/questions/all?assessment_id=${assessmentId}`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         const questions = (data || []) as Array<{ q_id: string; domain?: string }>
@@ -119,10 +118,10 @@ const AssessmentHub = () => {
     setStatusNote('')
 
     Promise.allSettled([
-      fetch(`${API_BASE}/assessment/${assessmentId}/resume`, { signal: controller.signal }),
-      fetch(`${API_BASE}/intake/${assessmentId}`, { signal: controller.signal }),
-      fetch(`${API_BASE}/intake/start`, { signal: controller.signal }),
-      fetch(`${API_BASE.replace('/api/v1', '')}/responses/analysis/${assessmentId}`, {
+      apiFetch(`/assessment/${assessmentId}/resume`, { signal: controller.signal }),
+      apiFetch(`/intake/${assessmentId}`, { signal: controller.signal }),
+      apiFetch(`/intake/start`, { signal: controller.signal }),
+      apiFetchRoot(`/responses/analysis/${assessmentId}`, {
         signal: controller.signal,
       }),
     ])
@@ -216,7 +215,7 @@ const AssessmentHub = () => {
   const syncOverrideDepth = async (enabled: boolean) => {
     if (!assessmentId) return
     try {
-      await fetch(`${API_BASE}/assessment/${assessmentId}/override`, {
+      await apiFetch(`/assessment/${assessmentId}/override`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ override_depth: enabled }),

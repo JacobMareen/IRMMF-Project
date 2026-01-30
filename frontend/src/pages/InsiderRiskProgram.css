@@ -122,6 +122,219 @@
   color: #10b981;
 }
 
+.stat-sub {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--text-sub);
+}
+
+.irp-section {
+  margin-bottom: 32px;
+}
+
+.irp-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.irp-section-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.irp-section-header p {
+  margin-top: 6px;
+  color: var(--text-sub);
+}
+
+.irp-section-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.irp-policy-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-bottom: 16px;
+}
+
+.irp-policy-sections {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.irp-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 24px var(--shadow);
+}
+
+.irp-card-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.irp-muted {
+  color: var(--text-sub);
+}
+
+.irp-status-note {
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+.irp-kv {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  margin-top: 12px;
+}
+
+.kv-label {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+.kv-value {
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.irp-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.irp-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-sub);
+}
+
+.irp-subgrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-top: 12px;
+}
+
+.irp-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  color: var(--text-sub);
+  font-size: 0.7rem;
+  margin-right: 6px;
+  margin-top: 4px;
+}
+
+.irp-control-stats .stat-card {
+  min-height: 120px;
+}
+
+.control-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.control-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--border-color);
+  box-shadow: 0 8px 24px var(--shadow);
+}
+
+.control-card.domain-governance {
+  border-left-color: #f59e0b;
+}
+
+.control-card.domain-prevention {
+  border-left-color: #60a5fa;
+}
+
+.control-card.domain-detection {
+  border-left-color: #6366f1;
+}
+
+.control-card.domain-response {
+  border-left-color: #ef4444;
+}
+
+.control-card.domain-recovery {
+  border-left-color: #10b981;
+}
+
+.control-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.control-id {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.control-title {
+  margin: 4px 0 0;
+  font-size: 1.15rem;
+}
+
+.control-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.control-objective {
+  color: var(--text-sub);
+  margin-top: 6px;
+}
+
+.control-meta-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-top: 12px;
+}
+
+.control-links {
+  margin-top: 12px;
+}
+
+.control-link-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.control-actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+}
+
 .recommendations-grid {
   display: grid;
   gap: 16px;
@@ -213,6 +426,21 @@
 .badge-status.in-progress {
   background: #dbeafe;
   color: #1e40af;
+}
+
+.badge-status.planned {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.badge-status.implemented {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-status.monitored {
+  background: #cffafe;
+  color: #155e75;
 }
 
 .badge-status.completed {

@@ -14,3 +14,11 @@ venv/
 
 # Hypothesis cache
 .hypothesis/
+
+# Local environment files
+.env
+.env.*
+
+# Local logs
+uvicorn.log
+nohup.out

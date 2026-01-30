@@ -64,6 +64,49 @@
   background: rgba(223, 230, 238, 0.4);
 }
 
+.cc-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cc-alert {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 215, 0, 0.08);
+  color: var(--text-sub);
+}
+
+.cc-alert.warning {
+  border-color: rgba(255, 215, 0, 0.4);
+}
+
+.cc-alerts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.cc-muted {
+  color: var(--text-sub);
+}
+
+.cc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cc-countdown {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+  color: var(--brand-gold);
+  font-size: 0.85rem;
+}
+
 .cc-modules {
   display: flex;
   flex-direction: column;

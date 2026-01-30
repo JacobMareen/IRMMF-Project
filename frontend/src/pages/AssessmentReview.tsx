@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './AssessmentReview.css'
 import { getStoredAssessmentId } from '../utils/assessment'
+import { apiFetch, apiFetchRoot } from '../lib/api'
 
 type AnswerOption = { a_id: string; answer_text: string; base_score: number }
 type Question = {
@@ -30,8 +31,6 @@ type IntakeAnswer = {
   value: string
 }
 
-const API_BASE = 'http://127.0.0.1:8000'
-
 const AssessmentReview = () => {
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
   const [assessmentId, setAssessmentId] = useState('')
@@ -46,7 +45,7 @@ const AssessmentReview = () => {
 
   useEffect(() => {
     if (!assessmentId) return
-    fetch(`${API_BASE}/api/v1/questions/all?assessment_id=${assessmentId}`)
+    apiFetch(`/questions/all?assessment_id=${assessmentId}`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setQuestions(data))
       .catch(() => setQuestions([]))
@@ -59,8 +58,8 @@ const AssessmentReview = () => {
     }
     setStatus('Loading review table...')
     Promise.all([
-      fetch(`${API_BASE}/responses/table/${assessmentId}`),
-      fetch(`${API_BASE}/api/v1/intake/${assessmentId}`),
+    apiFetchRoot(`/responses/table/${assessmentId}`),
+    apiFetch(`/intake/${assessmentId}`),
     ])
       .then(async ([reviewResp, intakeResp]) => {
         const reviewData = reviewResp.ok ? await reviewResp.json() : []
@@ -86,7 +85,7 @@ const AssessmentReview = () => {
     const q = questions.find((item) => item.q_id === qId)
     if (!q || !assessmentId) return
     const score = getScoreForAnswer(qId, aId)
-    await fetch(`${API_BASE}/api/v1/assessment/submit`, {
+    await apiFetch(`/assessment/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

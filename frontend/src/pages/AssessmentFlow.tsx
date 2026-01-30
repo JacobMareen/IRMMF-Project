@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../lib/api'
 import './AssessmentFlow.css'
 import { getStoredAssessmentId } from '../utils/assessment'
 
@@ -35,8 +36,6 @@ type ResumptionState = {
 
 type EvidenceCheck = { id: string; label: string }
 type EvidencePolicy = { label: string; description: string; checks: EvidenceCheck[]; required?: string[] }
-
-const API_BASE = 'http://127.0.0.1:8000/api/v1'
 
 const DEFAULT_EVIDENCE_CHECKS: EvidenceCheck[] = [
   { id: 'freshness', label: 'Updated in the last 12 months?' },
@@ -175,9 +174,9 @@ const AssessmentFlow = () => {
     const controller = new AbortController()
     setStatus('Loading assessment...')
     Promise.all([
-      fetch(`${API_BASE}/questions/all?assessment_id=${assessmentId}`, { signal: controller.signal }),
-      fetch(`${API_BASE}/assessment/${assessmentId}/resume`, { signal: controller.signal }),
-      fetch(`${API_BASE}/intake/${assessmentId}`, { signal: controller.signal }),
+      apiFetch(`/questions/all?assessment_id=${assessmentId}`, { signal: controller.signal }),
+      apiFetch(`/assessment/${assessmentId}/resume`, { signal: controller.signal }),
+      apiFetch(`/intake/${assessmentId}`, { signal: controller.signal }),
     ])
       .then(async ([qResp, rResp, intakeResp]) => {
         if (!qResp.ok || !rResp.ok) throw new Error('Assessment data unavailable.')
@@ -316,7 +315,7 @@ const AssessmentFlow = () => {
     if (!assessmentId) return
     const origin = isOverrideQuestion(payload.q_id) ? 'override' : 'adaptive'
     const q = questions.find((item) => item.q_id === payload.q_id)
-    const res = await fetch(`${API_BASE}/assessment/submit`, {
+    const res = await apiFetch(`/assessment/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -17,6 +17,7 @@ class DwfAssessment(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     assessment_id: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
+    tenant_key: Mapped[str] = mapped_column(String(64), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)
 

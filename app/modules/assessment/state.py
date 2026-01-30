@@ -323,13 +323,11 @@ class AssessmentStateService:
         self.db.commit()
         return {"assessment_id": assessment_id, "override_depth": record.override_depth}
 
-    def list_assessments_for_user(self, user_id: str) -> List[Dict[str, Any]]:
-        rows = (
-            self.db.query(models.Assessment)
-            .filter_by(user_id=user_id)
-            .order_by(models.Assessment.updated_at.desc(), models.Assessment.created_at.desc())
-            .all()
-        )
+    def list_assessments_for_user(self, user_id: str, tenant_key: str | None = None) -> List[Dict[str, Any]]:
+        query = self.db.query(models.Assessment).filter_by(user_id=user_id)
+        if tenant_key:
+            query = query.filter_by(tenant_key=tenant_key)
+        rows = query.order_by(models.Assessment.updated_at.desc(), models.Assessment.created_at.desc()).all()
         return [
             {
                 "assessment_id": r.assessment_id,
@@ -340,8 +338,8 @@ class AssessmentStateService:
             for r in rows
         ]
 
-    def get_latest_assessment_for_user(self, user_id: str) -> Dict[str, Any] | None:
-        rows = self.list_assessments_for_user(user_id)
+    def get_latest_assessment_for_user(self, user_id: str, tenant_key: str | None = None) -> Dict[str, Any] | None:
+        rows = self.list_assessments_for_user(user_id, tenant_key=tenant_key)
         return rows[0] if rows else None
 
     def reset_assessment_data(self, assessment_id: str) -> Dict[str, Any]:

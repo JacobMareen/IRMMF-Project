@@ -5,10 +5,12 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from auth import get_principal, Principal
 from app import models, schemas
 from app.db import get_db
 from app.modules.assessment.service import AssessmentService
 from app.modules.assessment.scraper import scrape_and_analyze_website, suggest_intake_answers
+from app.security.access import ensure_tenant_match, is_admin, rbac_disabled, require_tenant
 
 
 router = APIRouter()
@@ -18,14 +20,39 @@ def get_service(db: Session = Depends(get_db)) -> AssessmentService:
     return AssessmentService(db)
 
 
+def _ensure_assessment_access(
+    assessment_id: str,
+    principal: Principal,
+    db: Session,
+) -> None:
+    if rbac_disabled():
+        return
+    assessment = (
+        db.query(models.Assessment)
+        .filter_by(assessment_id=assessment_id)
+        .first()
+    )
+    if not assessment:
+        raise HTTPException(status_code=404, detail="Assessment not found.")
+    if is_admin(principal):
+        return
+    ensure_tenant_match(principal, assessment.tenant_key, not_found_detail="Assessment not found.")
+
+
+def _ensure_tenant_context(principal: Principal) -> None:
+    require_tenant(principal)
+
+
 @router.get("/api/v1/questions/all", response_model=list[schemas.QuestionOut])
 def get_all_questions(
     assessment_id: str | None = Query(default=None),
+    principal: Principal = Depends(get_principal),
     db: Session = Depends(get_db),
     service: AssessmentService = Depends(get_service),
 ):
     """Returns the full static Question Bank or the depth-eligible set."""
     if assessment_id:
+        _ensure_assessment_access(assessment_id, principal, db)
         try:
             return service.get_questions_for_assessment(assessment_id)
         except ValueError as e:
@@ -34,20 +61,38 @@ def get_all_questions(
 
 
 @router.post("/api/v1/assessment/submit")
-def submit_answer(payload: schemas.ResponseCreate, service: AssessmentService = Depends(get_service)):
+def submit_answer(
+    payload: schemas.ResponseCreate,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
     """Core loop: save answer, run branching, return updated state."""
+    _ensure_assessment_access(payload.assessment_id, principal, db)
     return service.submit_answer(payload)
 
 
 @router.post("/responses/submit")
-def submit_answer_alias(payload: schemas.ResponseCreate, service: AssessmentService = Depends(get_service)):
+def submit_answer_alias(
+    payload: schemas.ResponseCreate,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
     """Compatibility alias for evidence payload submissions."""
+    _ensure_assessment_access(payload.assessment_id, principal, db)
     return service.submit_answer(payload)
 
 
 @router.get("/api/v1/assessment/{assessment_id}/context")
-def get_context(assessment_id: str, service: AssessmentService = Depends(get_service)):
+def get_context(
+    assessment_id: str,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
     """Resume logic: return prior answers and reachable path."""
+    _ensure_assessment_access(assessment_id, principal, db)
     try:
         return service.get_context(assessment_id)
     except ValueError as e:
@@ -60,8 +105,11 @@ def get_context(assessment_id: str, service: AssessmentService = Depends(get_ser
 def set_override_depth(
     assessment_id: str,
     payload: dict,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
     service: AssessmentService = Depends(get_service),
 ):
+    _ensure_assessment_access(assessment_id, principal, db)
     try:
         override_depth = bool(payload.get("override_depth"))
         return service.set_override_depth(assessment_id, override_depth)
@@ -72,19 +120,37 @@ def set_override_depth(
 
 
 @router.get("/responses/analysis/{assessment_id}")
-def get_analysis(assessment_id: str, service: AssessmentService = Depends(get_service)):
+def get_analysis(
+    assessment_id: str,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
     """Run scoring engine to calculate archetype and axis scores."""
+    _ensure_assessment_access(assessment_id, principal, db)
     return service.get_analysis(assessment_id)
 
 
 @router.get("/responses/table/{assessment_id}")
-def get_review_table(assessment_id: str, service: AssessmentService = Depends(get_service)):
+def get_review_table(
+    assessment_id: str,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
     """Return a flat review table of answers for audit workflows."""
+    _ensure_assessment_access(assessment_id, principal, db)
     return service.get_review_table(assessment_id)
 
 
 @router.get("/api/v1/assessment/{assessment_id}/resume", response_model=schemas.ResumptionState)
-def resume_assessment(assessment_id: str, service: AssessmentService = Depends(get_service)):
+def resume_assessment(
+    assessment_id: str,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
+    _ensure_assessment_access(assessment_id, principal, db)
     try:
         state = service.get_resumption_state(assessment_id)
         return state
@@ -95,28 +161,54 @@ def resume_assessment(assessment_id: str, service: AssessmentService = Depends(g
 
 
 @router.post("/api/v1/assessment/new")
-def start_assessment(payload: dict | None = Body(default=None), service: AssessmentService = Depends(get_service)):
+def start_assessment(
+    payload: dict | None = Body(default=None),
+    principal: Principal = Depends(get_principal),
+    service: AssessmentService = Depends(get_service),
+):
     """Create a new assessment and return the secure access key."""
+    _ensure_tenant_context(principal)
     user_id = payload.get("user_id") if payload else None
-    new_key = service.create_new_assessment(user_id=user_id)
+    tenant_key = principal.tenant_key or "default"
+    # Dev-only fallback: replace with real login-derived user_id and tenant_key once auth is enabled.
+    resolved_user = user_id or principal.subject
+    new_key = service.create_new_assessment(tenant_key=tenant_key, user_id=resolved_user)
     return {"assessment_id": new_key}
 
 
 @router.get("/api/v1/assessment/user/{user_id}")
-def list_assessments_for_user(user_id: str, service: AssessmentService = Depends(get_service)):
-    return service.list_assessments_for_user(user_id)
+def list_assessments_for_user(
+    user_id: str,
+    principal: Principal = Depends(get_principal),
+    service: AssessmentService = Depends(get_service),
+):
+    _ensure_tenant_context(principal)
+    tenant_key = principal.tenant_key or "default"
+    return service.list_assessments_for_user(user_id, tenant_key=tenant_key)
 
 
 @router.get("/api/v1/assessment/user/{user_id}/latest")
-def get_latest_assessment_for_user(user_id: str, service: AssessmentService = Depends(get_service)):
-    latest = service.get_latest_assessment_for_user(user_id)
+def get_latest_assessment_for_user(
+    user_id: str,
+    principal: Principal = Depends(get_principal),
+    service: AssessmentService = Depends(get_service),
+):
+    _ensure_tenant_context(principal)
+    tenant_key = principal.tenant_key or "default"
+    latest = service.get_latest_assessment_for_user(user_id, tenant_key=tenant_key)
     if not latest:
         raise HTTPException(status_code=404, detail="No assessments found for user.")
     return latest
 
 
 @router.post("/api/v1/assessment/{assessment_id}/reset")
-def reset_assessment_data(assessment_id: str, service: AssessmentService = Depends(get_service)):
+def reset_assessment_data(
+    assessment_id: str,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
+    _ensure_assessment_access(assessment_id, principal, db)
     try:
         return service.reset_assessment_data(assessment_id)
     except ValueError as e:
@@ -154,11 +246,17 @@ def get_intake_debug(service: AssessmentService = Depends(get_service)):
 
 
 @router.post("/api/v1/intake/submit")
-def submit_intake(payload: dict, service: AssessmentService = Depends(get_service)):
+def submit_intake(
+    payload: dict,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
     assessment_id = payload.get("assessment_id")
     answers = payload.get("answers") or {}
     if not assessment_id:
         raise HTTPException(status_code=400, detail="assessment_id is required")
+    _ensure_assessment_access(assessment_id, principal, db)
     try:
         return service.submit_intake(assessment_id, answers)
     except ValueError as e:
@@ -168,7 +266,12 @@ def submit_intake(payload: dict, service: AssessmentService = Depends(get_servic
 
 
 @router.post("/api/v1/intake/scrape")
-async def scrape_intake(payload: dict, service: AssessmentService = Depends(get_service)):
+async def scrape_intake(
+    payload: dict,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
     base_url = payload.get("base_url")
     assessment_id = payload.get("assessment_id")
     persist = bool(payload.get("persist"))
@@ -180,6 +283,7 @@ async def scrape_intake(payload: dict, service: AssessmentService = Depends(get_
     intake_options = service.get_intake_options()
     suggested = suggest_intake_answers(result, intake_options)
     if persist and assessment_id:
+        _ensure_assessment_access(assessment_id, principal, db)
         service.submit_intake(assessment_id, suggested)
     return {
         "analysis": result,
@@ -189,7 +293,13 @@ async def scrape_intake(payload: dict, service: AssessmentService = Depends(get_
 
 
 @router.get("/api/v1/intake/{assessment_id}")
-def get_intake_responses(assessment_id: str, service: AssessmentService = Depends(get_service)):
+def get_intake_responses(
+    assessment_id: str,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
+    _ensure_assessment_access(assessment_id, principal, db)
     return service.get_intake_responses(assessment_id)
 
 
@@ -207,9 +317,12 @@ def get_rec_service(db: Session = Depends(get_db)) -> RecommendationService:
 def get_recommendations(
     assessment_id: str,
     status: Optional[str] = None,
-    service: RecommendationService = Depends(get_rec_service)
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: RecommendationService = Depends(get_rec_service),
 ):
     """Get all recommendations for an assessment."""
+    _ensure_assessment_access(assessment_id, principal, db)
     try:
         return service.get_recommendations_for_assessment(assessment_id, status)
     except Exception as e:
@@ -221,9 +334,12 @@ def update_recommendation(
     assessment_id: str,
     rec_id: str,
     payload: dict,
-    service: RecommendationService = Depends(get_rec_service)
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: RecommendationService = Depends(get_rec_service),
 ):
     """Update a recommendation (status, priority, assignment, etc.)."""
+    _ensure_assessment_access(assessment_id, principal, db)
     try:
         user_id = payload.pop("user_id", None)
         return service.update_recommendation(assessment_id, rec_id, payload, user_id)
@@ -237,9 +353,12 @@ def update_recommendation(
 def get_recommendation_history(
     assessment_id: str,
     rec_id: str,
-    service: RecommendationService = Depends(get_rec_service)
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: RecommendationService = Depends(get_rec_service),
 ):
     """Get change history for a recommendation."""
+    _ensure_assessment_access(assessment_id, principal, db)
     history = service.rec_repo.get_recommendation_history(assessment_id, rec_id)
     return [
         {
@@ -259,9 +378,11 @@ def get_recommendation_history(
 @router.get("/api/v1/recommendations/library")
 def get_recommendation_library(
     category: Optional[str] = None,
-    service: RecommendationService = Depends(get_rec_service)
+    principal: Principal = Depends(get_principal),
+    service: RecommendationService = Depends(get_rec_service),
 ):
     """Browse the master recommendation library."""
+    _ensure_tenant_context(principal)
     if category:
         recs = service.rec_repo.search_recommendations(category=category)
     else:
@@ -287,9 +408,11 @@ def get_recommendation_library(
 @router.get("/api/v1/recommendations/library/{rec_id}")
 def get_recommendation_details(
     rec_id: str,
-    service: RecommendationService = Depends(get_rec_service)
+    principal: Principal = Depends(get_principal),
+    service: RecommendationService = Depends(get_rec_service),
 ):
     """Get full details of a recommendation from library."""
+    _ensure_tenant_context(principal)
     rec = service.rec_repo.get_recommendation_by_id(rec_id)
     if not rec:
         raise HTTPException(status_code=404, detail="Recommendation not found")

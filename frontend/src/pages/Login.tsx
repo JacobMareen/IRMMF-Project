@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Login.css'
+import { apiFetch } from '../lib/api'
 
-const TEST_USER = 'test'
-const TEST_PASS = 'test123'
-const API_BASE = 'http://127.0.0.1:8000/api/v1'
+const DEFAULT_TENANT_KEY = 'default'
 
 const Login = () => {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [status, setStatus] = useState('Use credentials: test / test123')
+  const [status, setStatus] = useState('Enter your email to sign in.')
 
   useEffect(() => {
     const user = localStorage.getItem('irmmf_user')
@@ -26,28 +25,57 @@ const Login = () => {
 
   const handleLogin = async () => {
     const user = username.trim()
-    const pass = password.trim()
-    if (user === TEST_USER && pass === TEST_PASS) {
-      localStorage.setItem('irmmf_user', user)
+    if (!user) {
+      setStatus('Enter an email address.')
+      return
+    }
+    setStatus('Signing in...')
+    try {
+      const resp = await apiFetch(`/auth/login?tenant_key=${DEFAULT_TENANT_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user,
+          password: password.trim() || null,
+        }),
+      })
+      if (!resp.ok) {
+        setStatus('Login failed. Check your email or invite status.')
+        return
+      }
+      const data = (await resp.json()) as {
+        user?: { email?: string; roles?: { role: string }[] }
+        token?: string
+      }
+      const storedUser = data?.user?.email || user
+      localStorage.setItem('irmmf_user', storedUser)
+      if (data?.token) {
+        localStorage.setItem('irmmf_token', data.token)
+      }
+      const roles = data?.user?.roles?.map((role) => role.role).join(',') || ''
+      if (roles) {
+        localStorage.setItem('irmmf_roles', roles)
+      }
+      localStorage.setItem('irmmf_tenant', DEFAULT_TENANT_KEY)
       window.dispatchEvent(new Event('irmmf_user_change'))
       try {
-        const latestResp = await fetch(`${API_BASE}/assessment/user/${user}/latest`)
+        const latestResp = await apiFetch(`/assessment/user/${storedUser}/latest`)
         if (latestResp.ok) {
           const latest = (await latestResp.json()) as { assessment_id?: string }
           if (latest.assessment_id) {
-            localStorage.setItem(`assessment_id_${user}`, latest.assessment_id)
+            localStorage.setItem(`assessment_id_${storedUser}`, latest.assessment_id)
             localStorage.setItem('assessment_id', latest.assessment_id)
           }
         } else if (latestResp.status === 404) {
-          const createResp = await fetch(`${API_BASE}/assessment/new`, {
+          const createResp = await apiFetch(`/assessment/new`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: user }),
+            body: JSON.stringify({ user_id: storedUser }),
           })
           if (createResp.ok) {
             const created = (await createResp.json()) as { assessment_id?: string }
             if (created.assessment_id) {
-              localStorage.setItem(`assessment_id_${user}`, created.assessment_id)
+              localStorage.setItem(`assessment_id_${storedUser}`, created.assessment_id)
               localStorage.setItem('assessment_id', created.assessment_id)
             }
           }
@@ -56,9 +84,9 @@ const Login = () => {
         setStatus('Signed in, but unable to resolve assessment ID. Check API status.')
       }
       navigate('/', { replace: true })
-      return
+    } catch {
+      setStatus('Login failed. Check API status.')
     }
-    setStatus('Invalid credentials. Use test / test123.')
   }
 
   return (
@@ -70,10 +98,10 @@ const Login = () => {
         </div>
         <div className="login-form">
           <label>
-            Username
+            Email
             <input
               type="text"
-              placeholder="test"
+              placeholder="user@example.com"
               value={username}
               onChange={(event) => setUsername(event.target.value)}
             />
@@ -82,7 +110,7 @@ const Login = () => {
             Password
             <input
               type="password"
-              placeholder="test123"
+              placeholder="Optional"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
             />

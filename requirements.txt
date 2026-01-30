@@ -8,6 +8,7 @@ pandas
 openpyxl
 litellm
 groq
+alembic
 
 # Added for local LLM support
 transformers

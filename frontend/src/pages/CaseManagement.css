@@ -1,0 +1,50 @@
+.case-mgmt-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.case-mgmt-header h1 {
+  color: var(--brand-gold);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  margin: 0;
+}
+
+.case-mgmt-subtitle {
+  color: var(--text-sub);
+  margin-top: 6px;
+}
+
+.case-mgmt-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.case-mgmt-tab {
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 6px 14px;
+  color: var(--text-sub);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.case-mgmt-tab:hover {
+  color: var(--brand-gold);
+  border-color: rgba(255, 215, 0, 0.5);
+}
+
+.case-mgmt-tab.active {
+  color: var(--brand-gold);
+  background: rgba(255, 215, 0, 0.08);
+  border-color: rgba(255, 215, 0, 0.5);
+}
+
+.case-mgmt-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

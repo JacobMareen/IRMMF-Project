@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './AssessmentRisks.css'
 import { getStoredAssessmentId } from '../utils/assessment'
+import { apiFetchRoot } from '../lib/api'
 
 type RiskEntry = {
   scenario?: string
@@ -16,8 +17,6 @@ type RiskPayload = {
   risk_heatmap?: RiskEntry[]
   top_risks?: RiskEntry[]
 }
-
-const API_BASE = 'http://127.0.0.1:8000'
 
 const AssessmentRisks = () => {
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
@@ -35,7 +34,7 @@ const AssessmentRisks = () => {
       return
     }
     setStatus('Loading risks...')
-    fetch(`${API_BASE}/responses/analysis/${assessmentId}`)
+    apiFetchRoot(`/responses/analysis/${assessmentId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!data) throw new Error('No data')
