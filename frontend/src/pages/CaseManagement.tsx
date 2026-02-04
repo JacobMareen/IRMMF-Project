@@ -26,6 +26,12 @@ const CaseManagement = () => {
           Cases
         </NavLink>
         <NavLink
+          to="/case-management/inbox"
+          className={({ isActive }) => `case-mgmt-tab${isActive ? ' active' : ''}`}
+        >
+          Inbox
+        </NavLink>
+        <NavLink
           to="/case-management/notifications"
           className={({ isActive }) => `case-mgmt-tab${isActive ? ' active' : ''}`}
         >

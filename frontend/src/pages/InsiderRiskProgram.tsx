@@ -72,17 +72,18 @@ type Control = {
 
 const DEFAULT_POLICY: InsiderRiskPolicy = {
   status: 'Draft',
-  version: 'v0.9',
+  version: 'v1.0',
   owner: 'IR Program Lead',
   approval: 'Pending GC + HR approval',
-  scope: 'Employees, contractors, and trusted third parties with access to sensitive data or systems.',
-  last_reviewed: '2026-01-15',
-  next_review: '2026-04-15',
+  scope: 'Employees, contractors, and trusted third parties with access to sensitive data, systems, or facilities.',
+  last_reviewed: '2026-02-03',
+  next_review: '2026-05-03',
   principles: [
     'Lawful, fair, and transparent handling of insider risk signals.',
     'Least intrusive monitoring with strict access controls and audit trails.',
     'Clear escalation paths with legal, HR, and privacy oversight.',
     'Documented decision-making and proportional response.',
+    'Consistent triage decisions based on an approved business-impact rubric.',
   ],
   sections: [
     {
@@ -106,6 +107,18 @@ const DEFAULT_POLICY: InsiderRiskPolicy = {
       ],
       owner: 'Security Operations',
       artifacts: ['Monitoring charter', 'Signal catalog', 'Triage checklist'],
+    },
+    {
+      title: 'Intake & Triage',
+      intent: 'Capture early context and apply a consistent, business-friendly triage rubric.',
+      bullets: [
+        'Intake records trigger source, data sensitivity, jurisdiction, stakeholders, and initial evidence quality.',
+        'Triage rubric uses Impact (Minimal–Severe), Likelihood (Unlikely–Confirmed), and Confidence (Low/Medium/High) with clear examples.',
+        'Outcome choices are documented as No further action, HR/ER review, or Open investigation.',
+        'SLA targets scale by environment size (e.g., Small: 5 business days, Mid: 3 days, Large: 24–48 hours).',
+      ],
+      owner: 'Investigations Lead',
+      artifacts: ['Intake checklist', 'Triage rubric', 'Triage SLA matrix', 'Stakeholder notification map'],
     },
     {
       title: 'Investigation & Response',
@@ -243,7 +256,9 @@ const DEFAULT_CONTROLS: Control[] = [
 
 const CONTROL_STATUS_OPTIONS: ControlStatus[] = ['planned', 'in_progress', 'implemented', 'monitored']
 
-const InsiderRiskProgram = () => {
+type InsiderRiskProgramView = 'overview' | 'policy' | 'controls' | 'actions'
+
+const InsiderRiskProgram = ({ view = 'overview' }: { view?: InsiderRiskProgramView }) => {
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
   const [assessmentId, setAssessmentId] = useState<string>('')
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
@@ -450,6 +465,10 @@ const InsiderRiskProgram = () => {
     completed: filtered.filter((r) => r.status === 'completed').length,
   }
 
+  const showPolicy = view === 'overview' || view === 'policy'
+  const showControls = view === 'overview' || view === 'controls'
+  const showActions = view === 'overview' || view === 'actions'
+
   const controlDomains = useMemo(() => {
     const merged = new Set<string>(CONTROL_DOMAINS)
     controls.forEach((control) => merged.add(control.domain))
@@ -639,14 +658,8 @@ const InsiderRiskProgram = () => {
 
   return (
     <div className="recommendations-page">
-      <header className="rec-header">
-        <h1>🧭 Insider Risk Program</h1>
-        <p className="rec-subtitle">
-          Program governance, action ownership, and timelines tied to your assessment findings.
-        </p>
-      </header>
-
-      <section className="irp-section">
+      {showPolicy && (
+        <section className="irp-section">
         <div className="irp-section-header">
           <div>
             <h2>Insider Risk Policy</h2>
@@ -744,8 +757,10 @@ const InsiderRiskProgram = () => {
           ))}
         </div>
       </section>
+      )}
 
-      <section className="irp-section">
+      {showControls && (
+        <section className="irp-section">
         <div className="irp-section-header">
           <div>
             <h2>Control Register</h2>
@@ -904,8 +919,10 @@ const InsiderRiskProgram = () => {
           </div>
         )}
       </section>
+      )}
 
-      <section className="irp-section">
+      {showActions && (
+        <section className="irp-section">
         <div className="irp-section-header">
           <div>
             <h2>Program Actions</h2>
@@ -1102,8 +1119,9 @@ const InsiderRiskProgram = () => {
           </div>
         )}
       </section>
+      )}
 
-      {modalRec ? (
+      {showActions && modalRec ? (
         <div className="modal active" onClick={(event) => event.target === event.currentTarget && setModalRec(null)}>
           <div className="modal-content">
             <div className="modal-header">
@@ -1172,7 +1190,7 @@ const InsiderRiskProgram = () => {
           </div>
         </div>
       ) : null}
-      {controlDraft ? (
+      {showControls && controlDraft ? (
         <div className="modal active" onClick={(event) => event.target === event.currentTarget && setControlDraft(null)}>
           <div className="modal-content">
             <div className="modal-header">
@@ -1331,7 +1349,7 @@ const InsiderRiskProgram = () => {
           </div>
         </div>
       ) : null}
-      {policyDraft ? (
+      {showPolicy && policyDraft ? (
         <div className="modal active" onClick={(event) => event.target === event.currentTarget && setPolicyDraft(null)}>
           <div className="modal-content">
             <div className="modal-header">

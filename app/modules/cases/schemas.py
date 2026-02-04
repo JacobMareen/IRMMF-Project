@@ -27,6 +27,8 @@ class CaseCreate(BaseModel):
     external_report_id: Optional[str] = None
     reporter_channel_id: Optional[str] = None
     reporter_key: Optional[str] = None
+    urgent_dismissal: Optional[bool] = None
+    subject_suspended: Optional[bool] = None
 
 
 class CaseUpdate(BaseModel):
@@ -37,6 +39,8 @@ class CaseUpdate(BaseModel):
     external_report_id: Optional[str] = None
     reporter_channel_id: Optional[str] = None
     reporter_key: Optional[str] = None
+    urgent_dismissal: Optional[bool] = None
+    subject_suspended: Optional[bool] = None
 
 
 class CaseStatusUpdate(BaseModel):
@@ -94,6 +98,59 @@ class CaseLegalHoldCreate(BaseModel):
     conflict_override_reason: Optional[str] = None
 
 
+class CaseExpertAccessCreate(BaseModel):
+    expert_email: str
+    expert_name: Optional[str] = None
+    organization: Optional[str] = None
+    reason: Optional[str] = None
+
+    @field_validator("expert_email")
+    @classmethod
+    def validate_email(cls, value: str) -> str:
+        email = value.strip()
+        if "@" not in email or "." not in email:
+            raise ValueError("Expert email must be valid")
+        return email
+
+
+class CaseTriageTicketCreate(BaseModel):
+    subject: Optional[str] = None
+    message: str
+    reporter_name: Optional[str] = None
+    reporter_email: Optional[str] = None
+    source: Optional[str] = None
+
+    @field_validator("message")
+    @classmethod
+    def validate_message(cls, value: str) -> str:
+        message = value.strip()
+        if not message:
+            raise ValueError("Message is required.")
+        return message
+
+
+class CaseTriageTicketUpdate(BaseModel):
+    status: Optional[str] = None
+    triage_notes: Optional[str] = None
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        normalized = value.strip().lower()
+        if normalized not in {"new", "triaged", "closed"}:
+            raise ValueError("Invalid triage status")
+        return normalized
+
+
+class CaseTriageTicketConvert(BaseModel):
+    case_title: Optional[str] = None
+    case_summary: Optional[str] = None
+    jurisdiction: Optional[str] = None
+    vip_flag: Optional[bool] = None
+
+
 class CaseEvidenceCreate(BaseModel):
     label: str
     source: str
@@ -109,6 +166,22 @@ class CaseTaskCreate(BaseModel):
     status: Optional[str] = None
     due_at: Optional[datetime] = None
     assignee: Optional[str] = None
+
+
+class CaseTaskUpdate(BaseModel):
+    status: Optional[str] = None
+    due_at: Optional[datetime] = None
+    assignee: Optional[str] = None
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        normalized = value.strip().lower()
+        if normalized not in {"open", "in_progress", "completed"}:
+            raise ValueError("Invalid task status")
+        return normalized
 
 
 class CaseNoteCreate(BaseModel):
@@ -142,6 +215,58 @@ class CaseAdversarialForm(BaseModel):
     rights_acknowledged: bool
     representative_present: Optional[str] = None
     interview_summary: Optional[str] = None
+
+
+class CaseLegalApprovalForm(BaseModel):
+    approved_at: Optional[str] = None
+    approval_note: Optional[str] = None
+
+
+class CaseWorksCouncilForm(BaseModel):
+    monitoring: bool
+    approval_document_uri: Optional[str] = None
+    approval_received_at: Optional[str] = None
+    approval_notes: Optional[str] = None
+
+
+class CaseTriageForm(BaseModel):
+    impact: int
+    probability: int
+    risk_score: int
+    outcome: str
+    notes: Optional[str] = None
+    trigger_source: Optional[str] = None
+    business_impact: Optional[str] = None
+    exposure_summary: Optional[str] = None
+    data_sensitivity: Optional[str] = None
+    stakeholders: Optional[str] = None
+    confidence_level: Optional[str] = None
+    recommended_actions: Optional[str] = None
+
+    @field_validator("impact", "probability", "risk_score")
+    @classmethod
+    def validate_scores(cls, value: int) -> int:
+        if value < 1 or value > 5:
+            raise ValueError("Score must be between 1 and 5.")
+        return value
+
+    @field_validator("outcome")
+    @classmethod
+    def validate_outcome(cls, value: str) -> str:
+        normalized = value.strip().upper()
+        allowed = {"DISMISS", "ROUTE_TO_HR", "OPEN_FULL_INVESTIGATION"}
+        if normalized not in allowed:
+            raise ValueError("Invalid triage outcome.")
+        return normalized
+
+
+class CaseImpactAnalysisForm(BaseModel):
+    estimated_loss: Optional[float] = None
+    regulation_breached: Optional[str] = None
+    operational_impact: Optional[str] = None
+    reputational_impact: Optional[str] = None
+    people_impact: Optional[str] = None
+    financial_impact: Optional[str] = None
 
 
 class CaseSeriousCauseUpsert(BaseModel):
@@ -219,6 +344,18 @@ class CasePlaybookOut(BaseModel):
 
 class CaseDocumentCreate(BaseModel):
     format: Optional[str] = None
+
+    @field_validator("format")
+    @classmethod
+    def validate_format(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        normalized = value.strip().lower()
+        if normalized in {"text", "plain"}:
+            normalized = "txt"
+        if normalized not in {"txt", "pdf", "docx"}:
+            raise ValueError("Unsupported document format")
+        return normalized
 
 
 class CaseDocumentOut(BaseModel):
@@ -366,6 +503,68 @@ class CaseLegalHoldOut(BaseModel):
     created_at: datetime
 
 
+class CaseExpertAccessOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    case_id: str
+    access_id: str
+    expert_email: str
+    expert_name: Optional[str] = None
+    organization: Optional[str] = None
+    reason: Optional[str] = None
+    status: str
+    granted_by: Optional[str] = None
+    granted_at: datetime
+    expires_at: datetime
+    revoked_at: Optional[datetime] = None
+    revoked_by: Optional[str] = None
+
+
+class CaseTriageTicketOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    ticket_id: str
+    tenant_key: str
+    subject: Optional[str] = None
+    message: str
+    reporter_name: Optional[str] = None
+    reporter_email: Optional[str] = None
+    source: str
+    status: str
+    triage_notes: Optional[str] = None
+    linked_case_id: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class CaseSummaryDraftOut(BaseModel):
+    summary: str
+    note_count: int
+    generated_at: datetime
+
+
+class CaseRedactionSuggestionOut(BaseModel):
+    value: str
+    match_type: str
+    source: str
+    reason: str
+
+
+class CaseOutcomeStat(BaseModel):
+    outcome: str
+    count: int
+    percent: float
+
+
+class CaseConsistencyOut(BaseModel):
+    sample_size: int
+    jurisdiction: str
+    playbook_key: Optional[str] = None
+    outcomes: List[CaseOutcomeStat]
+    recommendation: str
+    warning: Optional[str] = None
+
+
 class CaseReporterMessageCreate(BaseModel):
     body: str
 
@@ -433,6 +632,14 @@ class CaseGateRecordOut(BaseModel):
     updated_at: datetime
 
 
+class CaseSanityCheckOut(BaseModel):
+    score: int
+    completed: int
+    total: int
+    missing: List[str]
+    warnings: List[str]
+
+
 class CaseSeriousCauseOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     enabled: bool
@@ -474,6 +681,9 @@ class CaseOut(BaseModel):
     date_investigation_started: Optional[datetime] = None
     remediation_statement: Optional[str] = None
     remediation_exported_at: Optional[datetime] = None
+    urgent_dismissal: Optional[bool] = None
+    subject_suspended: Optional[bool] = None
+    evidence_locked: Optional[bool] = None
     created_at: datetime
     updated_at: datetime
     subjects: List[CaseSubjectOut]

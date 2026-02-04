@@ -1,6 +1,7 @@
 """FastAPI entrypoint: routing + startup wiring for IRMMF services."""
 from __future__ import annotations
 from fastapi import FastAPI, Depends, Request
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -19,6 +20,8 @@ from app.modules.tenant.routes import router as tenant_router
 from app.modules.users.routes import router as users_router
 from app.modules.cases.routes import router as cases_router
 from app.modules.insider_program.routes import router as insider_program_router
+from app.security.audit import AuditContext, reset_audit_context, set_audit_context
+from app.security.rate_limit import RateLimiter, load_rate_limit_config, resolve_client_ip
 
 # 1. Initialize Database Tables (safe to run on restart)
 init_database()
@@ -51,13 +54,65 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SecurityHeadersMiddleware)
 
+rate_limit_config = load_rate_limit_config()
+rate_limiter = RateLimiter(
+    limit=rate_limit_config.limit_per_minute,
+    window_seconds=rate_limit_config.window_seconds,
+)
+
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if not rate_limit_config.enabled:
+            return await call_next(request)
+        if request.method in {"OPTIONS", "HEAD"}:
+            return await call_next(request)
+        content_length = request.headers.get("content-length")
+        if content_length and rate_limit_config.max_body_bytes:
+            try:
+                if int(content_length) > rate_limit_config.max_body_bytes:
+                    return JSONResponse(
+                        status_code=413,
+                        content={"detail": "Payload too large."},
+                    )
+            except ValueError:
+                pass
+        client_ip = resolve_client_ip(request)
+        allowed, retry_after = rate_limiter.allow(client_ip)
+        if not allowed:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Rate limit exceeded. Please retry later."},
+                headers={"Retry-After": str(retry_after)},
+            )
+        return await call_next(request)
+
+
+app.add_middleware(RateLimitMiddleware)
+
 
 class PrincipalContextMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         principal = resolve_principal_from_headers(request.headers, allow_anonymous=True)
         if principal is not None:
             request.state.principal = principal
-        return await call_next(request)
+        forwarded = request.headers.get("x-forwarded-for") or request.headers.get("x-real-ip")
+        client_ip = None
+        if forwarded:
+            client_ip = forwarded.split(",", 1)[0].strip()
+        elif request.client:
+            client_ip = request.client.host
+        token = set_audit_context(
+            AuditContext(
+                actor=getattr(principal, "subject", None) if principal else None,
+                ip_address=client_ip,
+                user_agent=request.headers.get("user-agent"),
+            )
+        )
+        try:
+            return await call_next(request)
+        finally:
+            reset_audit_context(token)
 
 
 app.add_middleware(PrincipalContextMiddleware)

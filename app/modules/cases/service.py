@@ -28,8 +28,20 @@ from app.modules.cases.schemas import (
     CaseEvidenceSuggestionOut,
     CaseEvidenceSuggestionUpdate,
     CaseGateRecordOut,
+    CaseImpactAnalysisForm,
+    CaseLegalApprovalForm,
     CaseLinkCreate,
     CaseLinkOut,
+    CaseExpertAccessCreate,
+    CaseExpertAccessOut,
+    CaseTriageTicketCreate,
+    CaseTriageTicketUpdate,
+    CaseTriageTicketConvert,
+    CaseTriageTicketOut,
+    CaseSummaryDraftOut,
+    CaseRedactionSuggestionOut,
+    CaseConsistencyOut,
+    CaseOutcomeStat,
     CaseLegalHoldCreate,
     CaseLegalHoldOut,
     CaseLegitimacyForm,
@@ -60,13 +72,18 @@ from app.modules.cases.schemas import (
     CaseSubjectOut,
     CaseSubmitFindings,
     CaseTaskCreate,
+    CaseTriageForm,
+    CaseTaskUpdate,
     CaseTaskOut,
+    CaseWorksCouncilForm,
     CaseNotificationOut,
+    CaseSanityCheckOut,
 )
 from app.modules.tenant import models as tenant_models
 from app.modules.tenant.business_days import add_business_days
 from app.modules.cases.playbooks import PLAYBOOKS, get_playbook
-from app.modules.cases.documents import render_document
+from app.modules.cases.documents import normalize_document_format, render_document, render_document_bytes
+from app.security.audit import get_audit_context
 
 
 STAGE_FLOW = {
@@ -80,15 +97,21 @@ STAGE_FLOW = {
 }
 
 STAGE_GATES = {
+    ("INTAKE", "LEGITIMACY_GATE"): "triage",
     ("LEGITIMACY_GATE", "CREDENTIALING"): "legitimacy",
     ("CREDENTIALING", "INVESTIGATION"): "credentialing",
     ("ADVERSARIAL_DEBATE", "DECISION"): "adversarial",
+    ("DECISION", "CLOSURE"): "legal",
 }
 
 GATE_VALIDATORS = {
+    "triage": CaseTriageForm,
     "legitimacy": CaseLegitimacyForm,
     "credentialing": CaseCredentialingForm,
     "adversarial": CaseAdversarialForm,
+    "impact_analysis": CaseImpactAnalysisForm,
+    "works_council": CaseWorksCouncilForm,
+    "legal": CaseLegalApprovalForm,
 }
 
 
@@ -317,7 +340,9 @@ class CaseService:
                 "reminders": [
                     "Integration pending: connect to PIA workflow engine.",
                     "Integration pending: link to assessment_id when assessment integration is enabled.",
-                ]
+                ],
+                "urgent_dismissal": bool(payload.urgent_dismissal) if payload.urgent_dismissal is not None else None,
+                "subject_suspended": bool(payload.subject_suspended) if payload.subject_suspended is not None else None,
             },
             serious_cause_enabled=False,
         )
@@ -408,6 +433,28 @@ class CaseService:
             if key_value != case.reporter_key:
                 change_log["reporter_key"] = {"from": case.reporter_key, "to": key_value}
                 case.reporter_key = key_value
+        metadata = case.case_metadata or {}
+        if "urgent_dismissal" in updates:
+            urgent_value = updates.get("urgent_dismissal")
+            if urgent_value is not None:
+                urgent_value = bool(urgent_value)
+            if metadata.get("urgent_dismissal") != urgent_value:
+                change_log["urgent_dismissal"] = {
+                    "from": metadata.get("urgent_dismissal"),
+                    "to": urgent_value,
+                }
+                metadata["urgent_dismissal"] = urgent_value
+        if "subject_suspended" in updates:
+            suspended_value = updates.get("subject_suspended")
+            if suspended_value is not None:
+                suspended_value = bool(suspended_value)
+            if metadata.get("subject_suspended") != suspended_value:
+                change_log["subject_suspended"] = {
+                    "from": metadata.get("subject_suspended"),
+                    "to": suspended_value,
+                }
+                metadata["subject_suspended"] = suspended_value
+        case.case_metadata = metadata
         if change_log:
             self._log_audit_event(
                 case_id=case.case_id,
@@ -462,6 +509,7 @@ class CaseService:
     def add_evidence(self, case_id: str, payload: CaseEvidenceCreate, principal: Principal) -> CaseEvidenceOut:
         case = self._get_case_or_raise(case_id, principal=principal)
         self._ensure_not_anonymized(case)
+        self._ensure_evidence_unlocked(case)
         evidence = models.CaseEvidenceItem(
             case_id=case.case_id,
             evidence_id=f"EVD-{uuid.uuid4().hex[:6].upper()}",
@@ -505,6 +553,57 @@ class CaseService:
             message="Task added.",
             details={"task_id": task.task_id, "title": payload.title},
         )
+        self.db.commit()
+        self.db.refresh(task)
+        return CaseTaskOut.model_validate(task)
+
+    def update_task(
+        self,
+        case_id: str,
+        task_id: str,
+        payload: CaseTaskUpdate,
+        principal: Principal,
+    ) -> CaseTaskOut:
+        case = self._get_case_or_raise(case_id, principal=principal)
+        self._ensure_not_anonymized(case)
+        task = (
+            self.db.query(models.CaseTask)
+            .filter(models.CaseTask.case_id == case.case_id)
+            .filter(models.CaseTask.task_id == task_id)
+            .first()
+        )
+        if not task:
+            raise ValueError("Task not found.")
+        updates = payload.model_dump(exclude_unset=True)
+        if not updates:
+            return CaseTaskOut.model_validate(task)
+        change_log: dict[str, dict[str, str | None]] = {}
+        if "status" in updates and updates["status"] is not None:
+            status_value = updates["status"]
+            if status_value != task.status:
+                change_log["status"] = {"from": task.status, "to": status_value}
+                task.status = status_value
+        if "assignee" in updates:
+            assignee_value = (updates.get("assignee") or "").strip() or None
+            if assignee_value != task.assignee:
+                change_log["assignee"] = {"from": task.assignee, "to": assignee_value}
+                task.assignee = assignee_value
+        if "due_at" in updates:
+            due_value = updates.get("due_at")
+            if due_value != task.due_at:
+                change_log["due_at"] = {
+                    "from": task.due_at.isoformat() if task.due_at else None,
+                    "to": due_value.isoformat() if due_value else None,
+                }
+                task.due_at = due_value
+        if change_log:
+            self._log_audit_event(
+                case_id=case.case_id,
+                event_type="task_updated",
+                actor=principal.subject,
+                message="Task updated.",
+                details={"task_id": task.task_id, "changes": change_log},
+            )
         self.db.commit()
         self.db.refresh(task)
         return CaseTaskOut.model_validate(task)
@@ -584,6 +683,65 @@ class CaseService:
         )
         return [CaseLinkOut.model_validate(link) for link in links]
 
+    def sanity_check(self, case_id: str, principal: Principal) -> CaseSanityCheckOut:
+        case = self._get_case_or_raise(case_id, principal=principal)
+        missing: list[str] = []
+        warnings: list[str] = []
+        checks = [
+            ("triage", bool(self._gate_data(case.case_id, "triage")), "Triage assessment missing"),
+            ("impact", bool(self._gate_data(case.case_id, "impact_analysis")), "Impact analysis missing"),
+            ("legitimacy", bool(self._gate_data(case.case_id, "legitimacy")), "Legitimacy gate not completed"),
+            ("credentialing", bool(self._gate_data(case.case_id, "credentialing")), "Credentialing gate not completed"),
+            ("adversarial", bool(self._gate_data(case.case_id, "adversarial")), "Adversarial gate not completed"),
+            ("legal", bool(self._gate_data(case.case_id, "legal")), "Legal approval missing"),
+        ]
+        for _, ok, message in checks:
+            if not ok:
+                missing.append(message)
+
+        subjects_count = self.db.query(models.CaseSubject).filter(models.CaseSubject.case_id == case.case_id).count()
+        evidence_count = self.db.query(models.CaseEvidenceItem).filter(models.CaseEvidenceItem.case_id == case.case_id).count()
+        tasks_count = self.db.query(models.CaseTask).filter(models.CaseTask.case_id == case.case_id).count()
+        notes_count = self.db.query(models.CaseNote).filter(models.CaseNote.case_id == case.case_id).count()
+
+        if subjects_count == 0:
+            missing.append("No subjects recorded")
+        if evidence_count == 0:
+            missing.append("No evidence items registered")
+        if tasks_count == 0:
+            missing.append("No tasks recorded")
+        if notes_count == 0:
+            missing.append("No investigation notes")
+
+        outcome = (
+            self.db.query(models.CaseOutcome)
+            .filter(models.CaseOutcome.case_id == case.case_id)
+            .first()
+        )
+        if not outcome:
+            missing.append("Decision/outcome not recorded")
+
+        metadata = case.case_metadata or {}
+        if metadata.get("works_council_monitoring") and metadata.get("works_council_approval_uri") is None:
+            missing.append("Works Council approval missing")
+        if metadata.get("evidence_locked"):
+            warnings.append("Evidence folder locked pending Works Council approval")
+        if case.is_anonymized:
+            warnings.append("Case is anonymized; report completeness is limited")
+        if case.status != "CLOSED":
+            warnings.append(f"Case status is {case.status}, not CLOSED")
+
+        total_checks = len(checks) + 5  # triage/impact/gates + subjects/evidence/tasks/notes/decision
+        completed_checks = max(0, total_checks - len(missing))
+        score = max(0, round((completed_checks / total_checks) * 100))
+        return CaseSanityCheckOut(
+            score=score,
+            completed=completed_checks,
+            total=total_checks,
+            missing=missing,
+            warnings=warnings,
+        )
+
     def list_legal_holds(self, case_id: str, principal: Principal) -> List[CaseLegalHoldOut]:
         case = self._get_case_or_raise(case_id, principal=principal)
         holds = (
@@ -625,8 +783,13 @@ class CaseService:
         access_code = (payload.access_code or uuid.uuid4().hex[:10].upper()).strip()
         delivery_channel = (payload.delivery_channel or "SECURE_PORTAL").strip().upper()
 
+        doc_type = "SILENT_LEGAL_HOLD"
+        jurisdiction = (case.jurisdiction or "").strip().lower()
+        if jurisdiction in {"us", "usa", "united states"} or "united states" in jurisdiction or "u.s." in jurisdiction:
+            doc_type = "US_LEGAL_HOLD"
+
         title, content = render_document(
-            "SILENT_LEGAL_HOLD",
+            doc_type,
             case,
             None,
             None,
@@ -639,11 +802,11 @@ class CaseService:
                 "preservation_scope": payload.preservation_scope,
             },
         )
-        version = self._next_doc_version(case.case_id, "SILENT_LEGAL_HOLD")
-        storage_uri = f"generated://{case.case_id}/SILENT_LEGAL_HOLD/v{version}.txt"
+        version = self._next_doc_version(case.case_id, doc_type)
+        storage_uri = f"generated://{case.case_id}/{doc_type}/v{version}.txt"
         document = models.CaseDocument(
             case_id=case.case_id,
-            doc_type="SILENT_LEGAL_HOLD",
+            doc_type=doc_type,
             version=version,
             format="txt",
             title=title,
@@ -674,11 +837,413 @@ class CaseService:
             event_type="legal_hold_generated",
             actor=principal.subject,
             message="Legal hold instruction generated.",
-            details={"hold_id": hold_id, "delivery_channel": delivery_channel},
+            details={"hold_id": hold_id, "delivery_channel": delivery_channel, "doc_type": doc_type},
         )
         self.db.commit()
         self.db.refresh(record)
         return CaseLegalHoldOut.model_validate(record)
+
+    def list_expert_access(self, case_id: str, principal: Principal) -> List[CaseExpertAccessOut]:
+        case = self._get_case_or_raise(case_id, principal=principal)
+        records = (
+            self.db.query(models.CaseExpertAccess)
+            .filter(models.CaseExpertAccess.case_id == case.case_id)
+            .order_by(models.CaseExpertAccess.granted_at.desc())
+            .all()
+        )
+        if records:
+            now = datetime.now(timezone.utc)
+            updated = False
+            for record in records:
+                if record.status == "active" and record.expires_at and record.expires_at <= now:
+                    record.status = "expired"
+                    record.revoked_at = now
+                    record.revoked_by = "system"
+                    updated = True
+                    self._log_audit_event(
+                        case_id=case.case_id,
+                        event_type="expert_access_expired",
+                        actor=principal.subject,
+                        message="Expert access expired.",
+                        details={"access_id": record.access_id, "expert_email": record.expert_email},
+                    )
+            if updated:
+                self.db.commit()
+        return [CaseExpertAccessOut.model_validate(record) for record in records]
+
+    def grant_expert_access(
+        self,
+        case_id: str,
+        payload: CaseExpertAccessCreate,
+        principal: Principal,
+    ) -> CaseExpertAccessOut:
+        case = self._get_case_or_raise(case_id, principal=principal)
+        self._ensure_not_anonymized(case)
+        email = payload.expert_email.strip().lower()
+        if not email:
+            raise ValueError("Expert email is required.")
+        existing = (
+            self.db.query(models.CaseExpertAccess)
+            .filter(
+                models.CaseExpertAccess.case_id == case.case_id,
+                models.CaseExpertAccess.expert_email == email,
+                models.CaseExpertAccess.status == "active",
+            )
+            .first()
+        )
+        if existing:
+            raise ValueError("An active expert access grant already exists for this email.")
+        access_id = f"EXPERT-{uuid.uuid4().hex[:8].upper()}"
+        now = datetime.now(timezone.utc)
+        expires_at = now + timedelta(hours=48)
+        record = models.CaseExpertAccess(
+            case_id=case.case_id,
+            access_id=access_id,
+            expert_email=email,
+            expert_name=payload.expert_name,
+            organization=payload.organization,
+            reason=payload.reason,
+            status="active",
+            granted_by=principal.subject,
+            granted_at=now,
+            expires_at=expires_at,
+        )
+        self.db.add(record)
+        self._log_audit_event(
+            case_id=case.case_id,
+            event_type="expert_access_granted",
+            actor=principal.subject,
+            message="Expert access granted.",
+            details={
+                "access_id": access_id,
+                "expert_email": email,
+                "expires_at": expires_at.isoformat(),
+            },
+        )
+        self.db.commit()
+        self.db.refresh(record)
+        return CaseExpertAccessOut.model_validate(record)
+
+    def revoke_expert_access(self, case_id: str, access_id: str, principal: Principal) -> CaseExpertAccessOut:
+        case = self._get_case_or_raise(case_id, principal=principal)
+        record = (
+            self.db.query(models.CaseExpertAccess)
+            .filter(
+                models.CaseExpertAccess.case_id == case.case_id,
+                models.CaseExpertAccess.access_id == access_id,
+            )
+            .first()
+        )
+        if not record:
+            raise ValueError("Expert access record not found.")
+        if record.status != "revoked":
+            record.status = "revoked"
+            record.revoked_at = datetime.now(timezone.utc)
+            record.revoked_by = principal.subject
+            self._log_audit_event(
+                case_id=case.case_id,
+                event_type="expert_access_revoked",
+                actor=principal.subject,
+                message="Expert access revoked.",
+                details={"access_id": record.access_id, "expert_email": record.expert_email},
+            )
+            self.db.commit()
+        self.db.refresh(record)
+        return CaseExpertAccessOut.model_validate(record)
+
+    def create_triage_ticket(self, payload: CaseTriageTicketCreate, tenant_key: str) -> CaseTriageTicketOut:
+        subject = (payload.subject or "").strip() or "General inquiry"
+        message = payload.message.strip()
+        reporter_name = (payload.reporter_name or "").strip() or None
+        reporter_email = (payload.reporter_email or "").strip() or None
+        source = (payload.source or "dropbox").strip() or "dropbox"
+        ticket_id = f"TRIAGE-{uuid.uuid4().hex[:8].upper()}"
+
+        record = models.CaseTriageTicket(
+            ticket_id=ticket_id,
+            tenant_key=tenant_key or "default",
+            subject=subject,
+            message=message,
+            reporter_name=reporter_name,
+            reporter_email=reporter_email,
+            source=source,
+            status="new",
+        )
+        self.db.add(record)
+        self.db.commit()
+        self.db.refresh(record)
+        return CaseTriageTicketOut.model_validate(record)
+
+    def list_triage_tickets(
+        self,
+        principal: Principal,
+        status: str | None = None,
+    ) -> List[CaseTriageTicketOut]:
+        tenant_key = principal.tenant_key or "default"
+        query = self.db.query(models.CaseTriageTicket).filter(models.CaseTriageTicket.tenant_key == tenant_key)
+        if status:
+            query = query.filter(models.CaseTriageTicket.status == status.strip().lower())
+        tickets = query.order_by(models.CaseTriageTicket.created_at.desc()).all()
+        return [CaseTriageTicketOut.model_validate(ticket) for ticket in tickets]
+
+    def update_triage_ticket(
+        self,
+        ticket_id: str,
+        payload: CaseTriageTicketUpdate,
+        principal: Principal,
+    ) -> CaseTriageTicketOut:
+        record = self._get_triage_ticket(ticket_id, principal)
+        updates = payload.model_dump(exclude_unset=True)
+        if "status" in updates and updates["status"]:
+            record.status = updates["status"]
+        if "triage_notes" in updates:
+            record.triage_notes = updates.get("triage_notes")
+        self.db.commit()
+        self.db.refresh(record)
+        return CaseTriageTicketOut.model_validate(record)
+
+    def convert_triage_ticket(
+        self,
+        ticket_id: str,
+        payload: CaseTriageTicketConvert,
+        principal: Principal,
+    ) -> CaseOut:
+        record = self._get_triage_ticket(ticket_id, principal)
+        if record.linked_case_id:
+            case = self._get_case_or_raise(record.linked_case_id, principal=principal)
+            return self._serialize_case(case)
+
+        title = (payload.case_title or record.subject or "Triage case").strip()
+        summary = (payload.case_summary or record.message or "").strip() or None
+        create_payload = CaseCreate(
+            title=title,
+            summary=summary,
+            jurisdiction=payload.jurisdiction,
+            vip_flag=payload.vip_flag,
+        )
+        case = self.create_case(create_payload, principal)
+        record.linked_case_id = case.case_id
+        record.status = "triaged"
+        self.db.commit()
+        return case
+
+    def draft_case_summary(self, case_id: str, principal: Principal) -> CaseSummaryDraftOut:
+        case = self._get_case_or_raise(case_id, principal=principal)
+        notes = (
+            self.db.query(models.CaseNote)
+            .filter(models.CaseNote.case_id == case.case_id)
+            .order_by(models.CaseNote.created_at.asc())
+            .all()
+        )
+        now = datetime.now(timezone.utc)
+        if not notes:
+            summary = (
+                "Draft summary (auto-generated).\n"
+                "No investigation notes available yet. Add notes and retry."
+            )
+            return CaseSummaryDraftOut(summary=summary, note_count=0, generated_at=now)
+
+        max_lines = int(os.getenv("IRMMF_SUMMARY_MAX_LINES", "12"))
+        lines: list[str] = []
+        for note in notes:
+            snippet = (note.body or "").strip().replace("\n", " ")
+            snippet = re.sub(r"\s+", " ", snippet)
+            if len(snippet) > 160:
+                snippet = snippet[:157].rsplit(" ", 1)[0] + "..."
+            date_label = note.created_at.date().isoformat()
+            lines.append(f"{date_label} · {note.note_type}: {snippet}")
+
+        trimmed = lines[:max_lines]
+        if len(lines) > max_lines:
+            trimmed.append(f"...({len(lines) - max_lines} more notes)")
+
+        header = (
+            "Draft summary (auto-generated from case notes). Review for accuracy and legal tone.\n"
+            f"Case: {case.case_id} · Generated {now.date().isoformat()}\n"
+        )
+        summary = header + "\n".join(trimmed)
+        return CaseSummaryDraftOut(summary=summary, note_count=len(notes), generated_at=now)
+
+    def suggest_redactions(self, case_id: str, principal: Principal) -> List[CaseRedactionSuggestionOut]:
+        case = self._get_case_or_raise(case_id, principal=principal)
+        sources: list[tuple[str, str]] = []
+
+        if case.summary:
+            sources.append(("case_summary", case.summary))
+
+        subjects = (
+            self.db.query(models.CaseSubject)
+            .filter(models.CaseSubject.case_id == case.case_id)
+            .all()
+        )
+        for subject in subjects:
+            sources.append(("subject_name", subject.display_name))
+            if subject.reference:
+                sources.append(("subject_reference", subject.reference))
+            if subject.manager_name:
+                sources.append(("manager_name", subject.manager_name))
+
+        notes = (
+            self.db.query(models.CaseNote)
+            .filter(models.CaseNote.case_id == case.case_id)
+            .all()
+        )
+        for note in notes:
+            sources.append((f"note:{note.note_type}", note.body))
+
+        evidence = (
+            self.db.query(models.CaseEvidenceItem)
+            .filter(models.CaseEvidenceItem.case_id == case.case_id)
+            .all()
+        )
+        for item in evidence:
+            sources.append(("evidence_label", item.label))
+            sources.append(("evidence_source", item.source))
+            if item.link:
+                sources.append(("evidence_link", item.link))
+
+        tasks = (
+            self.db.query(models.CaseTask)
+            .filter(models.CaseTask.case_id == case.case_id)
+            .all()
+        )
+        for task in tasks:
+            sources.append(("task_title", task.title))
+            if task.assignee:
+                sources.append(("task_assignee", task.assignee))
+
+        reporter_messages = (
+            self.db.query(models.CaseReporterMessage)
+            .filter(models.CaseReporterMessage.case_id == case.case_id)
+            .all()
+        )
+        for msg in reporter_messages:
+            sources.append(("reporter_message", msg.body))
+
+        documents = (
+            self.db.query(models.CaseDocument)
+            .filter(models.CaseDocument.case_id == case.case_id)
+            .all()
+        )
+        for doc in documents:
+            content = doc.content or {}
+            text = content.get("rendered_text")
+            if text:
+                sources.append((f"document:{doc.doc_type}", str(text)))
+
+        patterns = [
+            ("email", re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")),
+            ("phone", re.compile(r"\b(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}\b")),
+            ("ssn", re.compile(r"\b\d{3}-\d{2}-\d{4}\b")),
+            ("ip_address", re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")),
+        ]
+        suggestions: dict[str, CaseRedactionSuggestionOut] = {}
+
+        def _add(value: str, match_type: str, source: str, reason: str) -> None:
+            key = f"{match_type}:{value}"
+            if key in suggestions:
+                return
+            suggestions[key] = CaseRedactionSuggestionOut(
+                value=value,
+                match_type=match_type,
+                source=source,
+                reason=reason,
+            )
+
+        for source, text in sources:
+            if not text:
+                continue
+            for match_type, pattern in patterns:
+                for match in pattern.findall(text):
+                    value = match.strip()
+                    if not value:
+                        continue
+                    reason = "PII detected"
+                    if match_type == "email":
+                        reason = "Email address"
+                    elif match_type == "phone":
+                        reason = "Phone number"
+                    elif match_type == "ssn":
+                        reason = "Government ID"
+                    elif match_type == "ip_address":
+                        reason = "IP address"
+                    _add(value, match_type, source, reason)
+
+        return list(suggestions.values())
+
+    def get_consistency_insights(self, case_id: str, principal: Principal) -> CaseConsistencyOut:
+        case = self._get_case_or_raise(case_id, principal=principal)
+        tenant_key = case.tenant_key or "default"
+        playbook_key = None
+
+        events = (
+            self.db.query(models.CaseAuditEvent)
+            .filter(
+                models.CaseAuditEvent.case_id == case.case_id,
+                models.CaseAuditEvent.event_type == "playbook_applied",
+            )
+            .order_by(models.CaseAuditEvent.created_at.desc())
+            .all()
+        )
+        for event in events:
+            detail_key = (event.details or {}).get("playbook_key")
+            if detail_key:
+                playbook_key = str(detail_key)
+                break
+
+        base_query = (
+            self.db.query(models.CaseOutcome.outcome)
+            .join(models.Case, models.Case.case_id == models.CaseOutcome.case_id)
+            .filter(models.Case.tenant_key == tenant_key)
+            .filter(models.Case.case_id != case.case_id)
+            .filter(models.Case.jurisdiction == case.jurisdiction)
+        )
+
+        if playbook_key:
+            related_case_ids: set[str] = set()
+            all_events = (
+                self.db.query(models.CaseAuditEvent.case_id, models.CaseAuditEvent.details)
+                .filter(models.CaseAuditEvent.event_type == "playbook_applied")
+                .all()
+            )
+            for case_id_value, details in all_events:
+                if not details:
+                    continue
+                if details.get("playbook_key") == playbook_key:
+                    related_case_ids.add(case_id_value)
+            if related_case_ids:
+                base_query = base_query.filter(models.CaseOutcome.case_id.in_(related_case_ids))
+
+        outcomes = [row[0] for row in base_query.all()]
+        total = len(outcomes)
+        counts: dict[str, int] = {}
+        for outcome in outcomes:
+            normalized = (outcome or "UNKNOWN").upper()
+            counts[normalized] = counts.get(normalized, 0) + 1
+
+        stats: list[CaseOutcomeStat] = []
+        for outcome, count in sorted(counts.items(), key=lambda item: item[1], reverse=True):
+            percent = round((count / total) * 100, 1) if total else 0.0
+            stats.append(CaseOutcomeStat(outcome=outcome, count=count, percent=percent))
+
+        if total == 0:
+            recommendation = "No historical outcomes available for similar cases yet."
+        else:
+            top = stats[0]
+            recommendation = f"Most common outcome for similar cases is {top.outcome} ({top.percent}%)."
+
+        warning = None
+        if total < 3:
+            warning = "Limited historical data; treat this as directional only."
+
+        return CaseConsistencyOut(
+            sample_size=total,
+            jurisdiction=case.jurisdiction,
+            playbook_key=playbook_key,
+            outcomes=stats,
+            recommendation=recommendation,
+            warning=warning,
+        )
 
     def list_reporter_messages(self, case_id: str, principal: Principal) -> List[CaseReporterMessageOut]:
         case = self._get_case_or_raise(case_id, principal=principal)
@@ -740,6 +1305,31 @@ class CaseService:
             "messages": [CaseReporterMessageOut.model_validate(message).model_dump() for message in messages],
         }
 
+    def get_reporter_portal_by_case(self, case_id: str, reporter_key: str) -> dict:
+        reporter_key = (reporter_key or "").strip()
+        case_id = (case_id or "").strip()
+        if not reporter_key or not case_id:
+            raise ValueError("Case ID and token are required.")
+        case = (
+            self.db.query(models.Case)
+            .filter(models.Case.case_id == case_id)
+            .filter(models.Case.reporter_key == reporter_key)
+            .first()
+        )
+        if not case:
+            raise ValueError("Case token not found.")
+        messages = (
+            self.db.query(models.CaseReporterMessage)
+            .filter(models.CaseReporterMessage.case_id == case.case_id)
+            .order_by(models.CaseReporterMessage.created_at.asc())
+            .all()
+        )
+        return {
+            "case_id": case.case_id,
+            "external_report_id": case.external_report_id,
+            "messages": [CaseReporterMessageOut.model_validate(message).model_dump() for message in messages],
+        }
+
     def post_reporter_portal_message(self, reporter_key: str, payload: CaseReporterMessageCreate) -> CaseReporterMessageOut:
         reporter_key = (reporter_key or "").strip()
         case = (
@@ -749,6 +1339,45 @@ class CaseService:
         )
         if not case:
             raise ValueError("Reporter key not found.")
+        body = payload.body.strip()
+        if not body:
+            raise ValueError("Message body cannot be empty.")
+        message = models.CaseReporterMessage(
+            case_id=case.case_id,
+            sender="reporter",
+            body=body,
+            created_by=None,
+        )
+        self.db.add(message)
+        self._log_audit_event(
+            case_id=case.case_id,
+            event_type="reporter_message_received",
+            actor="reporter",
+            message="Reporter portal message received.",
+            details={"sender": "reporter"},
+        )
+        self.db.commit()
+        self.db.refresh(message)
+        return CaseReporterMessageOut.model_validate(message)
+
+    def post_reporter_portal_message_by_case(
+        self,
+        case_id: str,
+        reporter_key: str,
+        payload: CaseReporterMessageCreate,
+    ) -> CaseReporterMessageOut:
+        reporter_key = (reporter_key or "").strip()
+        case_id = (case_id or "").strip()
+        if not reporter_key or not case_id:
+            raise ValueError("Case ID and token are required.")
+        case = (
+            self.db.query(models.Case)
+            .filter(models.Case.case_id == case_id)
+            .filter(models.Case.reporter_key == reporter_key)
+            .first()
+        )
+        if not case:
+            raise ValueError("Case token not found.")
         body = payload.body.strip()
         if not body:
             raise ValueError("Message body cannot be empty.")
@@ -888,6 +1517,14 @@ class CaseService:
             .order_by(models.CaseDocument.created_at.desc())
             .all()
         )
+        self._log_audit_event(
+            case_id=case.case_id,
+            event_type="document_list_viewed",
+            actor=principal.subject,
+            message="Document list viewed.",
+            details={"count": len(documents)},
+        )
+        self.db.commit()
         return [CaseDocumentOut.model_validate(doc) for doc in documents]
 
     def create_document(
@@ -900,7 +1537,7 @@ class CaseService:
         case = self._get_case_or_raise(case_id, principal=principal)
         self._ensure_not_anonymized(case)
         normalized = doc_type.strip().upper()
-        format_value = (payload.format or "txt").lower()
+        format_value = normalize_document_format(payload.format)
 
         if normalized == "DISMISSAL_REASONS_LETTER" and not self._is_legal(principal):
             raise ValueError("Legal approval required to generate dismissal reasons letter.")
@@ -911,6 +1548,7 @@ class CaseService:
         if normalized == "INTERVIEW_INVITATION":
             gate_data = self._gate_data(case.case_id, "adversarial")
 
+        extra_data = None
         proven_facts_note = None
         if normalized == "DISMISSAL_REASONS_LETTER":
             self._enforce_dismissal_window(case)
@@ -928,7 +1566,10 @@ class CaseService:
             if last_doc and proven_facts_note.created_at > last_doc.created_at and not self._is_legal(principal):
                 raise ValueError("Legal approval required to regenerate dismissal reasons letter.")
 
-        title, content = render_document(normalized, case, gate_data, proven_facts_note, None)
+        if normalized == "INVESTIGATION_REPORT":
+            extra_data = self._build_report_payload(case)
+
+        title, content = render_document(normalized, case, gate_data, proven_facts_note, extra_data)
         version = self._next_doc_version(case.case_id, normalized)
         storage_uri = f"generated://{case.case_id}/{normalized}/v{version}.{format_value}"
         document = models.CaseDocument(
@@ -953,7 +1594,7 @@ class CaseService:
         self.db.refresh(document)
         return CaseDocumentOut.model_validate(document)
 
-    def download_document(self, case_id: str, doc_id: int, principal: Principal) -> tuple[str, bytes]:
+    def download_document(self, case_id: str, doc_id: int, principal: Principal) -> tuple[str, bytes, str]:
         case = self._get_case_or_raise(case_id, principal=principal)
         document = (
             self.db.query(models.CaseDocument)
@@ -965,8 +1606,18 @@ class CaseService:
             raise ValueError("Document not found")
         content = document.content or {}
         rendered_text = content.get("rendered_text") or ""
-        filename = f"{document.doc_type.lower()}_v{document.version}.{document.format}"
-        return filename, rendered_text.encode("utf-8")
+        format_value = normalize_document_format(document.format)
+        filename = f"{document.doc_type.lower()}_v{document.version}.{format_value}"
+        payload, media_type = render_document_bytes(format_value, rendered_text)
+        self._log_audit_event(
+            case_id=case.case_id,
+            event_type="document_downloaded",
+            actor=principal.subject,
+            message="Document downloaded.",
+            details={"doc_id": document.id, "doc_type": document.doc_type, "version": document.version},
+        )
+        self.db.commit()
+        return filename, payload, media_type
 
     def export_pack(self, case_id: str, principal: Principal) -> bytes:
         import io
@@ -980,6 +1631,7 @@ class CaseService:
         gates = self.db.query(models.CaseGateRecord).filter(models.CaseGateRecord.case_id == case.case_id).all()
         documents = self.db.query(models.CaseDocument).filter(models.CaseDocument.case_id == case.case_id).all()
         legal_holds = self.db.query(models.CaseLegalHold).filter(models.CaseLegalHold.case_id == case.case_id).all()
+        experts = self.db.query(models.CaseExpertAccess).filter(models.CaseExpertAccess.case_id == case.case_id).all()
         reporter_messages = (
             self.db.query(models.CaseReporterMessage)
             .filter(models.CaseReporterMessage.case_id == case.case_id)
@@ -1000,6 +1652,7 @@ class CaseService:
             "gates": [CaseGateRecordOut.model_validate(item).model_dump() for item in gates],
             "documents": [CaseDocumentOut.model_validate(item).model_dump() for item in documents],
             "legal_holds": [CaseLegalHoldOut.model_validate(item).model_dump() for item in legal_holds],
+            "experts": [CaseExpertAccessOut.model_validate(item).model_dump() for item in experts],
             "reporter_messages": [CaseReporterMessageOut.model_validate(item).model_dump() for item in reporter_messages],
             "redaction_log": self._latest_redaction_log(case.case_id),
             "audit_events": [CaseAuditEventOut.model_validate(item).model_dump() for item in audits],
@@ -1011,8 +1664,10 @@ class CaseService:
             for doc in documents:
                 content = doc.content or {}
                 rendered_text = content.get("rendered_text") or ""
-                filename = f"documents/{doc.doc_type.lower()}_v{doc.version}.{doc.format}"
-                zf.writestr(filename, rendered_text)
+                format_value = normalize_document_format(doc.format)
+                payload, _ = render_document_bytes(format_value, rendered_text)
+                filename = f"documents/{doc.doc_type.lower()}_v{doc.version}.{format_value}"
+                zf.writestr(filename, payload)
 
         self._log_audit_event(
             case_id=case.case_id,
@@ -1311,6 +1966,7 @@ class CaseService:
     def convert_suggestion(self, case_id: str, suggestion_id: str, principal: Principal) -> CaseEvidenceOut:
         case = self._get_case_or_raise(case_id, principal=principal)
         self._ensure_not_anonymized(case)
+        self._ensure_evidence_unlocked(case)
         suggestion = (
             self.db.query(models.CaseEvidenceSuggestion)
             .filter(models.CaseEvidenceSuggestion.case_id == case.case_id)
@@ -1427,22 +2083,73 @@ class CaseService:
         self.db.refresh(flag)
         return CaseContentFlagOut.model_validate(flag)
 
-    def list_audit_events(self, case_id: str, principal: Principal) -> List[CaseAuditEventOut]:
+    def list_audit_events(
+        self,
+        case_id: str,
+        principal: Principal,
+        *,
+        actor: str | None = None,
+    ) -> List[CaseAuditEventOut]:
         case = self._get_case_or_raise(case_id, principal=principal)
-        events = (
-            self.db.query(models.CaseAuditEvent)
-            .filter(models.CaseAuditEvent.case_id == case.case_id)
-            .order_by(models.CaseAuditEvent.created_at.desc())
-            .all()
-        )
+        query = self.db.query(models.CaseAuditEvent).filter(models.CaseAuditEvent.case_id == case.case_id)
+        if actor:
+            query = query.filter(models.CaseAuditEvent.actor == actor)
+        events = query.order_by(models.CaseAuditEvent.created_at.desc()).all()
         return [CaseAuditEventOut.model_validate(event) for event in events]
 
     def save_gate(self, case_id: str, gate_key: str, payload: dict, principal: Principal) -> CaseGateRecordOut:
         case = self._get_case_or_raise(case_id, principal=principal)
         self._ensure_not_anonymized(case)
         validated = self._validate_gate(gate_key, payload)
+        if gate_key == "legal" and not self._is_legal(principal):
+            raise ValueError("Legal approval required.")
         if gate_key == "credentialing":
             self._enforce_credentialing_rules(case, validated, principal)
+        if gate_key == "legal":
+            approved_at = (validated.get("approved_at") or "").strip()
+            validated["approved_at"] = approved_at or datetime.now(timezone.utc).isoformat()
+            note = (validated.get("approval_note") or "").strip()
+            validated["approval_note"] = note or None
+            validated["approved_by"] = principal.subject
+        if gate_key == "works_council":
+            monitoring = bool(validated.get("monitoring"))
+            approval_uri = (validated.get("approval_document_uri") or "").strip() or None
+            approved_at = (validated.get("approval_received_at") or "").strip()
+            if approval_uri and not approved_at:
+                validated["approval_received_at"] = datetime.now(timezone.utc).isoformat()
+            metadata = case.case_metadata or {}
+            if monitoring and not approval_uri:
+                metadata["evidence_locked"] = True
+            elif approval_uri:
+                metadata["evidence_locked"] = False
+            metadata["works_council_monitoring"] = monitoring
+            metadata["works_council_approval_uri"] = approval_uri
+            case.case_metadata = metadata
+            if monitoring and not approval_uri:
+                title, content = render_document(
+                    "WORKS_COUNCIL_REQUEST",
+                    case,
+                    None,
+                    None,
+                    {
+                        "monitoring": monitoring,
+                        "summary": (case.summary or "").strip() or "Investigation monitoring requested.",
+                        "requested_by": principal.subject,
+                    },
+                )
+                version = self._next_doc_version(case.case_id, "WORKS_COUNCIL_REQUEST")
+                storage_uri = f"generated://{case.case_id}/WORKS_COUNCIL_REQUEST/v{version}.txt"
+                document = models.CaseDocument(
+                    case_id=case.case_id,
+                    doc_type="WORKS_COUNCIL_REQUEST",
+                    version=version,
+                    format="txt",
+                    title=title,
+                    content=content,
+                    storage_uri=storage_uri,
+                    created_by=principal.subject,
+                )
+                self.db.add(document)
         record = (
             self.db.query(models.CaseGateRecord)
             .filter(models.CaseGateRecord.case_id == case.case_id)
@@ -1508,6 +2215,7 @@ class CaseService:
 
         jurisdiction_rule = self._get_jurisdiction_profile(case)
 
+        clock_started = record.facts_confirmed_at is None
         facts_confirmed_at = payload.facts_confirmed_at or record.facts_confirmed_at
         if payload.enabled and not facts_confirmed_at:
             facts_confirmed_at = now
@@ -1543,6 +2251,14 @@ class CaseService:
             actor=principal.subject,
             message="Serious cause record updated.",
         )
+        if payload.enabled and clock_started and record.facts_confirmed_at:
+            self._log_audit_event(
+                case_id=case.case_id,
+                event_type="serious_cause_clock_started",
+                actor=principal.subject,
+                message="Serious-cause clock started.",
+                details={"facts_confirmed_at": record.facts_confirmed_at.isoformat()},
+            )
 
         self.db.commit()
         self.db.refresh(record)
@@ -1587,6 +2303,13 @@ class CaseService:
             message="Serious cause toggle updated.",
             details={"enabled": payload.enabled},
         )
+        if not payload.enabled:
+            self._log_audit_event(
+                case_id=case.case_id,
+                event_type="serious_cause_clock_stopped",
+                actor=principal.subject,
+                message="Serious-cause clock stopped.",
+            )
         self.db.commit()
         self.db.refresh(case)
         return self._serialize_case(case)
@@ -1604,6 +2327,7 @@ class CaseService:
         if not record:
             record = models.CaseSeriousCause(case_id=case.case_id)
             self.db.add(record)
+        clock_started = record.facts_confirmed_at is None
         confirmed_at = payload.confirmed_at or datetime.now(timezone.utc)
         record.facts_confirmed_at = confirmed_at
         jurisdiction_rule = self._get_jurisdiction_profile(case)
@@ -1636,6 +2360,14 @@ class CaseService:
             message="Findings submitted to decision maker.",
             details={"facts_confirmed_at": confirmed_at.isoformat()},
         )
+        if clock_started:
+            self._log_audit_event(
+                case_id=case.case_id,
+                event_type="serious_cause_clock_started",
+                actor=principal.subject,
+                message="Serious-cause clock started.",
+                details={"facts_confirmed_at": confirmed_at.isoformat()},
+            )
         self._create_serious_cause_notifications(case, record)
         self.db.commit()
         self.db.refresh(record)
@@ -1800,6 +2532,7 @@ class CaseService:
         self.db.query(models.CaseEvidenceSuggestion).filter(models.CaseEvidenceSuggestion.case_id == case.case_id).delete()
         self.db.query(models.CaseDocument).filter(models.CaseDocument.case_id == case.case_id).delete()
         self.db.query(models.CaseLegalHold).filter(models.CaseLegalHold.case_id == case.case_id).delete()
+        self.db.query(models.CaseExpertAccess).filter(models.CaseExpertAccess.case_id == case.case_id).delete()
         self.db.query(models.CaseReporterMessage).filter(models.CaseReporterMessage.case_id == case.case_id).delete()
         self.db.query(models.CaseLink).filter(
             or_(
@@ -1807,10 +2540,6 @@ class CaseService:
                 models.CaseLink.linked_case_id == case.case_id,
             )
         ).delete(synchronize_session=False)
-        self.db.query(models.CaseAuditEvent).filter(models.CaseAuditEvent.case_id == case.case_id).update(
-            {"actor": None, "message": "Event redacted due to anonymization.", "details": {}},
-            synchronize_session=False,
-        )
         self._log_audit_event(
             case_id=case.case_id,
             event_type="case_anonymized",
@@ -1913,6 +2642,9 @@ class CaseService:
             date_investigation_started=case.date_investigation_started,
             remediation_statement=metadata.get("remediation_statement"),
             remediation_exported_at=metadata.get("remediation_exported_at"),
+            urgent_dismissal=metadata.get("urgent_dismissal"),
+            subject_suspended=metadata.get("subject_suspended"),
+            evidence_locked=metadata.get("evidence_locked"),
             created_at=case.created_at,
             updated_at=case.updated_at,
             subjects=[CaseSubjectOut.model_validate(subject) for subject in subjects],
@@ -1961,6 +2693,14 @@ class CaseService:
                     {
                         "code": "missing_evidence",
                         "message": "At least one evidence item is required before adversarial debate.",
+                    }
+                )
+            works_gate = self._gate_data(case.case_id, "works_council")
+            if works_gate.get("monitoring") and not works_gate.get("approval_document_uri"):
+                blockers.append(
+                    {
+                        "code": "works_council_pending",
+                        "message": "Works Council approval required before advancing.",
                     }
                 )
         if current == "DECISION" and target_stage == "CLOSURE":
@@ -2185,6 +2925,17 @@ class CaseService:
             )
         if not validated.get("conflict_check_passed") and not validated.get("conflict_override_reason"):
             raise ValueError("Conflict check failed. Provide an override reason or assign a different investigator.")
+
+        settings = self._get_tenant_settings(case.tenant_key)
+        if settings and settings.investigation_mode.lower() == "systematic":
+            if not validated.get("licensed"):
+                raise ValueError(
+                    "Systematic investigations require a licensed investigator. "
+                    "Update credentials or switch investigation mode in tenant settings."
+                )
+            if not validated.get("license_id"):
+                raise ValueError("Licensed investigator requires a license ID for systematic investigations.")
+
         if conflicts:
             validated["conflict_detected"] = conflicts
         if validated.get("conflict_override_reason"):
@@ -2410,6 +3161,94 @@ class CaseService:
             .first()
         )
 
+    def _ensure_evidence_unlocked(self, case: models.Case) -> None:
+        metadata = case.case_metadata or {}
+        if metadata.get("evidence_locked"):
+            raise ValueError("Evidence folder is locked pending Works Council approval.")
+
+    def _build_report_payload(self, case: models.Case) -> dict:
+        impact = self._gate_data(case.case_id, "impact_analysis")
+        triage = self._gate_data(case.case_id, "triage")
+        gates = {
+            record.gate_key: record.status
+            for record in (
+                self.db.query(models.CaseGateRecord)
+                .filter(models.CaseGateRecord.case_id == case.case_id)
+                .all()
+            )
+        }
+        outcome = (
+            self.db.query(models.CaseOutcome)
+            .filter(models.CaseOutcome.case_id == case.case_id)
+            .first()
+        )
+        evidence = (
+            self.db.query(models.CaseEvidenceItem)
+            .filter(models.CaseEvidenceItem.case_id == case.case_id)
+            .order_by(models.CaseEvidenceItem.created_at.asc())
+            .limit(25)
+            .all()
+        )
+        tasks = (
+            self.db.query(models.CaseTask)
+            .filter(models.CaseTask.case_id == case.case_id)
+            .order_by(models.CaseTask.created_at.asc())
+            .limit(25)
+            .all()
+        )
+        experts = (
+            self.db.query(models.CaseExpertAccess)
+            .filter(models.CaseExpertAccess.case_id == case.case_id)
+            .order_by(models.CaseExpertAccess.granted_at.asc())
+            .limit(10)
+            .all()
+        )
+        notes = (
+            self.db.query(models.CaseNote)
+            .filter(models.CaseNote.case_id == case.case_id)
+            .order_by(models.CaseNote.created_at.asc())
+            .limit(15)
+            .all()
+        )
+        lessons_note = self._latest_note_by_types(
+            case.case_id,
+            ["lessons_learned", "lessons learned", "root_cause", "root cause"],
+        )
+        timeline = [
+            {
+                "date": note.created_at.date().isoformat(),
+                "type": note.note_type,
+                "summary": (note.body or "")[:140],
+            }
+            for note in notes
+        ]
+        return {
+            "impact_analysis": impact,
+            "triage": triage,
+            "gates": gates,
+            "outcome": CaseOutcomeOut.model_validate(outcome).model_dump() if outcome else {},
+            "evidence": [
+                {"label": item.label, "source": item.source, "status": item.status}
+                for item in evidence
+            ],
+            "tasks": [
+                {"title": task.title, "status": task.status, "assignee": task.assignee}
+                for task in tasks
+            ],
+            "experts": [
+                {
+                    "email": expert.expert_email,
+                    "name": expert.expert_name,
+                    "organization": expert.organization,
+                    "status": expert.status,
+                    "expires_at": expert.expires_at.isoformat() if expert.expires_at else None,
+                }
+                for expert in experts
+            ],
+            "timeline": timeline,
+            "lessons_learned": lessons_note.body if lessons_note else "",
+        }
+
     def _gate_data(self, case_id: str, gate_key: str) -> dict:
         record = (
             self.db.query(models.CaseGateRecord)
@@ -2422,7 +3261,7 @@ class CaseService:
     def _is_legal(self, principal: Principal) -> bool:
         if not principal.roles:
             return False
-        return "LEGAL" in principal.roles or "ADMIN" in principal.roles
+        return "LEGAL" in principal.roles or "LEGAL_COUNSEL" in principal.roles or "ADMIN" in principal.roles
 
     def _add_business_days(self, tenant_key: str | None, start: datetime, days: int) -> datetime:
         settings = self._get_tenant_settings(tenant_key)
@@ -2480,10 +3319,6 @@ class CaseService:
             outcome.decision = None
             outcome.decided_by = None
 
-        self.db.query(models.CaseAuditEvent).filter(models.CaseAuditEvent.case_id == case.case_id).update(
-            {"actor": None, "message": "Event redacted due to erasure.", "details": {}},
-            synchronize_session=False,
-        )
 
     def _log_audit_event(
         self,
@@ -2493,14 +3328,37 @@ class CaseService:
         actor: str | None = None,
         details: dict | None = None,
     ) -> None:
+        details_payload = dict(details or {})
+        context = get_audit_context()
+        if context:
+            context_payload = dict(details_payload.get("_context") or {})
+            if context.ip_address:
+                context_payload.setdefault("ip_address", context.ip_address)
+            if context.user_agent:
+                context_payload.setdefault("user_agent", context.user_agent)
+            if context_payload:
+                details_payload["_context"] = context_payload
+            if not actor and context.actor:
+                actor = context.actor
         event = models.CaseAuditEvent(
             case_id=case_id,
             event_type=event_type,
             actor=actor,
             message=message,
-            details=details or {},
+            details=details_payload,
         )
         self.db.add(event)
+
+    def _get_triage_ticket(self, ticket_id: str, principal: Principal) -> models.CaseTriageTicket:
+        tenant_key = principal.tenant_key or "default"
+        record = (
+            self.db.query(models.CaseTriageTicket)
+            .filter(models.CaseTriageTicket.ticket_id == ticket_id)
+            .first()
+        )
+        if not record or record.tenant_key != tenant_key:
+            raise ValueError("Triage ticket not found.")
+        return record
 
     def _get_serious_cause_or_raise(self, case_id: str, principal: Principal) -> models.CaseSeriousCause:
         case = self._get_case_or_raise(case_id, principal=principal)

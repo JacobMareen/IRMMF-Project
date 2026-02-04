@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, readApiError } from '../lib/api'
 import './AssessmentFlow.css'
-import { getStoredAssessmentId } from '../utils/assessment'
+import { clearStoredAssessmentId, describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
 
 type AnswerOption = { a_id: string; answer_text: string; base_score: number; tags?: string }
 type Question = {
@@ -179,7 +179,16 @@ const AssessmentFlow = () => {
       apiFetch(`/intake/${assessmentId}`, { signal: controller.signal }),
     ])
       .then(async ([qResp, rResp, intakeResp]) => {
-        if (!qResp.ok || !rResp.ok) throw new Error('Assessment data unavailable.')
+        if (qResp.status === 404 || rResp.status === 404) {
+          clearStoredAssessmentId(assessmentId, currentUser)
+          setStatus('Assessment not found. Returning to the hub...')
+          navigate('/assessment', { replace: true })
+          return
+        }
+        if (!qResp.ok || !rResp.ok) {
+          const detail = !qResp.ok ? await readApiError(qResp) : await readApiError(rResp)
+          throw new Error(describeAssessmentError(detail, 'Assessment data unavailable.'))
+        }
         const allQuestions = (await qResp.json()) as Question[]
         const state = (await rResp.json()) as ResumptionState
         setQuestions(allQuestions)

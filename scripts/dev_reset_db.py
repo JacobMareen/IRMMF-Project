@@ -35,7 +35,7 @@ def main() -> None:
                 """
             )
         )
-        revision = os.getenv("ALEMBIC_HEAD", "0003_insider_program")
+        revision = os.getenv("ALEMBIC_HEAD", "0006_triage_inbox")
         conn.execute(text("DELETE FROM alembic_version"))
         conn.execute(
             text("INSERT INTO alembic_version (version_num) VALUES (:rev)"),

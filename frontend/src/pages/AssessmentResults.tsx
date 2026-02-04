@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Chart from 'chart.js/auto'
 import './AssessmentResults.css'
-import { getStoredAssessmentId } from '../utils/assessment'
-import { apiFetchRoot, API_BASE } from '../lib/api'
+import { describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
+import { apiFetchRoot, API_BASE, readApiError } from '../lib/api'
 
 type AxisScore = { axis?: string; code?: string; score?: number }
 type Recommendation = {
@@ -72,13 +72,21 @@ const AssessmentResults = () => {
     }
     setStatus('Loading results...')
     apiFetchRoot(`/responses/analysis/${assessmentId}`)
-      .then((res) => (res.ok ? res.json() : null))
+      .then(async (res) => {
+        if (!res.ok) {
+          const detail = await readApiError(res)
+          throw new Error(describeAssessmentError(detail, 'Results unavailable.'))
+        }
+        return res.json()
+      })
       .then((data) => {
         if (!data) throw new Error('No data')
         setPayload(data)
         setStatus('')
       })
-      .catch(() => setStatus('Results unavailable. Check API status.'))
+      .catch((err) => {
+        setStatus(err instanceof Error ? err.message : 'Results unavailable. Check API status.')
+      })
   }, [assessmentId])
 
   useEffect(() => {

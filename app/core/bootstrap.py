@@ -6,7 +6,7 @@ import logging
 from sqlalchemy import inspect
 
 from app.core.registry import ModuleRegistry, ModuleSpec
-from app.db import ensure_indexes, ensure_pg_extensions, engine
+from app.db import ensure_audit_immutability, ensure_indexes, ensure_pg_extensions, engine
 from app import models
 
 logger = logging.getLogger(__name__)
@@ -65,4 +65,9 @@ def init_database() -> None:
         ensure_indexes()
     except Exception:
         # Index creation is best-effort in dev; migrations should own this in prod.
+        pass
+    try:
+        ensure_audit_immutability()
+    except Exception:
+        # Audit immutability is best-effort in dev; migrations should own this in prod.
         pass

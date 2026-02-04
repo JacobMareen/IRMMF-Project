@@ -1,0 +1,125 @@
+.external-inbox {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #1b335a 0%, #0b1b33 55%, #071528 100%);
+  color: #e7efff;
+  display: flex;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.external-inbox-shell {
+  max-width: 860px;
+  width: 100%;
+}
+
+.external-inbox-shell header {
+  margin-bottom: 18px;
+}
+
+.external-inbox-shell h1 {
+  margin: 0 0 6px;
+  font-size: 2rem;
+}
+
+.external-inbox-card {
+  background: rgba(6, 20, 40, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.external-inbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.external-inbox-label {
+  font-size: 0.75rem;
+  color: rgba(231, 239, 255, 0.6);
+}
+
+.external-inbox-value {
+  font-weight: 600;
+}
+
+.external-inbox-status {
+  margin-top: 10px;
+  color: #f6d27a;
+}
+
+.external-inbox-muted {
+  margin-top: 12px;
+  color: rgba(231, 239, 255, 0.6);
+}
+
+.external-inbox-thread {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.external-inbox-message {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.external-inbox-message.investigator {
+  border-left: 3px solid #f0b35a;
+}
+
+.external-inbox-message.reporter {
+  border-left: 3px solid #7fc8ff;
+}
+
+.external-inbox-meta {
+  font-size: 0.75rem;
+  color: rgba(231, 239, 255, 0.6);
+  margin-bottom: 6px;
+}
+
+.external-inbox-compose {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.external-inbox-compose textarea {
+  min-height: 120px;
+  border-radius: 12px;
+  background: rgba(9, 24, 45, 0.8);
+  color: #e7efff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  resize: vertical;
+}
+
+.external-inbox-btn {
+  background: #f0b35a;
+  color: #0b1b33;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.external-inbox-btn.outline {
+  background: transparent;
+  color: #f6d27a;
+  border: 1px solid rgba(240, 179, 90, 0.6);
+}
+
+.external-inbox-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

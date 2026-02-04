@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './AssessmentHub.css'
-import { getStoredAssessmentId, storeAssessmentId } from '../utils/assessment'
-import { apiFetch, apiFetchRoot } from '../lib/api'
+import { clearStoredAssessmentId, describeAssessmentError, getStoredAssessmentId, storeAssessmentId } from '../utils/assessment'
+import { apiFetch, apiFetchRoot, readApiError } from '../lib/api'
 
 type ResumptionState = {
   completion_pct?: number
@@ -35,6 +35,12 @@ const AssessmentHub = () => {
 
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
   const navigate = useNavigate()
+
+  const resetAssessment = (note: string) => {
+    clearStoredAssessmentId(assessmentId, currentUser)
+    setAssessmentId('')
+    setStatusNote(note)
+  }
 
   useEffect(() => {
     setAssessmentId(getStoredAssessmentId(currentUser))
@@ -83,7 +89,13 @@ const AssessmentHub = () => {
   useEffect(() => {
     if (!assessmentId) return
     apiFetch(`/questions/all?assessment_id=${assessmentId}`)
-      .then((res) => (res.ok ? res.json() : []))
+      .then((res) => {
+        if (res.status === 404) {
+          resetAssessment('Assessment not found. Creating a new one...')
+          return []
+        }
+        return res.ok ? res.json() : []
+      })
       .then((data) => {
         const questions = (data || []) as Array<{ q_id: string; domain?: string }>
         setAllQuestions(questions.filter((q) => q.q_id && q.domain) as Array<{ q_id: string; domain: string }>)
@@ -126,6 +138,10 @@ const AssessmentHub = () => {
       }),
     ])
       .then(async ([resumeResp, intakeResp, intakeStartResp, riskResp]) => {
+        if (resumeResp.status === 'fulfilled' && resumeResp.value.status === 404) {
+          resetAssessment('Assessment not found. Creating a new one...')
+          return
+        }
         let anyOk = false
 
         if (resumeResp.status === 'fulfilled' && resumeResp.value.ok) {
@@ -164,11 +180,19 @@ const AssessmentHub = () => {
         }
 
         if (!anyOk) {
-          setStatusNote('API offline. Start the backend to load assessment data.')
+          let detail = ''
+          if (intakeStartResp.status === 'fulfilled' && !intakeStartResp.value.ok) {
+            detail = await readApiError(intakeStartResp.value)
+          } else if (resumeResp.status === 'fulfilled' && !resumeResp.value.ok) {
+            detail = await readApiError(resumeResp.value)
+          } else if (riskResp.status === 'fulfilled' && !riskResp.value.ok) {
+            detail = await readApiError(riskResp.value)
+          }
+          setStatusNote(describeAssessmentError(detail, 'Assessment data unavailable.'))
         }
       })
       .catch(() => {
-        setStatusNote('API offline. Start the backend to load assessment data.')
+        setStatusNote('Unable to reach the API. Ensure the backend is running, then refresh.')
         const storedAnswered = localStorage.getItem(`intake_answered_${assessmentId}`)
         const storedTotal = localStorage.getItem(`intake_total_${assessmentId}`)
         setIntakeAnswered(storedAnswered ? Number(storedAnswered) : null)
@@ -264,7 +288,7 @@ const AssessmentHub = () => {
           <button className="ah-btn secondary" onClick={() => navigate('/assessment/flow')} disabled={!assessmentId}>
             Assessment Flow
           </button>
-          <button className="ah-btn secondary" onClick={() => navigate('/assessment/risks')} disabled={!assessmentId}>
+          <button className="ah-btn secondary" onClick={() => navigate('/insider-risk-program/risks')} disabled={!assessmentId}>
             Risks
           </button>
         </div>

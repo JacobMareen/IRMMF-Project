@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
+import uuid
 from typing import Iterable
 
 from sqlalchemy import select
@@ -12,22 +13,25 @@ from app.modules.insider_program.schemas import (
     InsiderRiskControlIn,
     InsiderRiskControlUpdate,
     PolicySection,
+    InsiderRiskRoadmapIn,
+    InsiderRiskRoadmapUpdate,
 )
 
 
 DEFAULT_POLICY = InsiderRiskPolicyIn(
     status="Draft",
-    version="v0.9",
+    version="v1.0",
     owner="IR Program Lead",
     approval="Pending GC + HR approval",
-    scope="Employees, contractors, and trusted third parties with access to sensitive data or systems.",
-    last_reviewed=date(2026, 1, 15),
-    next_review=date(2026, 4, 15),
+    scope="Employees, contractors, and trusted third parties with access to sensitive data, systems, or facilities.",
+    last_reviewed=date(2026, 2, 3),
+    next_review=date(2026, 5, 3),
     principles=[
         "Lawful, fair, and transparent handling of insider risk signals.",
         "Least intrusive monitoring with strict access controls and audit trails.",
         "Clear escalation paths with legal, HR, and privacy oversight.",
         "Documented decision-making and proportional response.",
+        "Consistent triage decisions based on an approved business-impact rubric.",
     ],
     sections=[
         PolicySection(
@@ -51,6 +55,18 @@ DEFAULT_POLICY = InsiderRiskPolicyIn(
             ],
             owner="Security Operations",
             artifacts=["Monitoring charter", "Signal catalog", "Triage checklist"],
+        ),
+        PolicySection(
+            title="Intake & Triage",
+            intent="Capture early context and apply a consistent, business-friendly triage rubric.",
+            bullets=[
+                "Intake records trigger source, data sensitivity, jurisdiction, stakeholders, and initial evidence quality.",
+                "Triage rubric uses Impact (Minimal–Severe), Likelihood (Unlikely–Confirmed), and Confidence (Low/Medium/High) with clear examples.",
+                "Outcome choices are documented as No further action, HR/ER review, or Open investigation.",
+                "SLA targets scale by environment size (e.g., Small: 5 business days, Mid: 3 days, Large: 24–48 hours).",
+            ],
+            owner="Investigations Lead",
+            artifacts=["Intake checklist", "Triage rubric", "Triage SLA matrix", "Stakeholder notification map"],
         ),
         PolicySection(
             title="Investigation & Response",
@@ -184,5 +200,75 @@ class InsiderRiskProgramService:
         stmt = select(models.InsiderRiskControl).where(
             models.InsiderRiskControl.tenant_key == tenant_key,
             models.InsiderRiskControl.control_id == control_id,
+        )
+        return self.db.execute(stmt).scalar_one_or_none()
+
+    def list_roadmap(self, tenant_key: str) -> list[models.InsiderRiskRoadmapItem]:
+        stmt = (
+            select(models.InsiderRiskRoadmapItem)
+            .where(models.InsiderRiskRoadmapItem.tenant_key == tenant_key)
+            .order_by(models.InsiderRiskRoadmapItem.created_at.desc())
+        )
+        return list(self.db.execute(stmt).scalars().all())
+
+    def create_roadmap_item(
+        self,
+        tenant_key: str,
+        payload: InsiderRiskRoadmapIn,
+    ) -> models.InsiderRiskRoadmapItem:
+        item = models.InsiderRiskRoadmapItem(
+            tenant_key=tenant_key,
+            phase=payload.phase,
+            title=payload.title,
+            description=payload.description,
+            owner=payload.owner,
+            target_window=payload.target_window,
+            status=payload.status,
+        )
+        self.db.add(item)
+        self.db.commit()
+        self.db.refresh(item)
+        return item
+
+    def update_roadmap_item(
+        self,
+        tenant_key: str,
+        item_id: str,
+        payload: InsiderRiskRoadmapUpdate,
+    ) -> models.InsiderRiskRoadmapItem:
+        item = self.get_roadmap_item(tenant_key, item_id)
+        if item is None:
+            raise ValueError("Roadmap item not found.")
+        if payload.phase is not None:
+            item.phase = payload.phase
+        if payload.title is not None:
+            item.title = payload.title
+        if payload.description is not None:
+            item.description = payload.description
+        if payload.owner is not None:
+            item.owner = payload.owner
+        if payload.target_window is not None:
+            item.target_window = payload.target_window
+        if payload.status is not None:
+            item.status = payload.status
+        self.db.commit()
+        self.db.refresh(item)
+        return item
+
+    def delete_roadmap_item(self, tenant_key: str, item_id: str) -> None:
+        item = self.get_roadmap_item(tenant_key, item_id)
+        if item is None:
+            raise ValueError("Roadmap item not found.")
+        self.db.delete(item)
+        self.db.commit()
+
+    def get_roadmap_item(self, tenant_key: str, item_id: str) -> models.InsiderRiskRoadmapItem | None:
+        try:
+            parsed_id = uuid.UUID(item_id)
+        except ValueError:
+            return None
+        stmt = select(models.InsiderRiskRoadmapItem).where(
+            models.InsiderRiskRoadmapItem.tenant_key == tenant_key,
+            models.InsiderRiskRoadmapItem.id == parsed_id,
         )
         return self.db.execute(stmt).scalar_one_or_none()

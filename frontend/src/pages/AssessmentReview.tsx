@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './AssessmentReview.css'
-import { getStoredAssessmentId } from '../utils/assessment'
-import { apiFetch, apiFetchRoot } from '../lib/api'
+import { describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
+import { apiFetch, apiFetchRoot, readApiError } from '../lib/api'
 
 type AnswerOption = { a_id: string; answer_text: string; base_score: number }
 type Question = {
@@ -62,13 +62,22 @@ const AssessmentReview = () => {
     apiFetch(`/intake/${assessmentId}`),
     ])
       .then(async ([reviewResp, intakeResp]) => {
-        const reviewData = reviewResp.ok ? await reviewResp.json() : []
+        if (!reviewResp.ok) {
+          const detail = await readApiError(reviewResp)
+          throw new Error(describeAssessmentError(detail, 'Review table unavailable.'))
+        }
+        const reviewData = await reviewResp.json()
         const intakeData = intakeResp.ok ? await intakeResp.json() : []
         setRows(reviewData)
         setIntakeAnswers(Array.isArray(intakeData) ? intakeData : [])
-        setStatus('')
+        if (!intakeResp.ok) {
+          const detail = await readApiError(intakeResp)
+          setStatus(describeAssessmentError(detail, 'Intake answers unavailable. Review table loaded.'))
+        } else {
+          setStatus('')
+        }
       })
-      .catch(() => setStatus('Review table unavailable. Check API status.'))
+      .catch((err) => setStatus(err instanceof Error ? err.message : 'Review table unavailable. Check API status.'))
   }
 
   useEffect(() => {

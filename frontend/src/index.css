@@ -52,6 +52,10 @@ body {
   color: var(--text-main);
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -63,4 +67,154 @@ button {
 
 #root {
   min-height: 100vh;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 20;
+  padding: 24px;
+  overscroll-behavior: contain;
+}
+
+.modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: var(--bg-card);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 720px;
+  max-height: calc(100vh - 48px);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header,
+.modal-footer {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-color);
+  border-bottom: none;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-body {
+  padding: 16px;
+  overflow: auto;
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 11, 20, 0.65);
+  z-index: 30;
+  padding: 24px;
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+.overlay.active {
+  display: flex;
+}
+
+.overlay-panel {
+  width: min(560px, 100%);
+  background: var(--bg-card);
+  border-radius: 16px 0 0 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 48px);
+}
+
+.overlay-panel.wide {
+  width: min(900px, 100%);
+}
+
+.overlay-header,
+.overlay-footer {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.overlay-footer {
+  border-top: 1px solid var(--border-color);
+  border-bottom: none;
+  justify-content: flex-end;
+}
+
+.overlay-body {
+  padding: 20px;
+  overflow: auto;
+}
+
+.overlay-title {
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--brand-gold);
+}
+
+.overlay-subtitle {
+  color: var(--text-sub);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.overlay-close {
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  color: var(--text-sub);
+  cursor: pointer;
+}
+
+.overlay-close:hover {
+  color: var(--brand-gold);
+  border-color: rgba(255, 215, 0, 0.5);
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-sub);
+}
+
+.form-group select,
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+textarea {
+  min-height: 100px;
 }

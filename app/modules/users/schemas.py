@@ -6,7 +6,17 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 
-ALLOWED_ROLES = {"ADMIN", "INVESTIGATOR", "LEGAL", "HR", "DPO_AUDITOR", "VIEWER"}
+ALLOWED_ROLES = {
+    "ADMIN",
+    "INVESTIGATOR",
+    "LEGAL",
+    "LEGAL_COUNSEL",
+    "HR",
+    "EXTERNAL_EXPERT",
+    "AUDITOR",
+    "DPO_AUDITOR",
+    "VIEWER",
+}
 
 
 class UserInviteIn(BaseModel):

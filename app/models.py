@@ -439,3 +439,24 @@ class InsiderRiskControl(Base):
         UniqueConstraint("tenant_key", "control_id", name="uq_insider_risk_control_tenant"),
         Index("ix_insider_risk_controls_tenant_domain", "tenant_key", "domain"),
     )
+
+
+class InsiderRiskRoadmapItem(Base):
+    """Roadmap milestones for the insider risk program."""
+    __tablename__ = "insider_risk_roadmap_items"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_key: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    phase: Mapped[str] = mapped_column(String(32), nullable=False, default="Now")
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    owner: Mapped[str] = mapped_column(String(128), nullable=True)
+    target_window: Mapped[str] = mapped_column(String(64), nullable=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="planned")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    __table_args__ = (
+        Index("ix_insider_risk_roadmap_tenant_phase", "tenant_key", "phase"),
+    )

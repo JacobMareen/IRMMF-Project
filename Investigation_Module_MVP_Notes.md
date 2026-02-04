@@ -79,6 +79,16 @@ The script creates a test case, exercises gates and stage transitions, generates
 - **US1.3 RBAC (guardrails scaffolded)**
   - `require_roles()` helper
   - RBAC enforcement disabled by default via `DEV_RBAC_DISABLED=1`
+  - Role catalog expanded: `LEGAL_COUNSEL`, `EXTERNAL_EXPERT`, `AUDITOR`
+- **T1.1a Tenant settings schema + migration**
+  - Alembic baseline + `0002_tenant_settings_assessments` revision
+  - `tenant_settings` fields for investigation mode, retention, keyword flagging, etc.
+- **T1.1b Settings API + validation**
+  - Tenant settings routes, validation, and model wiring
+- **T1.1c Settings UI**
+  - Platform Settings form with save and JSON rules editor
+- **T1.4a Business-day calculator + tests**
+  - `add_business_days()` service and unit tests for weekends, holidays, and cutoff hours
 
 ### Implemented (this pass)
 - **US2.1 Case object + lifecycle state**
@@ -112,6 +122,11 @@ The script creates a test case, exercises gates and stage transitions, generates
   - Table: `case_legal_holds`
   - API: `POST /api/v1/cases/{case_id}/legal-hold`, `GET /api/v1/cases/{case_id}/legal-holds`
   - UI: Investigation step legal hold card + download
+- **US2.1 Secure Key Portal (public)**
+  - Public endpoint: `/api/external/inbox?case_id=...&token=...`
+  - UI: `/external/inbox` lightweight portal for anonymous two-way messages.
+- **US2.2 Investigator chat console**
+  - Reporter Q&A panel in Investigation step now includes response templates for quick replies.
 - **US2.6 Serious cause clock record**
   - Table: `case_serious_cause`
   - API: `POST/GET /api/v1/cases/{case_id}/serious-cause`
@@ -119,6 +134,12 @@ The script creates a test case, exercises gates and stage transitions, generates
 - **US3.1 Workflow transitions / hard gates**
   - Transition validation enforced on `/cases/{id}/stage`
   - Blocked transitions return `409` with reason codes
+- **US3.1 Stage 1: Initial assessment (triage)**
+  - Gate: `triage` with impact/probability matrix, risk_score (1–5), and outcome (Dismiss/Route to HR/Open Full Investigation).
+  - Required before moving from `INTAKE → LEGITIMACY_GATE`.
+- **US3.2 Stage 2: Impact analysis (PIA)**
+  - Gate: `impact_analysis` capturing estimated loss, regulation breached, operational/financial/reputational/people impacts.
+  - UI card in Investigation step; data included in export pack and audit trail.
 - **US3.2 Legitimacy gate wizard (mandate record)**
   - Table: `case_gate_records`
   - API: `POST /api/v1/cases/{case_id}/gates/legitimacy`
@@ -126,9 +147,43 @@ The script creates a test case, exercises gates and stage transitions, generates
 - **US3.3 Credentialing constraints**
   - API: `POST /api/v1/cases/{case_id}/gates/credentialing`
   - UI: Credentialing gate form
+  - Systematic investigation mode now requires a licensed investigator + license ID (enforced server-side)
+- **US3.3 Investigation checklist progress**
+  - Tasks track status (`open`, `in_progress`, `completed`).
+  - Investigation step shows completion progress bar.
 - **US3.7 Conflict of Interest check (investigator vs subject/manager)**
   - Subject capture includes optional manager name
   - Credentialing gate blocks assignment when investigator matches subject or manager (override required)
+- **US6.1 Immutable audit log**
+  - Audit events are append-only (DB trigger guardrails in dev).
+  - `GET /api/v1/audit?case_id=...&actor=...` supports filtering by actor.
+  - Audit log lives in the Case Flow `Audit` step with actor + date filters.
+  - Serious-cause clock events are now explicitly logged (clock started/stopped, findings submitted, dismissal recorded).
+- **US6.3 Serious-cause audit event types**
+  - Clock start/stop and key deadline actions emit dedicated audit events.
+- **SOS: Escalate to Expert (External access grant)**
+  - Table: `case_expert_access`
+  - API: `GET/POST /api/v1/cases/{case_id}/experts`, `POST /api/v1/cases/{case_id}/experts/{access_id}/revoke`
+  - UI: Investigation step card to grant 48h external expert access with revoke tracking.
+- **Secure Inbox: Unlinked Dropbox (triage inbox)**
+  - Table: `case_triage_tickets`
+  - API: `POST /api/external/dropbox`, `GET/PATCH /api/v1/triage/inbox`, `POST /api/v1/triage/inbox/{ticket_id}/convert`
+  - UI: Case Management → Inbox with create-case actions; public `/external/dropbox` intake page.
+- **AI: Draft Summary (MVP heuristic)**
+  - API: `GET /api/v1/cases/{case_id}/summary/draft`
+  - Generates a draft decision summary from investigation notes (timeline format). Intended as a placeholder for future LLM integration.
+- **AI: PII Auto-Redaction (MVP heuristic)**
+  - API: `GET /api/v1/cases/{case_id}/redactions/suggest`
+  - Uses regex heuristics to suggest PII candidates (email, phone, SSN, IP) for DSAR redaction logs.
+- **AI: Consistency Recommender (MVP heuristic)**
+  - API: `GET /api/v1/cases/{case_id}/consistency`
+  - Shows outcome distribution for similar cases (same jurisdiction, optional playbook) with a caution when sample size is small.
+- **US10.1 Security baseline**
+  - Lightweight rate limiting middleware (per-IP) with optional max body size guard.
+  - Guardrails are configurable via env (`IRMMF_RATE_LIMIT_*`, `IRMMF_MAX_BODY_MB`).
+- **US5.1 Document template engine (PDF/DOCX)**
+  - Document generation supports `txt`, `pdf`, and `docx` formats.
+  - PDF export uses `reportlab`; DOCX export uses `python-docx`.
 - **US3.4 Adversarial debate workflow**
   - API: `POST /api/v1/cases/{case_id}/gates/adversarial`
   - UI: Adversarial debate (interview) form
@@ -156,6 +211,10 @@ The script creates a test case, exercises gates and stage transitions, generates
 - **US6.1 Immutable audit log (MVP)**
   - Table: `case_audit_events`
   - API: `GET /api/v1/audit?case_id=...`
+- **US6.2 Sanity Check Wizard**
+  - API: `GET /api/v1/cases/{case_id}/sanity-check`
+  - Checks missing gates, evidence, tasks, notes, and decision outcome.
+  - Returns score + missing items and warnings; surfaced in Closure step UI.
 - **US6.2 Prohibited data keyword flagging (MVP)**
   - Table: `case_content_flags`
   - Notes scanned when tenant keyword flagging is enabled
@@ -164,21 +223,49 @@ The script creates a test case, exercises gates and stage transitions, generates
 - **US8.2 BE authorized access restriction**
   - Belgium cases require `BE_AUTHORIZED` role (ADMIN bypass) for list/detail access.
   - UI role selector includes BE Authorized option.
+- **US8.3 Jurisdiction rules config (JSON)**
+  - Tenant settings store JSON rules in `tenant_settings.jurisdiction_rules`
+  - Settings UI includes a JSON editor for jurisdiction rules
+- **US8.4 Jurisdiction validator service**
+  - Stage transitions return structured blockers when jurisdiction rules prevent progress
+  - Case Flow shows a banner + modal listing unmet jurisdiction requirements
 - **US4.1 Playbook library + apply to case**
   - Playbooks: DATA_EXFIL, FRAUD, SABOTAGE
   - API: `GET /api/v1/cases/playbooks`, `POST /api/v1/cases/{case_id}/apply-playbook`
   - Applying playbook adds tasks + evidence suggestions (deduped)
+- **UI: Case management overlays**
+  - Cases and PIA Compliance now open creation/workspace flows in overlays (scroll-locked), with list views simplified for faster scanning.
+  - Case creation overlay now walks through intake → triage → subjects before handing off to the full flow.
+  - Triage capture uses business-friendly labels and richer context fields (trigger source, sensitivity, stakeholders, confidence).
+  - Triage labels and outcomes aligned with the Insider Risk Program policy rubric.
+  - Single source of truth: cases are created and managed in `Case Management → Cases`; Compliance is now policy + workflow guidance only.
+- **US4.2 NL: Suspension Enforcer**
+  - Intake captures urgent dismissal + subject suspended flags.
+  - NL urgent dismissal without suspension triggers a warning modal before saving.
 - **US4.2 Evidence checklist suggestions UX**
   - Table: `case_evidence_suggestions`
   - API: `GET /api/v1/cases/{case_id}/suggestions`
   - Convert: `POST /api/v1/cases/{case_id}/suggestions/{suggestion_id}/convert`
   - Dismiss: `PUT /api/v1/cases/{case_id}/suggestions/{suggestion_id}`
+- **US4.3 DE/FR: Works Council Airlock**
+  - Works Council gate captures monitoring, approval URI, approval timestamp, and notes.
+  - Evidence folder locks when monitoring is required and approval missing; unlocks once approval URI is saved.
+  - Request document generated as `WORKS_COUNCIL_REQUEST` when monitoring is enabled.
+- **US4.4 US: Legal Hold Notification**
+  - US cases generate `US_LEGAL_HOLD` instruction (Preserve Mailbox X) with no subject notification.
+  - Logged via `case_legal_holds` + audit event `legal_hold_generated`.
 - **US5.1 Document template engine (PDF/DOCX)**
   - Table: `case_documents`
   - API: `POST /api/v1/cases/{case_id}/documents/{doc_type}`, `GET /api/v1/cases/{case_id}/documents`
   - Download: `GET /api/v1/cases/{case_id}/documents/{doc_id}/download`
+- **US5.1 Investigation report generator**
+  - Document type: `INVESTIGATION_REPORT`
+  - Pulls triage, impact analysis, evidence register, task checklist, decision/outcome, gate status, and lessons learned.
 - **US5.2 One-click case export pack**
   - API: `GET /api/v1/cases/{case_id}/export` (ZIP with case JSON + docs)
+- **US5.2 Root cause & recommendations**
+  - Notes captured via `note_type=lessons_learned` with root cause + action items.
+  - Surfaced in Closure UI and the Investigation Report.
 - **US5.3 Dismissal reasons letter from proven facts**
   - Document type: `DISMISSAL_REASONS_LETTER` (requires note_type `proven_facts`)
   - Legal approval required for generation/regeneration
@@ -198,6 +285,16 @@ The script creates a test case, exercises gates and stage transitions, generates
   - API: `POST /api/v1/cases/{case_id}/remediation-export`
   - Stores `case_metadata.remediation_statement` and exports JSON/CSV for assessment intake.
   - Generates `ERASURE_CERTIFICATE` document
+- **US3.4 Legal/compliance gate (closure blocker)**
+  - Added gate `legal` required for `DECISION → CLOSURE` stage transition.
+  - API: `POST /api/v1/cases/{case_id}/gates/legal` (Legal/Admin only)
+  - UI: Legal approval card added to the Decision step.
+- **US1.2 Detailed audit logging (enhanced)**
+  - Audit events now capture request context (`ip_address`, `user_agent`) in `details._context`.
+  - Document list/download actions logged (`document_list_viewed`, `document_downloaded`).
+- **US2.1 Secure Key Portal (public alias)**
+  - Added `/api/external/inbox?case_id=...&token=...` for external portal access.
+  - Mirrors existing reporter portal flow; still uses case reporter token.
 - **US7.3 Retaliation monitoring task**
   - Auto-create task on case close (`task_type=retaliation_check`, due +90 days)
   - UI: Task badge shows in Investigation step list
@@ -231,6 +328,7 @@ The script creates a test case, exercises gates and stage transitions, generates
 - **US10.2 Automated tests**
   - Business-day calculator tests
   - Case status/stage validation tests
+  - Triage validator tests (scores + outcomes)
 
 ## API Summary (Core Case Module)
 
@@ -249,6 +347,13 @@ The script creates a test case, exercises gates and stage transitions, generates
 - `POST /api/v1/cases/{case_id}/evidence`
 - `GET /api/v1/cases/{case_id}/reporter-messages`
 - `POST /api/v1/cases/{case_id}/reporter-messages`
+- `GET /api/v1/cases/{case_id}/experts`
+- `POST /api/v1/cases/{case_id}/experts`
+- `POST /api/v1/cases/{case_id}/experts/{access_id}/revoke`
+- `POST /api/external/dropbox`
+- `GET /api/v1/triage/inbox`
+- `PATCH /api/v1/triage/inbox/{ticket_id}`
+- `POST /api/v1/triage/inbox/{ticket_id}/convert`
 - `POST /api/v1/cases/{case_id}/tasks`
 - `GET /api/v1/cases/{case_id}/tasks`
 - `POST /api/v1/cases/{case_id}/notes`
@@ -276,6 +381,9 @@ The script creates a test case, exercises gates and stage transitions, generates
 - `GET /api/v1/cases/{case_id}/documents`
 - `POST /api/v1/cases/{case_id}/documents/{doc_type}`
 - `GET /api/v1/cases/{case_id}/documents/{doc_id}/download`
+- `GET /api/v1/cases/{case_id}/summary/draft`
+- `GET /api/v1/cases/{case_id}/redactions/suggest`
+- `GET /api/v1/cases/{case_id}/consistency`
 - `GET /api/v1/cases/{case_id}/export`
 - `POST /api/v1/cases/{case_id}/export/redact`
 - `POST /api/v1/cases/{case_id}/remediation-export`
@@ -308,7 +416,7 @@ The script creates a test case, exercises gates and stage transitions, generates
 - Location: `frontend/src/pages/Cases.tsx` and `frontend/src/pages/CaseFlow.tsx`
 - Cases and Compliance pages include cross-links for quick navigation.
 - Shared workspace layout: `frontend/src/components/CaseWorkspace.tsx` keeps Cases + PIA case panels aligned.
-- Case Management UI groups Compliance, Cases, and Notifications under `/case-management/*`.
+- Case Management UI groups Compliance, Cases, Inbox, and Notifications under `/case-management/*`.
 
 ## Multi-Tenant & User Linking Notes
 
@@ -331,7 +439,9 @@ The script creates a test case, exercises gates and stage transitions, generates
   - `case_documents`
   - `case_links`
   - `case_legal_holds`
-  - `case_reporter_messages`
+- `case_reporter_messages`
+- `case_expert_access`
+- `case_triage_tickets`
 - `case_outcomes`, `case_erasure_jobs`
 - `dashboard_alert_events`
 - `case_notifications`
@@ -413,6 +523,12 @@ Implemented components:
     - Tables: `insider_risk_policies`, `insider_risk_controls`
   - Control register supports linking to assessment recommendations via `linked_rec_ids` and `linked_categories`.
   - Alembic revision: `0003_insider_program` (policy + control tables).
+  - New subpages under Insider Risk Program: Policy, Controls, Risks, Roadmap, Actions.
+  - Assessment risk view moved to `Insider Risk Program → Risks` (assessment route redirects).
+  - Roadmap is now persisted via `GET/POST/PUT/DELETE /api/v1/insider-program/roadmap`
+    with table `insider_risk_roadmap_items` (Alembic `0004_insider_program_roadmap`).
+  - Alembic revision: `0005_case_expert_access` (external expert access grants).
+  - Alembic revision: `0006_triage_inbox` (triage inbox tickets).
 
 ## Backlog Extensions (NAVEX Gap + Process Edge)
 
@@ -428,9 +544,11 @@ Additions proposed for future sprints:
 
 ## Environment
 
-- Postgres runs on port `5433` in dev.
+- Postgres runs on port `5432` in dev (single source of truth is `.env`).
+- Keep DBeaver and the API pointing at the same port/database.
 - `.env` includes:
-  - `DATABASE_URL=postgresql+psycopg://jacobmareen@127.0.0.1:5433/postgres`
+  - `DATABASE_URL=postgresql+psycopg://irmmf_app:secure_password@127.0.0.1:5432/irmmf_db`
+- Assessment UI now auto-resets stale assessment IDs (404) and re-creates a fresh assessment to avoid DB mismatch issues.
 
 ---
 If this file is moved, update the location in project docs.

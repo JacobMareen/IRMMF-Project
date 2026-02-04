@@ -12,6 +12,9 @@ from app.modules.insider_program.schemas import (
     InsiderRiskControlIn,
     InsiderRiskControlOut,
     InsiderRiskControlUpdate,
+    InsiderRiskRoadmapIn,
+    InsiderRiskRoadmapOut,
+    InsiderRiskRoadmapUpdate,
 )
 from app.modules.insider_program.service import InsiderRiskProgramService, DEFAULT_POLICY
 from app.security.access import tenant_principal_required
@@ -79,5 +82,51 @@ def update_control(
     tenant_key = principal.tenant_key or "default"
     try:
         return service.update_control(tenant_key, control_id, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get("/api/v1/insider-program/roadmap", response_model=list[InsiderRiskRoadmapOut])
+def list_roadmap(
+    principal: Principal = Depends(get_principal),
+    service: InsiderRiskProgramService = Depends(get_program_service),
+):
+    tenant_key = principal.tenant_key or "default"
+    return service.list_roadmap(tenant_key)
+
+
+@router.post("/api/v1/insider-program/roadmap", response_model=InsiderRiskRoadmapOut, status_code=201)
+def create_roadmap_item(
+    payload: InsiderRiskRoadmapIn,
+    principal: Principal = Depends(get_principal),
+    service: InsiderRiskProgramService = Depends(get_program_service),
+):
+    tenant_key = principal.tenant_key or "default"
+    return service.create_roadmap_item(tenant_key, payload)
+
+
+@router.put("/api/v1/insider-program/roadmap/{item_id}", response_model=InsiderRiskRoadmapOut)
+def update_roadmap_item(
+    item_id: str,
+    payload: InsiderRiskRoadmapUpdate,
+    principal: Principal = Depends(get_principal),
+    service: InsiderRiskProgramService = Depends(get_program_service),
+):
+    tenant_key = principal.tenant_key or "default"
+    try:
+        return service.update_roadmap_item(tenant_key, item_id, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.delete("/api/v1/insider-program/roadmap/{item_id}", status_code=204)
+def delete_roadmap_item(
+    item_id: str,
+    principal: Principal = Depends(get_principal),
+    service: InsiderRiskProgramService = Depends(get_program_service),
+):
+    tenant_key = principal.tenant_key or "default"
+    try:
+        service.delete_roadmap_item(tenant_key, item_id)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))

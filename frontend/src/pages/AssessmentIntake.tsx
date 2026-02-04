@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, readApiError } from '../lib/api'
 import './AssessmentIntake.css'
-import { getStoredAssessmentId } from '../utils/assessment'
+import { describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
 
 type IntakeOption = { value: string; display_order?: number }
 type IntakeQuestion = {
@@ -50,11 +50,16 @@ const AssessmentIntake = () => {
     ])
       .then(async ([questionsResp, intakeResp]) => {
         if (!questionsResp.ok) {
-          throw new Error('Intake service is offline. Please restart the API.')
+          const detail = await readApiError(questionsResp)
+          throw new Error(describeAssessmentError(detail, 'Unable to load intake questions.'))
         }
         const qs = (await questionsResp.json()) as IntakeQuestion[]
         setQuestions(qs)
         const answers = intakeResp.ok ? ((await intakeResp.json()) as IntakeAnswerRow[]) : []
+        if (!intakeResp.ok) {
+          const detail = await readApiError(intakeResp)
+          setStatus(describeAssessmentError(detail, 'Intake answers unavailable. You can still complete intake.'))
+        }
         const nextDraft: Record<string, string> = {}
         answers.forEach((row) => {
           if (row.value) nextDraft[row.intake_q_id] = row.value
@@ -67,7 +72,8 @@ const AssessmentIntake = () => {
         localStorage.setItem(`intake_answered_${assessmentId}`, String(answeredCount))
       })
       .catch((err) => {
-        setStatus(err instanceof Error ? err.message : 'Failed to load intake.')
+        const fallback = 'Unable to load intake. Check the API and question bank.'
+        setStatus(err instanceof Error ? err.message : fallback)
       })
       .finally(() => setLoading(false))
 
@@ -235,7 +241,7 @@ const AssessmentIntake = () => {
     return (
       <div className="ai-card">
         <h2>No intake questions available</h2>
-        <p>{status || 'Please load the question bank and restart the API.'}</p>
+        <p>{status || 'Intake questions are not available yet. Load the question bank and refresh the page.'}</p>
       </div>
     )
   }

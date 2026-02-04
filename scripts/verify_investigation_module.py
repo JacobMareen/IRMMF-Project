@@ -160,6 +160,22 @@ if __name__ == "__main__":
 
     # Stage transitions + gates
     try:
+        _request(
+            "POST",
+            f"/cases/{case_id}/gates/triage",
+            {
+                "impact": 3,
+                "probability": 3,
+                "risk_score": 3,
+                "outcome": "OPEN_FULL_INVESTIGATION",
+                "notes": "Automated triage assessment.",
+            },
+        )
+        _report("Triage gate", True)
+    except Exception as exc:
+        _report("Triage gate", False, str(exc))
+
+    try:
         _request("POST", f"/cases/{case_id}/stage", {"stage": "LEGITIMACY_GATE"})
         _report("Stage -> LEGITIMACY_GATE", True)
     except Exception as exc:
@@ -211,6 +227,23 @@ if __name__ == "__main__":
         _report("Stage -> INVESTIGATION", True)
     except Exception as exc:
         _report("Stage -> INVESTIGATION", False, str(exc))
+
+    try:
+        _request(
+            "POST",
+            f"/cases/{case_id}/gates/impact-analysis",
+            {
+                "estimated_loss": 25000,
+                "regulation_breached": "GDPR",
+                "operational_impact": "Short-term system review required.",
+                "reputational_impact": "Low external exposure.",
+                "people_impact": "Limited to one team.",
+                "financial_impact": "Containable investigative cost.",
+            },
+        )
+        _report("Impact analysis gate", True)
+    except Exception as exc:
+        _report("Impact analysis gate", False, str(exc))
 
     try:
         _request("POST", f"/cases/{case_id}/stage", {"stage": "ADVERSARIAL_DEBATE"})
@@ -303,6 +336,25 @@ if __name__ == "__main__":
         _report("Document generation", True)
     except Exception as exc:
         _report("Document generation", False, str(exc))
+
+    try:
+        _request(
+            "POST",
+            f"/cases/{case_id}/gates/legal",
+            {
+                "approved_at": datetime.now(timezone.utc).isoformat(),
+                "approval_note": "Automated legal approval for smoke test.",
+            },
+        )
+        _report("Legal gate", True)
+    except Exception as exc:
+        _report("Legal gate", False, str(exc))
+
+    try:
+        _request("POST", f"/cases/{case_id}/documents/INVESTIGATION_REPORT", {"format": "txt"})
+        _report("Investigation report", True)
+    except Exception as exc:
+        _report("Investigation report", False, str(exc))
 
     try:
         _request("POST", f"/cases/{case_id}/stage", {"stage": "CLOSURE"})

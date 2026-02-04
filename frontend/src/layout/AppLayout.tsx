@@ -31,6 +31,25 @@ const AppLayout = () => {
     return () => window.removeEventListener('storage', handleStorage)
   }, [])
 
+  useEffect(() => {
+    const updateModalState = () => {
+      const hasModal = Boolean(document.querySelector('.modal.active'))
+      document.body.classList.toggle('modal-open', hasModal)
+    }
+    updateModalState()
+    const observer = new MutationObserver(updateModalState)
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class'],
+    })
+    return () => {
+      observer.disconnect()
+      document.body.classList.remove('modal-open')
+    }
+  }, [])
+
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light'
     setTheme(next)

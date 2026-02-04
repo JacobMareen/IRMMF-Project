@@ -58,6 +58,22 @@ type CaseLegalHold = {
   created_at: string
 }
 
+type CaseExpertAccess = {
+  id: number
+  case_id: string
+  access_id: string
+  expert_email: string
+  expert_name?: string | null
+  organization?: string | null
+  reason?: string | null
+  status: string
+  granted_by?: string | null
+  granted_at: string
+  expires_at: string
+  revoked_at?: string | null
+  revoked_by?: string | null
+}
+
 type CaseReporterMessage = {
   id: number
   case_id: string
@@ -92,6 +108,13 @@ type CaseAuditEvent = {
   created_at: string
 }
 
+type CaseSanityCheck = {
+  score: number
+  completed: number
+  total: number
+  missing: string[]
+  warnings: string[]
+}
 type CaseSeriousCause = {
   enabled: boolean
   facts_confirmed_at?: string | null
@@ -155,6 +178,21 @@ type CaseSuggestion = {
   updated_at: string
 }
 
+type ConsistencyOutcome = {
+  outcome: string
+  count: number
+  percent: number
+}
+
+type CaseConsistency = {
+  sample_size: number
+  jurisdiction: string
+  playbook_key?: string | null
+  outcomes: ConsistencyOutcome[]
+  recommendation: string
+  warning?: string | null
+}
+
 type CaseRecord = {
   case_id: string
   case_uuid: string
@@ -162,6 +200,9 @@ type CaseRecord = {
   summary?: string | null
   jurisdiction: string
   vip_flag?: boolean
+  urgent_dismissal?: boolean | null
+  subject_suspended?: boolean | null
+  evidence_locked?: boolean | null
   external_report_id?: string | null
   reporter_channel_id?: string | null
   reporter_key?: string | null
@@ -192,6 +233,7 @@ const STEPS = [
   { key: 'adversarial', label: 'Adversarial', stage: 'ADVERSARIAL_DEBATE' },
   { key: 'decision', label: 'Decision', stage: 'DECISION' },
   { key: 'closure', label: 'Closure', stage: 'CLOSURE' },
+  { key: 'audit', label: 'Audit', stage: 'CLOSURE' },
 ]
 
 const LEGAL_BASIS_OPTIONS = [
@@ -203,12 +245,23 @@ const LEGAL_BASIS_OPTIONS = [
   { value: 'Other', label: 'Other (specify)' },
 ]
 
-const NOTE_TYPE_OPTIONS = ['general', 'interview', 'decision', 'evidence', 'compliance', 'meeting']
+const NOTE_TYPE_OPTIONS = [
+  'general',
+  'interview',
+  'decision',
+  'proven_facts',
+  'evidence',
+  'compliance',
+  'meeting',
+  'lessons_learned',
+  'root_cause',
+]
 const SUBJECT_TYPE_OPTIONS = ['Employee', 'Contractor', 'Vendor', 'Third party', 'Unknown']
 const EVIDENCE_SOURCE_OPTIONS = ['SIEM', 'DLP', 'HR report', 'Email', 'Access logs', 'Physical security', 'Other']
 const INVESTIGATOR_ROLE_OPTIONS = ['Internal security', 'HR', 'Legal', 'External counsel', 'Compliance']
 const DELIVERY_METHOD_OPTIONS = ['STANDARD', 'REGISTERED_MAIL', 'HAND_DELIVERY', 'OTHER']
 const STATUS_OPTIONS = ['OPEN', 'ON_HOLD', 'CLOSED', 'ERASURE_PENDING', 'ERASED']
+const TASK_STATUS_OPTIONS = ['open', 'in_progress', 'completed']
 const JURISDICTION_OPTIONS = ['Belgium', 'Netherlands', 'Luxembourg', 'Ireland', 'EU (non-Belgium)', 'UK', 'US', 'Other']
 const LINK_RELATION_OPTIONS = [
   { value: 'RELATED', label: 'Related' },
@@ -217,6 +270,34 @@ const LINK_RELATION_OPTIONS = [
   { value: 'CHILD', label: 'Child (linked case is child)' },
 ]
 const LEGAL_HOLD_CHANNEL_OPTIONS = ['SECURE_PORTAL', 'EMAIL', 'IN_PERSON', 'OTHER']
+const TRIAGE_OUTCOME_OPTIONS = [
+  { value: 'DISMISS', label: 'No further action' },
+  { value: 'ROUTE_TO_HR', label: 'HR / Employee Relations review' },
+  { value: 'OPEN_FULL_INVESTIGATION', label: 'Open investigation' },
+]
+const TRIAGE_IMPACT_LEVELS = [
+  { value: 1, label: 'Minimal', detail: 'Localized impact, easily reversible.' },
+  { value: 2, label: 'Low', detail: 'Limited disruption or exposure.' },
+  { value: 3, label: 'Moderate', detail: 'Noticeable impact, potential compliance risk.' },
+  { value: 4, label: 'High', detail: 'Significant business, legal, or reputational exposure.' },
+  { value: 5, label: 'Severe', detail: 'Critical harm or regulatory breach likely.' },
+]
+const TRIAGE_PROBABILITY_LEVELS = [
+  { value: 1, label: 'Unlikely', detail: 'Single weak signal, no corroboration.' },
+  { value: 2, label: 'Possible', detail: 'Some indicators, limited evidence.' },
+  { value: 3, label: 'Likely', detail: 'Multiple indicators or partial evidence.' },
+  { value: 4, label: 'Very likely', detail: 'Strong signals with supporting data.' },
+  { value: 5, label: 'Confirmed', detail: 'Clear evidence or admission.' },
+]
+const TRIAGE_RISK_LEVELS = [
+  { value: 1, label: 'Minimal' },
+  { value: 2, label: 'Low' },
+  { value: 3, label: 'Moderate' },
+  { value: 4, label: 'High' },
+  { value: 5, label: 'Severe' },
+]
+const TRIAGE_CONFIDENCE_OPTIONS = ['Low', 'Medium', 'High']
+const DATA_SENSITIVITY_OPTIONS = ['Public', 'Internal', 'Confidential', 'Highly confidential']
 const RECOMMENDED_TASKS = [
   'Preserve relevant logs and access records',
   'Confirm data classification and sensitivity',
@@ -225,12 +306,20 @@ const RECOMMENDED_TASKS = [
   'Review least-intrusive alternatives',
   'Prepare interview plan and questions',
 ]
+const REPORT_TEMPLATES = [
+  'Thank you for your message. We are reviewing the matter and will respond with next steps.',
+  'Please confirm the date/time and individuals involved so we can verify the timeline.',
+  'If you have supporting files or screenshots, please upload them through the secure portal.',
+  'We have received your report. You will be updated as the review progresses.',
+]
 
 const CaseFlow = () => {
   const { caseId, step = 'intake' } = useParams()
   const navigate = useNavigate()
   const currentStep = useMemo(() => STEPS.find((s) => s.key === step) || STEPS[0], [step])
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
+  const computeRiskScore = (impact: number, probability: number) =>
+    Math.min(5, Math.max(1, Math.ceil((impact * probability) / 5)))
 
   const [caseData, setCaseData] = useState<CaseRecord | null>(null)
   const [status, setStatus] = useState('')
@@ -253,25 +342,45 @@ const CaseFlow = () => {
     conflict_override_reason: '',
   })
   const [legalHoldStatus, setLegalHoldStatus] = useState('')
+  const [expertAccess, setExpertAccess] = useState<CaseExpertAccess[]>([])
+  const [expertDraft, setExpertDraft] = useState({
+    expert_email: '',
+    expert_name: '',
+    organization: '',
+    reason: '',
+  })
+  const [expertStatus, setExpertStatus] = useState('')
   const [reporterMessages, setReporterMessages] = useState<CaseReporterMessage[]>([])
   const [reporterReply, setReporterReply] = useState('')
   const [auditEvents, setAuditEvents] = useState<CaseAuditEvent[]>([])
+  const [auditActorFilter, setAuditActorFilter] = useState('')
+  const [auditFromFilter, setAuditFromFilter] = useState('')
+  const [auditToFilter, setAuditToFilter] = useState('')
+  const [sanityCheck, setSanityCheck] = useState<CaseSanityCheck | null>(null)
+  const [docFormat, setDocFormat] = useState(() => localStorage.getItem('case_doc_format') || 'txt')
   const [decisionOutcome, setDecisionOutcome] = useState('NO_SANCTION')
   const [decisionSummary, setDecisionSummary] = useState('')
   const [decisionOverrideReason, setDecisionOverrideReason] = useState('')
   const [redactionInput, setRedactionInput] = useState('')
   const [remediationInput, setRemediationInput] = useState('')
   const [remediationFormat, setRemediationFormat] = useState('json')
+  const [consistency, setConsistency] = useState<CaseConsistency | null>(null)
+  const [transitionBlockers, setTransitionBlockers] = useState<{ code: string; message: string }[]>([])
+  const [transitionModalOpen, setTransitionModalOpen] = useState(false)
   const [caseMetaDraft, setCaseMetaDraft] = useState({
     title: '',
     summary: '',
     jurisdiction: '',
     jurisdiction_other: '',
     vip_flag: false,
+    urgent_dismissal: false,
+    subject_suspended: false,
     external_report_id: '',
     reporter_channel_id: '',
     reporter_key: '',
   })
+  const [showSuspensionModal, setShowSuspensionModal] = useState(false)
+  const [suspensionOverride, setSuspensionOverride] = useState(false)
   const [legitimacyGate, setLegitimacyGate] = useState({
     legal_basis: '',
     legal_basis_other: '',
@@ -280,6 +389,20 @@ const CaseFlow = () => {
     less_intrusive_steps: '',
     mandate_owner: '',
     mandate_date: '',
+  })
+  const [triageGate, setTriageGate] = useState({
+    impact: 3,
+    probability: 3,
+    risk_score: 3,
+    outcome: '',
+    notes: '',
+    trigger_source: '',
+    business_impact: '',
+    exposure_summary: '',
+    data_sensitivity: '',
+    stakeholders: '',
+    confidence_level: '',
+    recommended_actions: '',
   })
   const [credentialingGate, setCredentialingGate] = useState({
     investigator_name: '',
@@ -297,6 +420,24 @@ const CaseFlow = () => {
     rights_acknowledged: false,
     representative_present: '',
     interview_summary: '',
+  })
+  const [worksCouncilGate, setWorksCouncilGate] = useState({
+    monitoring: false,
+    approval_document_uri: '',
+    approval_received_at: '',
+    approval_notes: '',
+  })
+  const [legalGate, setLegalGate] = useState({
+    approved_at: '',
+    approval_note: '',
+  })
+  const [impactAnalysis, setImpactAnalysis] = useState({
+    estimated_loss: '',
+    regulation_breached: '',
+    operational_impact: '',
+    reputational_impact: '',
+    people_impact: '',
+    financial_impact: '',
   })
   const [subjectDraft, setSubjectDraft] = useState({
     subject_type: '',
@@ -317,6 +458,10 @@ const CaseFlow = () => {
   const [noteDraft, setNoteDraft] = useState({
     note_type: 'general',
     body: '',
+  })
+  const [lessonsDraft, setLessonsDraft] = useState({
+    root_cause: '',
+    action_items: '',
   })
   const [seriousEnabledDraft, setSeriousEnabledDraft] = useState(false)
   const [meetingDraft, setMeetingDraft] = useState({
@@ -362,6 +507,35 @@ const CaseFlow = () => {
     return jurisdiction.includes('belgium') || jurisdiction.includes('belgique')
   }, [caseData?.jurisdiction])
   const remediationBlocked = !caseData?.outcome || caseData.outcome.outcome === 'NO_SANCTION'
+  const isNetherlandsDraft = useMemo(() => {
+    const base = (caseMetaDraft.jurisdiction || '').trim().toLowerCase()
+    const other = (caseMetaDraft.jurisdiction_other || '').trim().toLowerCase()
+    if (base === 'netherlands') return true
+    return base === 'other' ? other.includes('netherlands') || other === 'nl' : base.includes('netherlands')
+  }, [caseMetaDraft.jurisdiction, caseMetaDraft.jurisdiction_other])
+  const needsSuspensionWarning =
+    isNetherlandsDraft && caseMetaDraft.urgent_dismissal && !caseMetaDraft.subject_suspended
+  const isWorksCouncilJurisdiction = useMemo(() => {
+    const jurisdiction = (caseData?.jurisdiction || '').trim().toLowerCase()
+    if (!jurisdiction) return false
+    return (
+      jurisdiction === 'germany' ||
+      jurisdiction === 'de' ||
+      jurisdiction.includes('germany') ||
+      jurisdiction === 'france' ||
+      jurisdiction === 'fr' ||
+      jurisdiction.includes('france')
+    )
+  }, [caseData?.jurisdiction])
+  const taskTotal = caseData?.tasks.length || 0
+  const taskCompleted = caseData?.tasks.filter((task) => task.status === 'completed').length || 0
+  const taskProgress = taskTotal ? Math.round((taskCompleted / taskTotal) * 100) : 0
+  const reportSignals = {
+    triage: !!caseData?.gates.find((gate) => gate.gate_key === 'triage'),
+    impact: !!caseData?.gates.find((gate) => gate.gate_key === 'impact_analysis'),
+    decision: !!caseData?.outcome,
+    lessons: !!caseData?.notes.find((note) => note.note_type === 'lessons_learned'),
+  }
 
   const loadCase = () => {
     if (!caseId) return
@@ -418,6 +592,14 @@ const CaseFlow = () => {
       .catch(() => setLegalHolds([]))
   }
 
+  const loadExpertAccess = () => {
+    if (!caseId) return
+    apiFetch(`/cases/${caseId}/experts`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: CaseExpertAccess[]) => setExpertAccess(data || []))
+      .catch(() => setExpertAccess([]))
+  }
+
   const loadReporterMessages = () => {
     if (!caseId) return
     apiFetch(`/cases/${caseId}/reporter-messages`)
@@ -426,12 +608,25 @@ const CaseFlow = () => {
       .catch(() => setReporterMessages([]))
   }
 
-  const loadAuditEvents = () => {
+  const loadAuditEvents = (actorOverride?: string) => {
     if (!caseId) return
-    apiFetch(`/audit?case_id=${encodeURIComponent(caseId)}`)
+    const actor = (actorOverride ?? auditActorFilter).trim()
+    const params = new URLSearchParams({ case_id: caseId })
+    if (actor) {
+      params.set('actor', actor)
+    }
+    apiFetch(`/audit?${params.toString()}`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data: CaseAuditEvent[]) => setAuditEvents(data || []))
       .catch(() => setAuditEvents([]))
+  }
+
+  const loadSanityCheck = () => {
+    if (!caseId) return
+    apiFetch(`/cases/${caseId}/sanity-check`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: CaseSanityCheck | null) => setSanityCheck(data))
+      .catch(() => setSanityCheck(null))
   }
 
   useEffect(() => {
@@ -442,9 +637,41 @@ const CaseFlow = () => {
     loadFlags()
     loadLinks()
     loadLegalHolds()
+    loadExpertAccess()
     loadReporterMessages()
     loadAuditEvents()
   }, [caseId])
+
+  const filteredAuditEvents = useMemo(() => {
+    if (!auditFromFilter && !auditToFilter) {
+      return auditEvents
+    }
+    const start = auditFromFilter ? new Date(`${auditFromFilter}T00:00:00`) : null
+    const end = auditToFilter ? new Date(`${auditToFilter}T23:59:59`) : null
+    return auditEvents.filter((event) => {
+      const eventDate = new Date(event.created_at)
+      if (start && eventDate < start) return false
+      if (end && eventDate > end) return false
+      return true
+    })
+  }, [auditEvents, auditFromFilter, auditToFilter])
+
+  const formatAuditChanges = (details?: Record<string, unknown>) => {
+    if (!details) return []
+    const base =
+      typeof details.changes === 'object' && details.changes !== null
+        ? (details.changes as Record<string, unknown>)
+        : details
+    return Object.entries(base)
+      .filter(([key]) => key !== '_context')
+      .map(([key, value]) => {
+        if (value && typeof value === 'object' && 'from' in value && 'to' in value) {
+          const entry = value as { from?: string | number | boolean | null; to?: string | number | boolean | null }
+          return `${key}: ${entry.from ?? '—'} → ${entry.to ?? '—'}`
+        }
+        return `${key}: ${typeof value === 'string' ? value : JSON.stringify(value)}`
+      })
+  }
 
   useEffect(() => {
     if (!caseData) return
@@ -456,6 +683,8 @@ const CaseFlow = () => {
       jurisdiction: matchJurisdiction ? caseData.jurisdiction : 'Other',
       jurisdiction_other: matchJurisdiction ? '' : caseData.jurisdiction,
       vip_flag: !!caseData.vip_flag,
+      urgent_dismissal: !!caseData.urgent_dismissal,
+      subject_suspended: !!caseData.subject_suspended,
       external_report_id: caseData.external_report_id || '',
       reporter_channel_id: caseData.reporter_channel_id || '',
       reporter_key: caseData.reporter_key || '',
@@ -490,6 +719,24 @@ const CaseFlow = () => {
       })
     }
 
+    const triage = caseData.gates.find((gate) => gate.gate_key === 'triage')
+    if (triage?.data) {
+      setTriageGate({
+        impact: Number(triage.data.impact || 3),
+        probability: Number(triage.data.probability || 3),
+        risk_score: Number(triage.data.risk_score || 3),
+        outcome: (triage.data.outcome as string | undefined) || '',
+        notes: (triage.data.notes as string | undefined) || '',
+        trigger_source: (triage.data.trigger_source as string | undefined) || '',
+        business_impact: (triage.data.business_impact as string | undefined) || '',
+        exposure_summary: (triage.data.exposure_summary as string | undefined) || '',
+        data_sensitivity: (triage.data.data_sensitivity as string | undefined) || '',
+        stakeholders: (triage.data.stakeholders as string | undefined) || '',
+        confidence_level: (triage.data.confidence_level as string | undefined) || '',
+        recommended_actions: (triage.data.recommended_actions as string | undefined) || '',
+      })
+    }
+
     const credentialing = caseData.gates.find((gate) => gate.gate_key === 'credentialing')
     if (credentialing?.data) {
       setCredentialingGate({
@@ -514,6 +761,46 @@ const CaseFlow = () => {
         interview_summary: (adversarial.data.interview_summary as string | undefined) || '',
       })
     }
+
+    const works = caseData.gates.find((gate) => gate.gate_key === 'works_council')
+    if (works?.data) {
+      setWorksCouncilGate({
+        monitoring: !!works.data.monitoring,
+        approval_document_uri: (works.data.approval_document_uri as string | undefined) || '',
+        approval_received_at: toLocalInput(works.data.approval_received_at as string | undefined),
+        approval_notes: (works.data.approval_notes as string | undefined) || '',
+      })
+    } else {
+      setWorksCouncilGate({
+        monitoring: false,
+        approval_document_uri: '',
+        approval_received_at: '',
+        approval_notes: '',
+      })
+    }
+
+    const impact = caseData.gates.find((gate) => gate.gate_key === 'impact_analysis')
+    if (impact?.data) {
+      const lossValue = impact.data.estimated_loss
+      setImpactAnalysis({
+        estimated_loss: lossValue !== null && lossValue !== undefined ? String(lossValue) : '',
+        regulation_breached: (impact.data.regulation_breached as string | undefined) || '',
+        operational_impact: (impact.data.operational_impact as string | undefined) || '',
+        reputational_impact: (impact.data.reputational_impact as string | undefined) || '',
+        people_impact: (impact.data.people_impact as string | undefined) || '',
+        financial_impact: (impact.data.financial_impact as string | undefined) || '',
+      })
+    }
+
+    const legal = caseData.gates.find((gate) => gate.gate_key === 'legal')
+    if (legal?.data) {
+      setLegalGate({
+        approved_at: toLocalInput(legal.data.approved_at as string | undefined),
+        approval_note: (legal.data.approval_note as string | undefined) || '',
+      })
+    } else {
+      setLegalGate({ approved_at: '', approval_note: '' })
+    }
   }, [caseData])
 
   useEffect(() => {
@@ -521,6 +808,10 @@ const CaseFlow = () => {
       setCredentialingGate((prev) => ({ ...prev, investigator_name: currentUser }))
     }
   }, [currentUser, credentialingGate.investigator_name])
+
+  useEffect(() => {
+    setSuspensionOverride(false)
+  }, [caseMetaDraft.urgent_dismissal, caseMetaDraft.subject_suspended, caseMetaDraft.jurisdiction, caseMetaDraft.jurisdiction_other])
 
   const goToStep = (key: string) => {
     if (!caseId) return
@@ -539,7 +830,12 @@ const CaseFlow = () => {
         .then(async (res) => {
           if (!res.ok) {
             const payload = await res.json().catch(() => null)
-            setStatus(payload?.detail?.message || 'Blocked. Complete required step.')
+            const detail = payload?.detail
+            if (detail?.blockers?.length) {
+              setTransitionBlockers(detail.blockers)
+              setTransitionModalOpen(true)
+            }
+            setStatus(detail?.message || payload?.detail || 'Blocked. Complete required step.')
             return null
           }
           return res.json()
@@ -547,6 +843,8 @@ const CaseFlow = () => {
         .then((data) => {
           if (data) {
             setStatus('')
+            setTransitionBlockers([])
+            setTransitionModalOpen(false)
             goToStep(next.key)
           }
         })
@@ -558,7 +856,7 @@ const CaseFlow = () => {
     setGuidanceOpen((prev) => ({ ...prev, [currentStep.key]: !prev[currentStep.key] }))
   }
 
-  const saveCaseDetails = () => {
+  const performSaveCaseDetails = (force = false) => {
     if (!caseId) return
     const jurisdictionValue =
       caseMetaDraft.jurisdiction === 'Other'
@@ -572,6 +870,10 @@ const CaseFlow = () => {
       setStatus('Select a jurisdiction.')
       return
     }
+    if (needsSuspensionWarning && !force && !suspensionOverride) {
+      setShowSuspensionModal(true)
+      return
+    }
     apiFetch(`/cases/${caseId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -580,6 +882,8 @@ const CaseFlow = () => {
         summary: caseMetaDraft.summary.trim() || null,
         jurisdiction: jurisdictionValue,
         vip_flag: caseMetaDraft.vip_flag,
+        urgent_dismissal: caseMetaDraft.urgent_dismissal,
+        subject_suspended: caseMetaDraft.subject_suspended,
         external_report_id: caseMetaDraft.external_report_id.trim() || null,
         reporter_channel_id: caseMetaDraft.reporter_channel_id.trim() || null,
         reporter_key: caseMetaDraft.reporter_key.trim() || null,
@@ -587,11 +891,16 @@ const CaseFlow = () => {
     })
       .then((res) => (res.ok ? res.json() : null))
       .then(() => {
+        if (needsSuspensionWarning) {
+          setSuspensionOverride(true)
+        }
         setStatus('Case details saved.')
         loadCase()
       })
       .catch(() => setStatus('Unable to save case details.'))
   }
+
+  const saveCaseDetails = () => performSaveCaseDetails(false)
 
   const saveGate = (gateKey: string, payload: Record<string, unknown>) => {
     if (!caseId) return
@@ -764,6 +1073,98 @@ const CaseFlow = () => {
       .catch((err) => setLegalHoldStatus(err.message || 'Legal hold failed.'))
   }
 
+  const grantExpertAccess = () => {
+    if (!caseId) return
+    if (!expertDraft.expert_email.trim()) {
+      setExpertStatus('Expert email is required.')
+      return
+    }
+    setExpertStatus('Granting access...')
+    apiFetch(`/cases/${caseId}/experts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        expert_email: expertDraft.expert_email.trim(),
+        expert_name: expertDraft.expert_name.trim() || null,
+        organization: expertDraft.organization.trim() || null,
+        reason: expertDraft.reason.trim() || null,
+      }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text()
+          let message = text || 'Failed to grant access.'
+          try {
+            const data = JSON.parse(text)
+            if (data?.detail) message = data.detail
+          } catch {
+            // keep raw text
+          }
+          throw new Error(message)
+        }
+        return res.json()
+      })
+      .then(() => {
+        setExpertStatus('Access granted for 48 hours.')
+        setExpertDraft({ expert_email: '', expert_name: '', organization: '', reason: '' })
+        loadExpertAccess()
+      })
+      .catch((err) => setExpertStatus(err.message || 'Failed to grant access.'))
+  }
+
+  const revokeExpertAccess = (accessId: string) => {
+    if (!caseId) return
+    apiFetch(`/cases/${caseId}/experts/${accessId}/revoke`, { method: 'POST' })
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text()
+          let message = text || 'Failed to revoke access.'
+          try {
+            const data = JSON.parse(text)
+            if (data?.detail) message = data.detail
+          } catch {
+            // keep raw text
+          }
+          throw new Error(message)
+        }
+        return res.json()
+      })
+      .then(() => {
+        setExpertStatus('Access revoked.')
+        loadExpertAccess()
+      })
+      .catch((err) => setExpertStatus(err.message || 'Failed to revoke access.'))
+  }
+
+  const draftDecisionSummary = () => {
+    if (!caseId) return
+    setStatus('Drafting summary from case notes...')
+    apiFetch(`/cases/${caseId}/summary/draft`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text()
+          let message = text || 'Failed to draft summary.'
+          try {
+            const data = JSON.parse(text)
+            if (data?.detail) message = data.detail
+          } catch {
+            // keep raw text
+          }
+          throw new Error(message)
+        }
+        return res.json() as Promise<{ summary?: string }>
+      })
+      .then((data) => {
+        if (data?.summary) {
+          setDecisionSummary(data.summary)
+          setStatus('Draft summary loaded. Review and edit as needed.')
+        } else {
+          setStatus('Draft summary unavailable.')
+        }
+      })
+      .catch((err) => setStatus(err.message || 'Failed to draft summary.'))
+  }
+
   const sendReporterReply = () => {
     if (!caseId) return
     if (!reporterReply.trim()) {
@@ -829,6 +1230,18 @@ const CaseFlow = () => {
     setTaskDraft({ title: '', assignee: '' })
   }
 
+  const updateTaskStatus = (taskId: string, status: string) => {
+    if (!caseId) return
+    apiFetch(`/cases/${caseId}/tasks/${taskId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then(() => loadCase())
+      .catch(() => setStatus('Failed to update task.'))
+  }
+
   const addRecommendedTask = (title: string) => {
     if (!caseData) return
     if (caseData.tasks.some((task) => task.title.toLowerCase() === title.toLowerCase())) {
@@ -870,6 +1283,32 @@ const CaseFlow = () => {
         loadFlags()
       })
       .catch(() => setStatus('Failed to add note.'))
+  }
+
+  const saveLessonsLearned = () => {
+    if (!caseId) return
+    if (!lessonsDraft.root_cause.trim() && !lessonsDraft.action_items.trim()) {
+      setStatus('Add root cause or action items before saving.')
+      return
+    }
+    const body = [
+      `Root cause: ${lessonsDraft.root_cause.trim() || 'Not provided'}`,
+      `Action items: ${lessonsDraft.action_items.trim() || 'Not provided'}`,
+    ].join('\n')
+    apiFetch(`/cases/${caseId}/notes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        note_type: 'lessons_learned',
+        body,
+      }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then(() => {
+        setLessonsDraft({ root_cause: '', action_items: '' })
+        loadCase()
+      })
+      .catch(() => setStatus('Failed to save lessons learned.'))
   }
 
   const addMeetingNote = () => {
@@ -957,7 +1396,7 @@ const CaseFlow = () => {
     apiFetch(`/cases/${caseId}/documents/${docType}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ format: 'txt' }),
+      body: JSON.stringify({ format: docFormat }),
     })
       .then(async (res) => {
         if (!res.ok) {
@@ -970,6 +1409,10 @@ const CaseFlow = () => {
       .then(() => loadDocuments())
       .catch(() => setStatus('Document failed.'))
   }
+
+  useEffect(() => {
+    localStorage.setItem('case_doc_format', docFormat)
+  }, [docFormat])
 
   const exportPack = () => {
     if (!caseId) return
@@ -1015,6 +1458,60 @@ const CaseFlow = () => {
         window.URL.revokeObjectURL(url)
       })
       .catch(() => setStatus('Failed to export redacted pack.'))
+  }
+
+  const suggestRedactions = () => {
+    if (!caseId) return
+    setStatus('Scanning for potential PII...')
+    apiFetch(`/cases/${caseId}/redactions/suggest`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text()
+          let message = text || 'Failed to suggest redactions.'
+          try {
+            const data = JSON.parse(text)
+            if (data?.detail) message = data.detail
+          } catch {
+            // keep raw text
+          }
+          throw new Error(message)
+        }
+        return res.json() as Promise<Array<Record<string, unknown>>>
+      })
+      .then((data) => {
+        if (!data || data.length === 0) {
+          setStatus('No redaction suggestions found.')
+          return
+        }
+        setRedactionInput(JSON.stringify(data, null, 2))
+        setStatus('Redaction suggestions loaded. Review before exporting.')
+      })
+      .catch((err) => setStatus(err.message || 'Failed to suggest redactions.'))
+  }
+
+  const runConsistencyCheck = () => {
+    if (!caseId) return
+    setStatus('Running consistency check...')
+    apiFetch(`/cases/${caseId}/consistency`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text()
+          let message = text || 'Failed to run consistency check.'
+          try {
+            const data = JSON.parse(text)
+            if (data?.detail) message = data.detail
+          } catch {
+            // keep raw text
+          }
+          throw new Error(message)
+        }
+        return res.json() as Promise<CaseConsistency>
+      })
+      .then((data) => {
+        setConsistency(data)
+        setStatus('')
+      })
+      .catch((err) => setStatus(err.message || 'Failed to run consistency check.'))
   }
 
   const exportRemediation = () => {
@@ -1223,6 +1720,9 @@ const CaseFlow = () => {
 
   const isAnonymized = caseData.is_anonymized
   const showGuidance = !!guidanceOpen[currentStep.key]
+  const triageImpactOption = TRIAGE_IMPACT_LEVELS.find((option) => option.value === triageGate.impact)
+  const triageProbabilityOption = TRIAGE_PROBABILITY_LEVELS.find((option) => option.value === triageGate.probability)
+  const triageRiskOption = TRIAGE_RISK_LEVELS.find((option) => option.value === triageGate.risk_score)
 
   return (
     <section className="case-flow">
@@ -1261,6 +1761,14 @@ const CaseFlow = () => {
       </div>
 
       {status ? <div className="case-flow-status">{status}</div> : null}
+      {transitionBlockers.length ? (
+        <div className="case-flow-banner">
+          Stage blocked: {transitionBlockers.length} requirement{transitionBlockers.length === 1 ? '' : 's'} pending.
+          <button className="case-flow-btn small outline" onClick={() => setTransitionModalOpen(true)}>
+            View details
+          </button>
+        </div>
+      ) : null}
 
       <div className="case-flow-panel">
         {currentStep.key === 'intake' ? (
@@ -1343,6 +1851,33 @@ const CaseFlow = () => {
                   VIP / highly sensitive case
                 </label>
                 <label className="case-flow-label">
+                  <input
+                    type="checkbox"
+                    checked={caseMetaDraft.urgent_dismissal}
+                    onChange={(e) =>
+                      setCaseMetaDraft({ ...caseMetaDraft, urgent_dismissal: e.target.checked })
+                    }
+                    disabled={isAnonymized}
+                  />
+                  Urgent dismissal case (NL guardrail)
+                </label>
+                <label className="case-flow-label">
+                  <input
+                    type="checkbox"
+                    checked={caseMetaDraft.subject_suspended}
+                    onChange={(e) =>
+                      setCaseMetaDraft({ ...caseMetaDraft, subject_suspended: e.target.checked })
+                    }
+                    disabled={isAnonymized}
+                  />
+                  Subject suspended (required for NL urgent cases)
+                </label>
+                {needsSuspensionWarning ? (
+                  <div className="case-flow-warning">
+                    Netherlands urgent dismissal cases require suspension confirmation.
+                  </div>
+                ) : null}
+                <label className="case-flow-label">
                   External report ID (optional)
                   <input
                     type="text"
@@ -1376,6 +1911,203 @@ const CaseFlow = () => {
                 <div className="case-flow-meta">Owner: {caseData.created_by || 'Unassigned'}</div>
                 <div className="case-flow-meta">Created: {new Date(caseData.created_at).toLocaleString()}</div>
                 {isAnonymized ? <div className="case-flow-warning">Case anonymized.</div> : null}
+              </div>
+              <div className="case-flow-card">
+                <h3>Initial assessment (triage)</h3>
+                <p className="case-flow-help">
+                  Use plain-language impact and likelihood levels to clarify the business decision.
+                </p>
+                <label className="case-flow-label">
+                  Business impact
+                  <select
+                    value={triageGate.impact}
+                    onChange={(e) => {
+                      const impact = Number(e.target.value)
+                      setTriageGate({
+                        ...triageGate,
+                        impact,
+                        risk_score: computeRiskScore(impact, triageGate.probability),
+                      })
+                    }}
+                    disabled={isAnonymized}
+                  >
+                    {TRIAGE_IMPACT_LEVELS.map((option) => (
+                      <option key={`impact-${option.value}`} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  {triageImpactOption?.detail ? (
+                    <span className="case-flow-muted">{triageImpactOption.detail}</span>
+                  ) : null}
+                </label>
+                <label className="case-flow-label">
+                  Likelihood
+                  <select
+                    value={triageGate.probability}
+                    onChange={(e) => {
+                      const probability = Number(e.target.value)
+                      setTriageGate({
+                        ...triageGate,
+                        probability,
+                        risk_score: computeRiskScore(triageGate.impact, probability),
+                      })
+                    }}
+                    disabled={isAnonymized}
+                  >
+                    {TRIAGE_PROBABILITY_LEVELS.map((option) => (
+                      <option key={`prob-${option.value}`} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  {triageProbabilityOption?.detail ? (
+                    <span className="case-flow-muted">{triageProbabilityOption.detail}</span>
+                  ) : null}
+                </label>
+                <div className="case-flow-score-card">
+                  <div>
+                    <div className="case-flow-subtitle">Overall risk</div>
+                    <div className="case-flow-muted">Calculated from impact and likelihood.</div>
+                  </div>
+                  <span className="case-flow-score-pill">{triageRiskOption?.label || 'TBD'}</span>
+                </div>
+                <label className="case-flow-label">
+                  Trigger source
+                  <input
+                    list="triage-trigger-sources"
+                    value={triageGate.trigger_source}
+                    onChange={(e) => setTriageGate({ ...triageGate, trigger_source: e.target.value })}
+                    placeholder="e.g., alert, hotline, audit finding"
+                    disabled={isAnonymized}
+                  />
+                  <datalist id="triage-trigger-sources">
+                    <option value="Automated alert" />
+                    <option value="Employee report" />
+                    <option value="Audit finding" />
+                    <option value="HR escalation" />
+                    <option value="External tip" />
+                  </datalist>
+                </label>
+                <label className="case-flow-label">
+                  Data sensitivity
+                  <select
+                    value={triageGate.data_sensitivity}
+                    onChange={(e) => setTriageGate({ ...triageGate, data_sensitivity: e.target.value })}
+                    disabled={isAnonymized}
+                  >
+                    <option value="">Select sensitivity</option>
+                    {DATA_SENSITIVITY_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="case-flow-label">
+                  Business impact summary
+                  <textarea
+                    value={triageGate.business_impact}
+                    onChange={(e) => setTriageGate({ ...triageGate, business_impact: e.target.value })}
+                    placeholder="Describe the potential business impact."
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Exposure summary
+                  <textarea
+                    value={triageGate.exposure_summary}
+                    onChange={(e) => setTriageGate({ ...triageGate, exposure_summary: e.target.value })}
+                    placeholder="Describe the data, systems, or processes exposed."
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Stakeholders impacted
+                  <input
+                    type="text"
+                    value={triageGate.stakeholders}
+                    onChange={(e) => setTriageGate({ ...triageGate, stakeholders: e.target.value })}
+                    placeholder="e.g., Legal, HR, Comms, Finance"
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Confidence level
+                  <select
+                    value={triageGate.confidence_level}
+                    onChange={(e) => setTriageGate({ ...triageGate, confidence_level: e.target.value })}
+                    disabled={isAnonymized}
+                  >
+                    <option value="">Select confidence</option>
+                    {TRIAGE_CONFIDENCE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="case-flow-label">
+                  Recommended next actions
+                  <textarea
+                    value={triageGate.recommended_actions}
+                    onChange={(e) => setTriageGate({ ...triageGate, recommended_actions: e.target.value })}
+                    placeholder="Immediate actions or decision gates."
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Triage outcome
+                  <select
+                    value={triageGate.outcome}
+                    onChange={(e) => setTriageGate({ ...triageGate, outcome: e.target.value })}
+                    disabled={isAnonymized}
+                  >
+                    <option value="">Select outcome</option>
+                    {TRIAGE_OUTCOME_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="case-flow-label">
+                  Notes (optional)
+                  <textarea
+                    value={triageGate.notes}
+                    onChange={(e) => setTriageGate({ ...triageGate, notes: e.target.value })}
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <button
+                  className="case-flow-btn outline"
+                  onClick={() => {
+                    if (!triageGate.outcome) {
+                      setStatus('Select a triage outcome before saving.')
+                      return
+                    }
+                    saveGate('triage', {
+                      impact: triageGate.impact,
+                      probability: triageGate.probability,
+                      risk_score: triageGate.risk_score,
+                      outcome: triageGate.outcome,
+                      notes: triageGate.notes || null,
+                      trigger_source: triageGate.trigger_source || null,
+                      business_impact: triageGate.business_impact || null,
+                      exposure_summary: triageGate.exposure_summary || null,
+                      data_sensitivity: triageGate.data_sensitivity || null,
+                      stakeholders: triageGate.stakeholders || null,
+                      confidence_level: triageGate.confidence_level || null,
+                      recommended_actions: triageGate.recommended_actions || null,
+                    })
+                  }}
+                  disabled={isAnonymized}
+                >
+                  Save triage assessment
+                </button>
+                <div className="case-flow-muted">
+                  Triage uses business-friendly labels instead of numeric scores.
+                </div>
               </div>
               <div className="case-flow-card">
                 <h3>Subjects</h3>
@@ -1852,8 +2584,166 @@ const CaseFlow = () => {
             ) : null}
             <div className="case-flow-grid">
               <div className="case-flow-card">
+                <h3>Impact analysis (PIA)</h3>
+                <p className="case-flow-help">
+                  Capture business impact to feed the final report (financial, reputational, people, operational).
+                </p>
+                <label className="case-flow-label">
+                  Estimated loss (optional)
+                  <input
+                    type="number"
+                    value={impactAnalysis.estimated_loss}
+                    onChange={(e) => setImpactAnalysis({ ...impactAnalysis, estimated_loss: e.target.value })}
+                    placeholder="e.g. 25000"
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Regulation breached (GDPR/SOX/etc.)
+                  <input
+                    type="text"
+                    value={impactAnalysis.regulation_breached}
+                    onChange={(e) => setImpactAnalysis({ ...impactAnalysis, regulation_breached: e.target.value })}
+                    placeholder="GDPR, SOX, local labor law"
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Operational impact
+                  <textarea
+                    value={impactAnalysis.operational_impact}
+                    onChange={(e) => setImpactAnalysis({ ...impactAnalysis, operational_impact: e.target.value })}
+                    placeholder="Systems disrupted, response workload, etc."
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Financial impact
+                  <textarea
+                    value={impactAnalysis.financial_impact}
+                    onChange={(e) => setImpactAnalysis({ ...impactAnalysis, financial_impact: e.target.value })}
+                    placeholder="Loss drivers, cost categories, exposure."
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Reputational impact
+                  <textarea
+                    value={impactAnalysis.reputational_impact}
+                    onChange={(e) => setImpactAnalysis({ ...impactAnalysis, reputational_impact: e.target.value })}
+                    placeholder="Brand, customer trust, media exposure."
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  People impact
+                  <textarea
+                    value={impactAnalysis.people_impact}
+                    onChange={(e) => setImpactAnalysis({ ...impactAnalysis, people_impact: e.target.value })}
+                    placeholder="Team morale, leadership involvement, HR implications."
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <button
+                  className="case-flow-btn outline"
+                  onClick={() => {
+                    const lossValue = impactAnalysis.estimated_loss.trim()
+                    const loss = lossValue ? Number(lossValue) : null
+                    if (lossValue && Number.isNaN(loss)) {
+                      setStatus('Estimated loss must be a number.')
+                      return
+                    }
+                    saveGate('impact-analysis', {
+                      estimated_loss: loss,
+                      regulation_breached: impactAnalysis.regulation_breached || null,
+                      operational_impact: impactAnalysis.operational_impact || null,
+                      reputational_impact: impactAnalysis.reputational_impact || null,
+                      people_impact: impactAnalysis.people_impact || null,
+                      financial_impact: impactAnalysis.financial_impact || null,
+                    })
+                  }}
+                  disabled={isAnonymized}
+                >
+                  Save impact analysis
+                </button>
+              </div>
+              <div className="case-flow-card">
+                <h3>Works Council airlock (DE/FR)</h3>
+                <p className="case-flow-help">
+                  If monitoring is required, evidence collection pauses until approval is documented.
+                </p>
+                {!isWorksCouncilJurisdiction ? (
+                  <div className="case-flow-muted">Applicable for Germany/France monitoring cases.</div>
+                ) : null}
+                <label className="case-flow-label">
+                  <input
+                    type="checkbox"
+                    checked={worksCouncilGate.monitoring}
+                    onChange={(e) => setWorksCouncilGate({ ...worksCouncilGate, monitoring: e.target.checked })}
+                    disabled={isAnonymized}
+                  />
+                  Monitoring requires Works Council approval
+                </label>
+                <label className="case-flow-label">
+                  Approval document URI
+                  <input
+                    type="text"
+                    value={worksCouncilGate.approval_document_uri}
+                    onChange={(e) =>
+                      setWorksCouncilGate({ ...worksCouncilGate, approval_document_uri: e.target.value })
+                    }
+                    placeholder="Link to approval document"
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Approval received at
+                  <input
+                    type="datetime-local"
+                    value={worksCouncilGate.approval_received_at}
+                    onChange={(e) =>
+                      setWorksCouncilGate({ ...worksCouncilGate, approval_received_at: e.target.value })
+                    }
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Notes
+                  <textarea
+                    value={worksCouncilGate.approval_notes}
+                    onChange={(e) =>
+                      setWorksCouncilGate({ ...worksCouncilGate, approval_notes: e.target.value })
+                    }
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <button
+                  className="case-flow-btn outline"
+                  onClick={() =>
+                    saveGate('works-council', {
+                      monitoring: !!worksCouncilGate.monitoring,
+                      approval_document_uri: worksCouncilGate.approval_document_uri || null,
+                      approval_received_at: worksCouncilGate.approval_received_at || null,
+                      approval_notes: worksCouncilGate.approval_notes || null,
+                    })
+                  }
+                  disabled={isAnonymized}
+                >
+                  Save Works Council status
+                </button>
+                {caseData.evidence_locked ? (
+                  <div className="case-flow-warning">Evidence folder locked until approval is recorded.</div>
+                ) : null}
+              </div>
+              <div className="case-flow-card">
                 <h3>Tasks & Checklist</h3>
                 <p className="case-flow-help">Track each investigative action and assignment.</p>
+                <div className="case-flow-progress">
+                  <div className="case-flow-progress-bar" style={{ width: `${taskProgress}%` }} />
+                </div>
+                <div className="case-flow-muted">
+                  {taskTotal === 0 ? 'No tasks yet.' : `${taskCompleted} of ${taskTotal} tasks completed`}
+                </div>
                 <label className="case-flow-label">
                   Task
                   <input
@@ -1891,7 +2781,18 @@ const CaseFlow = () => {
                         {task.task_type === 'retaliation_check' ? (
                           <span className="case-flow-tag">Retaliation</span>
                         ) : null}
-                        <span className="case-flow-tag">{task.status}</span>
+                        <select
+                          className="case-flow-select"
+                          value={task.status}
+                          onChange={(e) => updateTaskStatus(task.task_id, e.target.value)}
+                          disabled={isAnonymized}
+                        >
+                          {TASK_STATUS_OPTIONS.map((option) => (
+                            <option key={`${task.task_id}-${option}`} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   ))
@@ -1918,13 +2819,18 @@ const CaseFlow = () => {
               <div className="case-flow-card">
                 <h3>Evidence register</h3>
                 <p className="case-flow-help">Log every piece of evidence with its system of origin.</p>
+                {caseData.evidence_locked ? (
+                  <div className="case-flow-warning">
+                    Evidence folder locked pending Works Council approval.
+                  </div>
+                ) : null}
                 <label className="case-flow-label">
                   Label
                   <input
                     type="text"
                     value={evidenceDraft.label}
                     onChange={(e) => setEvidenceDraft({ ...evidenceDraft, label: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={isAnonymized || !!caseData.evidence_locked}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -1933,7 +2839,7 @@ const CaseFlow = () => {
                     list="evidence-sources"
                     value={evidenceDraft.source}
                     onChange={(e) => setEvidenceDraft({ ...evidenceDraft, source: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={isAnonymized || !!caseData.evidence_locked}
                   />
                   <datalist id="evidence-sources">
                     {EVIDENCE_SOURCE_OPTIONS.map((option) => (
@@ -1947,7 +2853,7 @@ const CaseFlow = () => {
                     type="text"
                     value={evidenceDraft.link}
                     onChange={(e) => setEvidenceDraft({ ...evidenceDraft, link: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={isAnonymized || !!caseData.evidence_locked}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -1956,11 +2862,15 @@ const CaseFlow = () => {
                     type="text"
                     value={evidenceDraft.evidence_hash}
                     onChange={(e) => setEvidenceDraft({ ...evidenceDraft, evidence_hash: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={isAnonymized || !!caseData.evidence_locked}
                     placeholder="SHA-256 or other hash"
                   />
                 </label>
-                <button className="case-flow-btn outline" onClick={addEvidence} disabled={isAnonymized}>
+                <button
+                  className="case-flow-btn outline"
+                  onClick={addEvidence}
+                  disabled={isAnonymized || !!caseData.evidence_locked}
+                >
                   Add evidence
                 </button>
                 <div className="case-flow-pill-list">
@@ -2008,7 +2918,7 @@ const CaseFlow = () => {
                           <button
                             className="case-flow-btn outline"
                             onClick={() => convertSuggestion(suggestion.suggestion_id)}
-                            disabled={isAnonymized}
+                            disabled={isAnonymized || !!caseData.evidence_locked}
                           >
                             Convert
                           </button>
@@ -2054,6 +2964,18 @@ const CaseFlow = () => {
                         disabled={isAnonymized}
                       />
                     </label>
+                    <div className="case-flow-inline">
+                      {REPORT_TEMPLATES.map((template, idx) => (
+                        <button
+                          key={`template-${idx}`}
+                          className="case-flow-btn outline small"
+                          onClick={() => setReporterReply(template)}
+                          disabled={isAnonymized}
+                        >
+                          Use template {idx + 1}
+                        </button>
+                      ))}
+                    </div>
                     <button className="case-flow-btn outline" onClick={sendReporterReply} disabled={isAnonymized}>
                       Send reply
                     </button>
@@ -2169,6 +3091,81 @@ const CaseFlow = () => {
                           }
                         >
                           Download instruction
+                        </button>
+                      ) : null}
+                    </div>
+                  ))
+                )}
+              </div>
+              <div className="case-flow-card">
+                <h3>External expert access (SOS)</h3>
+                <p className="case-flow-help">
+                  Grant 48-hour access to an external expert or partner firm with full audit logging.
+                </p>
+                <label className="case-flow-label">
+                  Expert email
+                  <input
+                    type="email"
+                    value={expertDraft.expert_email}
+                    onChange={(e) => setExpertDraft({ ...expertDraft, expert_email: e.target.value })}
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Expert name
+                  <input
+                    type="text"
+                    value={expertDraft.expert_name}
+                    onChange={(e) => setExpertDraft({ ...expertDraft, expert_name: e.target.value })}
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Organization
+                  <input
+                    type="text"
+                    value={expertDraft.organization}
+                    onChange={(e) => setExpertDraft({ ...expertDraft, organization: e.target.value })}
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Reason / scope
+                  <textarea
+                    value={expertDraft.reason}
+                    onChange={(e) => setExpertDraft({ ...expertDraft, reason: e.target.value })}
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <button className="case-flow-btn outline" onClick={grantExpertAccess} disabled={isAnonymized}>
+                  Grant 48h access
+                </button>
+                {expertStatus ? <div className="case-flow-meta">{expertStatus}</div> : null}
+                {expertAccess.length === 0 ? (
+                  <div className="case-flow-muted">No external experts granted access yet.</div>
+                ) : (
+                  expertAccess.map((expert) => (
+                    <div key={expert.access_id} className="case-flow-note">
+                      <div className="case-flow-muted">
+                        {expert.expert_email} · {expert.status}
+                      </div>
+                      {(expert.expert_name || expert.organization) ? (
+                        <div>
+                          {expert.expert_name || 'External expert'}
+                          {expert.organization ? ` · ${expert.organization}` : ''}
+                        </div>
+                      ) : null}
+                      <div className="case-flow-muted">
+                        Expires {new Date(expert.expires_at).toLocaleString()}
+                      </div>
+                      {expert.reason ? <div className="case-flow-muted">Scope: {expert.reason}</div> : null}
+                      {expert.status === 'active' ? (
+                        <button
+                          className="case-flow-btn outline small"
+                          onClick={() => revokeExpertAccess(expert.access_id)}
+                          disabled={isAnonymized}
+                        >
+                          Revoke access
                         </button>
                       ) : null}
                     </div>
@@ -2433,6 +3430,12 @@ const CaseFlow = () => {
                   Decision summary
                   <textarea value={decisionSummary} onChange={(e) => setDecisionSummary(e.target.value)} />
                 </label>
+                <div className="case-flow-inline">
+                  <button className="case-flow-btn outline" onClick={draftDecisionSummary} disabled={isAnonymized}>
+                    Draft summary from notes
+                  </button>
+                  <span className="case-flow-muted">Auto-generate a factual timeline from case notes.</span>
+                </div>
                 {hasRoleSeparationConflict ? (
                   <div className="case-flow-warning">
                     Role separation conflict: {roleSeparationConflicts.join('; ')}. Legal override required to proceed.
@@ -2464,6 +3467,78 @@ const CaseFlow = () => {
                     </button>
                   </div>
                 ) : null}
+              </div>
+              <div className="case-flow-card">
+                <h3>Legal approval</h3>
+                <div className="case-flow-muted">
+                  Gate status: {caseData.gates.find((g) => g.gate_key === 'legal')?.status || 'pending'}
+                </div>
+                <label className="case-flow-label">
+                  Approval date
+                  <input
+                    type="datetime-local"
+                    value={legalGate.approved_at}
+                    onChange={(e) => setLegalGate({ ...legalGate, approved_at: e.target.value })}
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Approval note
+                  <textarea
+                    value={legalGate.approval_note}
+                    onChange={(e) => setLegalGate({ ...legalGate, approval_note: e.target.value })}
+                    placeholder="Optional context for legal approval."
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <button
+                  className="case-flow-btn outline"
+                  onClick={() =>
+                    saveGate('legal', {
+                      approved_at: legalGate.approved_at || null,
+                      approval_note: legalGate.approval_note || null,
+                    })
+                  }
+                  disabled={isAnonymized}
+                >
+                  Record legal approval
+                </button>
+                {caseData.gates.find((g) => g.gate_key === 'legal')?.completed_by ? (
+                  <div className="case-flow-muted">
+                    Approved by {caseData.gates.find((g) => g.gate_key === 'legal')?.completed_by}
+                  </div>
+                ) : null}
+              </div>
+              <div className="case-flow-card">
+                <h3>Consistency check</h3>
+                <p className="case-flow-help">
+                  Compare this decision against historical outcomes for similar cases.
+                </p>
+                <button className="case-flow-btn outline" onClick={runConsistencyCheck}>
+                  Run consistency check
+                </button>
+                {consistency ? (
+                  <div className="case-flow-meta">
+                    <div>Sample size: {consistency.sample_size}</div>
+                    <div>Jurisdiction: {consistency.jurisdiction}</div>
+                    {consistency.playbook_key ? <div>Playbook: {consistency.playbook_key}</div> : null}
+                    <div className="case-flow-divider" />
+                    {consistency.outcomes.length === 0 ? (
+                      <div className="case-flow-muted">No comparable outcomes yet.</div>
+                    ) : (
+                      consistency.outcomes.map((row) => (
+                        <div key={`${row.outcome}-${row.count}`} className="case-flow-row">
+                          <span>{row.outcome}</span>
+                          <span>{row.count} ({row.percent}%)</span>
+                        </div>
+                      ))
+                    )}
+                    <div className="case-flow-muted">{consistency.recommendation}</div>
+                    {consistency.warning ? <div className="case-flow-warning">{consistency.warning}</div> : null}
+                  </div>
+                ) : (
+                  <div className="case-flow-muted">No consistency check run yet.</div>
+                )}
               </div>
               <div className="case-flow-card">
                 <h3>Serious cause (jurisdiction rules)</h3>
@@ -2638,6 +3713,73 @@ const CaseFlow = () => {
             ) : null}
             <div className="case-flow-grid">
               <div className="case-flow-card">
+                <h3>Reporting</h3>
+                <p className="case-flow-help">
+                  Generate a consolidated investigation report with triage, impact analysis, evidence, and decisions.
+                </p>
+                <label className="case-flow-label">
+                  Document format
+                  <select value={docFormat} onChange={(event) => setDocFormat(event.target.value)}>
+                    <option value="txt">Text (.txt)</option>
+                    <option value="pdf">PDF (.pdf)</option>
+                    <option value="docx">DOCX (.docx)</option>
+                  </select>
+                </label>
+                <div className="case-flow-muted">Readiness checklist</div>
+                <div className="case-flow-pill-list">
+                  <span className={`case-flow-pill ${reportSignals.triage ? 'good' : ''}`}>
+                    Triage {reportSignals.triage ? '✓' : '•'}
+                  </span>
+                  <span className={`case-flow-pill ${reportSignals.impact ? 'good' : ''}`}>
+                    Impact analysis {reportSignals.impact ? '✓' : '•'}
+                  </span>
+                  <span className={`case-flow-pill ${reportSignals.decision ? 'good' : ''}`}>
+                    Decision {reportSignals.decision ? '✓' : '•'}
+                  </span>
+                  <span className={`case-flow-pill ${reportSignals.lessons ? 'good' : ''}`}>
+                    Lessons learned {reportSignals.lessons ? '✓' : '•'}
+                  </span>
+                </div>
+                <button className="case-flow-btn outline" onClick={() => generateDocument('INVESTIGATION_REPORT')}>
+                  Generate investigation report
+                </button>
+              </div>
+              <div className="case-flow-card">
+                <h3>Sanity check</h3>
+                <p className="case-flow-help">Scan the case file for missing mandatory items before closure.</p>
+                <button className="case-flow-btn outline" onClick={loadSanityCheck}>
+                  Run sanity check
+                </button>
+                {sanityCheck ? (
+                  <>
+                    <div className="case-flow-muted">
+                      Score: {sanityCheck.score}% ({sanityCheck.completed}/{sanityCheck.total})
+                    </div>
+                    {sanityCheck.warnings.length > 0 ? (
+                      <div className="case-flow-warning">
+                        {sanityCheck.warnings.map((warn, idx) => (
+                          <div key={`warn-${idx}`}>{warn}</div>
+                        ))}
+                      </div>
+                    ) : null}
+                    {sanityCheck.missing.length > 0 ? (
+                      <div className="case-flow-meta">
+                        <strong>Missing items</strong>
+                        <ul className="case-flow-list">
+                          {sanityCheck.missing.map((item, idx) => (
+                            <li key={`missing-${idx}`}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <div className="case-flow-muted">All required items present.</div>
+                    )}
+                  </>
+                ) : (
+                  <div className="case-flow-muted">Run the check to see results.</div>
+                )}
+              </div>
+              <div className="case-flow-card">
                 <h3>Case status</h3>
                 <label className="case-flow-label">
                   Status
@@ -2667,6 +3809,36 @@ const CaseFlow = () => {
                 {isAnonymized ? <div className="case-flow-warning">This case is anonymized.</div> : null}
               </div>
               <div className="case-flow-card">
+                <h3>Root cause & actions</h3>
+                <p className="case-flow-help">Capture lessons learned and remediation actions for the report.</p>
+                <label className="case-flow-label">
+                  Root cause
+                  <textarea
+                    value={lessonsDraft.root_cause}
+                    onChange={(e) => setLessonsDraft({ ...lessonsDraft, root_cause: e.target.value })}
+                    placeholder="e.g. Lack of training, policy gap, weak access controls."
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <label className="case-flow-label">
+                  Action items
+                  <textarea
+                    value={lessonsDraft.action_items}
+                    onChange={(e) => setLessonsDraft({ ...lessonsDraft, action_items: e.target.value })}
+                    placeholder="e.g. Mandatory training, policy update, system hardening."
+                    disabled={isAnonymized}
+                  />
+                </label>
+                <button className="case-flow-btn outline" onClick={saveLessonsLearned} disabled={isAnonymized}>
+                  Save lessons learned
+                </button>
+                {caseData.notes.find((note) => note.note_type === 'lessons_learned') ? (
+                  <div className="case-flow-muted">Latest lessons learned captured.</div>
+                ) : (
+                  <div className="case-flow-muted">No lessons learned note yet.</div>
+                )}
+              </div>
+              <div className="case-flow-card">
                 <h3>DSAR redaction</h3>
                 <p className="case-flow-help">
                   Document redactions before producing a DSAR export. Paste a JSON array or leave a note.
@@ -2680,6 +3852,12 @@ const CaseFlow = () => {
                     disabled={isAnonymized}
                   />
                 </label>
+                <div className="case-flow-inline">
+                  <button className="case-flow-btn outline" onClick={suggestRedactions} disabled={isAnonymized}>
+                    Suggest redactions
+                  </button>
+                  <span className="case-flow-muted">Uses regex heuristics to pre-fill PII candidates.</span>
+                </div>
                 <button className="case-flow-btn outline" onClick={exportRedactedPack} disabled={isAnonymized}>
                   Export redacted pack
                 </button>
@@ -2754,26 +3932,176 @@ const CaseFlow = () => {
             <div className="case-flow-card">
               <div className="case-flow-row">
                 <h3>Audit timeline</h3>
-                <button className="case-flow-btn outline small" onClick={loadAuditEvents}>
-                  Refresh
+                <button className="case-flow-btn outline small" onClick={() => goToStep('audit')}>
+                  View audit log
                 </button>
               </div>
-              {auditEvents.length === 0 ? (
-                <div className="case-flow-muted">No audit events yet.</div>
-              ) : (
-                auditEvents.map((event, idx) => (
-                  <div key={`${event.event_type}-${idx}`} className="case-flow-note">
-                    <div className="case-flow-muted">
-                      {event.event_type} · {new Date(event.created_at).toLocaleString()}
-                    </div>
-                    <div>{event.message}</div>
-                    {event.actor ? <div className="case-flow-muted">Actor: {event.actor}</div> : null}
-                  </div>
-                ))
-              )}
+              <div className="case-flow-muted">Audit log is available in the dedicated Audit step.</div>
             </div>
           </div>
         ) : null}
+        {currentStep.key === 'audit' ? (
+          <div>
+            <div className="case-flow-step-header">
+              <div>
+                <h2>Audit log</h2>
+                <p className="case-flow-help">Review all case actions with actor/date filters and field-level diffs.</p>
+              </div>
+              <button className="case-flow-info" onClick={toggleGuidance} type="button" aria-label="Toggle guidance">
+                i
+              </button>
+            </div>
+            {showGuidance ? (
+              <div className="case-flow-guidance">
+                <h4>Guidance</h4>
+                <ul>
+                  <li>Use actor filtering for targeted reviews (legal, HR, external counsel).</li>
+                  <li>Date filters are local time; export the report for evidentiary packs.</li>
+                  <li>Field-level diffs appear for case/task updates.</li>
+                </ul>
+              </div>
+            ) : null}
+            <div className="case-flow-grid">
+              <div className="case-flow-card">
+                <div className="case-flow-row">
+                  <h3>Filters</h3>
+                  <div className="case-flow-inline">
+                    <button className="case-flow-btn outline small" onClick={() => loadAuditEvents()}>
+                      Refresh
+                    </button>
+                    <button
+                      className="case-flow-btn outline small"
+                      onClick={() => {
+                        setAuditActorFilter('')
+                        setAuditFromFilter('')
+                        setAuditToFilter('')
+                        loadAuditEvents('')
+                      }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+                <div className="case-flow-audit-controls">
+                  <label className="case-flow-label">
+                    Actor
+                    <input
+                      type="text"
+                      placeholder="e.g. legal_counsel"
+                      value={auditActorFilter}
+                      onChange={(event) => setAuditActorFilter(event.target.value)}
+                      onBlur={() => loadAuditEvents()}
+                    />
+                  </label>
+                  <label className="case-flow-label">
+                    From
+                    <input
+                      type="date"
+                      value={auditFromFilter}
+                      onChange={(event) => setAuditFromFilter(event.target.value)}
+                    />
+                  </label>
+                  <label className="case-flow-label">
+                    To
+                    <input
+                      type="date"
+                      value={auditToFilter}
+                      onChange={(event) => setAuditToFilter(event.target.value)}
+                    />
+                  </label>
+                </div>
+              </div>
+              <div className="case-flow-card">
+                <div className="case-flow-row">
+                  <h3>Audit timeline</h3>
+                  <span className="case-flow-muted">{filteredAuditEvents.length} events</span>
+                </div>
+                {filteredAuditEvents.length === 0 ? (
+                  <div className="case-flow-muted">No audit events yet.</div>
+                ) : (
+                  filteredAuditEvents.map((event, idx) => {
+                    const changes = formatAuditChanges(event.details as Record<string, unknown>)
+                    const context =
+                      event.details && typeof event.details === 'object' && '_context' in event.details
+                        ? (event.details as { _context?: { ip_address?: string; user_agent?: string } })._context
+                        : undefined
+                    return (
+                      <div key={`${event.event_type}-${idx}`} className="case-flow-note">
+                        <div className="case-flow-muted">
+                          {event.event_type} · {new Date(event.created_at).toLocaleString()}
+                        </div>
+                        <div>{event.message}</div>
+                        {event.actor ? <div className="case-flow-muted">Actor: {event.actor}</div> : null}
+                        {context?.ip_address ? (
+                          <div className="case-flow-muted">IP: {context.ip_address}</div>
+                        ) : null}
+                        {context?.user_agent ? (
+                          <div className="case-flow-muted">Agent: {context.user_agent}</div>
+                        ) : null}
+                        {changes.length > 0 ? (
+                          <div className="case-flow-audit-changes">
+                            {changes.map((line) => (
+                              <div key={line} className="case-flow-muted">
+                                {line}
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+      <div className={`modal ${showSuspensionModal ? 'active' : ''}`}>
+        <div className="modal-content">
+          <div className="modal-header">
+            <h3>Suspension required (NL)</h3>
+          </div>
+          <div className="modal-body">
+            <p>
+              For Netherlands urgent dismissal cases, the subject should be suspended before proceeding.
+              You can continue, but this may introduce legal risk.
+            </p>
+          </div>
+          <div className="modal-footer">
+            <button className="case-flow-btn outline" onClick={() => setShowSuspensionModal(false)}>
+              Review
+            </button>
+            <button
+              className="case-flow-btn"
+              onClick={() => {
+                setShowSuspensionModal(false)
+                performSaveCaseDetails(true)
+              }}
+            >
+              Continue & Save
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className={`modal ${transitionModalOpen ? 'active' : ''}`}>
+        <div className="modal-content">
+          <div className="modal-header">
+            <h3>Stage blocked</h3>
+          </div>
+          <div className="modal-body">
+            <p>Complete the following requirements before advancing:</p>
+            <ul className="case-flow-blocker-list">
+              {transitionBlockers.map((blocker) => (
+                <li key={`${blocker.code}-${blocker.message}`}>{blocker.message}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="modal-footer">
+            <button className="case-flow-btn outline" onClick={() => setTransitionModalOpen(false)}>
+              Close
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   )

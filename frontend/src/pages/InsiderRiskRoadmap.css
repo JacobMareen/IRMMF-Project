@@ -1,0 +1,74 @@
+.irp-roadmap {
+  background: transparent;
+}
+
+.irp-roadmap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.irp-roadmap-header h2 {
+  margin: 0;
+}
+
+.irp-roadmap-header p {
+  margin-top: 6px;
+  color: var(--text-sub);
+}
+
+.irp-roadmap-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.irp-roadmap-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 24px var(--shadow);
+}
+
+.irp-roadmap-card h3 {
+  margin: 8px 0;
+}
+
+.irp-roadmap-card p {
+  color: var(--text-sub);
+}
+
+.irp-roadmap-phase {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(232, 179, 115, 0.16);
+  color: var(--brand-gold);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.irp-roadmap-meta {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text-sub);
+  font-size: 0.85rem;
+}
+
+.irp-roadmap-actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+.irp-roadmap-note {
+  margin-top: 8px;
+  color: var(--text-sub);
+  font-size: 0.85rem;
+}

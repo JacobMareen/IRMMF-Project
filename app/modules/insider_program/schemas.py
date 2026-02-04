@@ -89,3 +89,25 @@ class InsiderRiskControlUpdate(BaseModel):
 
 class InsiderRiskControlOut(InsiderRiskControlBase):
     model_config = ConfigDict(from_attributes=True)
+
+
+class InsiderRiskRoadmapIn(BaseModel):
+    phase: str = "Now"
+    title: str
+    description: Optional[str] = None
+    owner: Optional[str] = None
+    target_window: Optional[str] = None
+    status: str = "planned"
+
+
+class InsiderRiskRoadmapUpdate(BaseModel):
+    phase: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    owner: Optional[str] = None
+    target_window: Optional[str] = None
+    status: Optional[str] = None
+
+
+class InsiderRiskRoadmapOut(InsiderRiskRoadmapIn):
+    model_config = ConfigDict(from_attributes=True)

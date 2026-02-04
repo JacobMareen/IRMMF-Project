@@ -17,7 +17,7 @@ if REPO_ROOT not in sys.path:
 
 from app.db import engine  # noqa: E402
 
-DEFAULT_REVISION = "0002_tenant_settings_assessments"
+DEFAULT_REVISION = "0006_triage_inbox"
 
 
 def main() -> None:

@@ -157,6 +157,42 @@ class CaseLegalHold(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
 
+class CaseExpertAccess(Base):
+    __tablename__ = "case_expert_access"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    case_id: Mapped[str] = mapped_column(String(64), ForeignKey("cases.case_id"), nullable=False, index=True)
+    access_id: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    expert_email: Mapped[str] = mapped_column(String(255), nullable=False)
+    expert_name: Mapped[str] = mapped_column(String(255), nullable=True)
+    organization: Mapped[str] = mapped_column(String(255), nullable=True)
+    reason: Mapped[str] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="active")
+    granted_by: Mapped[str] = mapped_column(String(128), nullable=True)
+    granted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_by: Mapped[str] = mapped_column(String(128), nullable=True)
+
+
+class CaseTriageTicket(Base):
+    __tablename__ = "case_triage_tickets"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    ticket_id: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    tenant_key: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    subject: Mapped[str] = mapped_column(String(255), nullable=True)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    reporter_name: Mapped[str] = mapped_column(String(255), nullable=True)
+    reporter_email: Mapped[str] = mapped_column(String(255), nullable=True)
+    source: Mapped[str] = mapped_column(String(32), nullable=False, default="dropbox")
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="new")
+    triage_notes: Mapped[str] = mapped_column(Text, nullable=True)
+    linked_case_id: Mapped[str] = mapped_column(String(64), ForeignKey("cases.case_id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)
+
+
 class CaseReporterMessage(Base):
     __tablename__ = "case_reporter_messages"
 

@@ -1,7 +1,7 @@
 """Core case management API routes."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 
 from auth import get_principal, Principal
@@ -19,8 +19,20 @@ from app.modules.cases.schemas import (
     CaseEvidenceSuggestionOut,
     CaseEvidenceSuggestionUpdate,
     CaseGateRecordOut,
+    CaseImpactAnalysisForm,
+    CaseLegalApprovalForm,
+    CaseWorksCouncilForm,
     CaseLinkCreate,
     CaseLinkOut,
+    CaseExpertAccessCreate,
+    CaseExpertAccessOut,
+    CaseTriageTicketCreate,
+    CaseTriageTicketUpdate,
+    CaseTriageTicketConvert,
+    CaseTriageTicketOut,
+    CaseSummaryDraftOut,
+    CaseRedactionSuggestionOut,
+    CaseConsistencyOut,
     CaseLegalHoldCreate,
     CaseLegalHoldOut,
     CaseLegitimacyForm,
@@ -42,6 +54,7 @@ from app.modules.cases.schemas import (
     CaseSubmitFindings,
     CaseTaskCreate,
     CaseTaskOut,
+    CaseTaskUpdate,
     CaseCredentialingForm,
     CaseAuditEventOut,
     CaseDocumentOut,
@@ -55,6 +68,8 @@ from app.modules.cases.schemas import (
     CaseErasureJobOut,
     CaseUpdate,
     CaseNotificationOut,
+    CaseTriageForm,
+    CaseSanityCheckOut,
 )
 from app.modules.cases.errors import TransitionError
 from app.modules.cases.service import CaseService
@@ -68,6 +83,18 @@ def get_case_service(db: Session = Depends(get_db)) -> CaseService:
     return CaseService(db)
 
 
+@router.post("/api/external/dropbox", response_model=CaseTriageTicketOut)
+def submit_dropbox_ticket(
+    payload: CaseTriageTicketCreate,
+    tenant_key: str | None = Query(default=None),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.create_triage_ticket(payload, tenant_key or "default")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 @router.get("/api/v1/cases", response_model=list[CaseOut])
 def list_cases(
     principal: Principal = Depends(get_principal),
@@ -79,6 +106,77 @@ def list_cases(
 @router.get("/api/v1/cases/playbooks", response_model=list[CasePlaybookOut])
 def list_playbooks(service: CaseService = Depends(get_case_service)):
     return service.list_playbooks()
+
+
+@router.get("/api/v1/triage/inbox", response_model=list[CaseTriageTicketOut])
+def list_triage_tickets(
+    status: str | None = None,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL", "HR", "DPO_AUDITOR")),
+    service: CaseService = Depends(get_case_service),
+):
+    return service.list_triage_tickets(principal, status=status)
+
+
+@router.patch("/api/v1/triage/inbox/{ticket_id}", response_model=CaseTriageTicketOut)
+def update_triage_ticket(
+    ticket_id: str,
+    payload: CaseTriageTicketUpdate,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL", "HR")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.update_triage_ticket(ticket_id, payload, principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.post("/api/v1/triage/inbox/{ticket_id}/convert", response_model=CaseOut)
+def convert_triage_ticket(
+    ticket_id: str,
+    payload: CaseTriageTicketConvert,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL", "HR")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.convert_triage_ticket(ticket_id, payload, principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get("/api/v1/cases/{case_id}/summary/draft", response_model=CaseSummaryDraftOut)
+def draft_case_summary(
+    case_id: str,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL", "HR")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.draft_case_summary(case_id, principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get("/api/v1/cases/{case_id}/redactions/suggest", response_model=list[CaseRedactionSuggestionOut])
+def suggest_redactions(
+    case_id: str,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL", "HR", "DPO_AUDITOR")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.suggest_redactions(case_id, principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get("/api/v1/cases/{case_id}/consistency", response_model=CaseConsistencyOut)
+def get_consistency(
+    case_id: str,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL", "HR", "DPO_AUDITOR")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.get_consistency_insights(case_id, principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
 
 
 @router.get("/api/v1/dashboard")
@@ -252,6 +350,44 @@ def create_legal_hold(
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+@router.get("/api/v1/cases/{case_id}/experts", response_model=list[CaseExpertAccessOut])
+def list_expert_access(
+    case_id: str,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.list_expert_access(case_id, principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.post("/api/v1/cases/{case_id}/experts", response_model=CaseExpertAccessOut)
+def grant_expert_access(
+    case_id: str,
+    payload: CaseExpertAccessCreate,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.grant_expert_access(case_id, payload, principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/api/v1/cases/{case_id}/experts/{access_id}/revoke", response_model=CaseExpertAccessOut)
+def revoke_expert_access(
+    case_id: str,
+    access_id: str,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.revoke_expert_access(case_id, access_id, principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
 @router.get("/api/v1/cases/{case_id}/reporter-messages", response_model=list[CaseReporterMessageOut])
 def list_reporter_messages(
     case_id: str,
@@ -300,6 +436,31 @@ def post_reporter_portal_message(
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+@router.get("/api/external/inbox")
+def get_external_inbox(
+    case_id: str,
+    token: str,
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.get_reporter_portal_by_case(case_id, token)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.post("/api/external/inbox", response_model=CaseReporterMessageOut)
+def post_external_inbox_message(
+    case_id: str,
+    token: str,
+    payload: CaseReporterMessageCreate,
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.post_reporter_portal_message_by_case(case_id, token, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 @router.post("/api/v1/cases/{case_id}/evidence", response_model=CaseEvidenceOut)
 def add_evidence(
     case_id: str,
@@ -326,6 +487,20 @@ def add_task(
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+@router.put("/api/v1/cases/{case_id}/tasks/{task_id}", response_model=CaseTaskOut)
+def update_task(
+    case_id: str,
+    task_id: str,
+    payload: CaseTaskUpdate,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "HR")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.update_task(case_id, task_id, payload, principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 @router.post("/api/v1/cases/{case_id}/apply-playbook", response_model=CaseOut)
 def apply_playbook(
     case_id: str,
@@ -347,6 +522,18 @@ def list_tasks(
 ):
     try:
         return service.list_tasks(case_id, principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get("/api/v1/cases/{case_id}/sanity-check", response_model=CaseSanityCheckOut)
+def get_sanity_check(
+    case_id: str,
+    principal: Principal = Depends(get_principal),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.sanity_check(case_id, principal)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
 
@@ -424,14 +611,16 @@ def download_document(
     service: CaseService = Depends(get_case_service),
 ):
     try:
-        filename, content = service.download_document(case_id, doc_id, principal)
+        filename, content, media_type = service.download_document(case_id, doc_id, principal)
         return Response(
             content=content,
-            media_type="application/octet-stream",
+            media_type=media_type,
             headers={"Content-Disposition": f"attachment; filename={filename}"},
         )
     except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        detail = str(exc)
+        status = 404 if "Document not found" in detail else 400
+        raise HTTPException(status_code=status, detail=detail)
 
 
 @router.get("/api/v1/cases/{case_id}/export")
@@ -602,6 +791,19 @@ def save_legitimacy_gate(
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+@router.post("/api/v1/cases/{case_id}/gates/triage", response_model=CaseGateRecordOut)
+def save_triage_gate(
+    case_id: str,
+    payload: CaseTriageForm,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL", "HR")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.save_gate(case_id, "triage", payload.model_dump(), principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 @router.post("/api/v1/cases/{case_id}/gates/credentialing", response_model=CaseGateRecordOut)
 def save_credentialing_gate(
     case_id: str,
@@ -624,6 +826,45 @@ def save_adversarial_gate(
 ):
     try:
         return service.save_gate(case_id, "adversarial", payload.model_dump(), principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/api/v1/cases/{case_id}/gates/works-council", response_model=CaseGateRecordOut)
+def save_works_council_gate(
+    case_id: str,
+    payload: CaseWorksCouncilForm,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL", "HR")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.save_gate(case_id, "works_council", payload.model_dump(), principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/api/v1/cases/{case_id}/gates/impact-analysis", response_model=CaseGateRecordOut)
+def save_impact_analysis_gate(
+    case_id: str,
+    payload: CaseImpactAnalysisForm,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL", "HR")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.save_gate(case_id, "impact_analysis", payload.model_dump(), principal)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/api/v1/cases/{case_id}/gates/legal", response_model=CaseGateRecordOut)
+def save_legal_gate(
+    case_id: str,
+    payload: CaseLegalApprovalForm,
+    principal: Principal = Depends(require_roles("ADMIN", "LEGAL", "LEGAL_COUNSEL")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.save_gate(case_id, "legal", payload.model_dump(), principal)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
@@ -747,10 +988,11 @@ def anonymize_case(
 @router.get("/api/v1/audit", response_model=list[CaseAuditEventOut])
 def list_audit_events(
     case_id: str,
+    actor: str | None = Query(default=None),
     principal: Principal = Depends(get_principal),
     service: CaseService = Depends(get_case_service),
 ):
     try:
-        return service.list_audit_events(case_id, principal)
+        return service.list_audit_events(case_id, principal, actor=actor)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))

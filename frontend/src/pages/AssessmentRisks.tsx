@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './AssessmentRisks.css'
-import { getStoredAssessmentId } from '../utils/assessment'
-import { apiFetchRoot } from '../lib/api'
+import { describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
+import { apiFetchRoot, readApiError } from '../lib/api'
 
 type RiskEntry = {
   scenario?: string
@@ -35,13 +35,19 @@ const AssessmentRisks = () => {
     }
     setStatus('Loading risks...')
     apiFetchRoot(`/responses/analysis/${assessmentId}`)
-      .then((res) => (res.ok ? res.json() : null))
+      .then(async (res) => {
+        if (!res.ok) {
+          const detail = await readApiError(res)
+          throw new Error(describeAssessmentError(detail, 'Risk data unavailable.'))
+        }
+        return res.json()
+      })
       .then((data) => {
         if (!data) throw new Error('No data')
         setPayload(data)
         setStatus('')
       })
-      .catch(() => setStatus('Risk data unavailable. Check API status.'))
+      .catch((err) => setStatus(err instanceof Error ? err.message : 'Risk data unavailable. Check API status.'))
   }, [assessmentId])
 
   const heatmap = payload?.risk_heatmap || []
@@ -52,9 +58,9 @@ const AssessmentRisks = () => {
     <section className="rk-page">
       <div className="rk-header">
         <div>
-          <h1>Risk Overview</h1>
+          <h1>Risk Intelligence</h1>
           <p className="rk-subtitle">
-            Assessment ID: <strong>{assessmentId || 'Not set'}</strong>
+            Insider risk program view · Assessment ID: <strong>{assessmentId || 'Not set'}</strong>
           </p>
         </div>
       </div>

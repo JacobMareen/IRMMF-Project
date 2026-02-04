@@ -9,6 +9,8 @@ openpyxl
 litellm
 groq
 alembic
+reportlab
+python-docx
 
 # Added for local LLM support
 transformers

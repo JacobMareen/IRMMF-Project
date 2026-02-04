@@ -625,7 +625,10 @@ const Settings = () => {
               <option value="ADMIN">Admin</option>
               <option value="INVESTIGATOR">Investigator</option>
               <option value="LEGAL">Legal</option>
+              <option value="LEGAL_COUNSEL">Legal Counsel</option>
               <option value="HR">HR</option>
+              <option value="EXTERNAL_EXPERT">External Expert</option>
+              <option value="AUDITOR">Auditor</option>
               <option value="BE_AUTHORIZED">BE Authorized</option>
               <option value="DPO_AUDITOR">DPO Auditor</option>
               <option value="VIEWER">Viewer</option>
@@ -665,7 +668,10 @@ const Settings = () => {
                       <option value="ADMIN">Admin</option>
                       <option value="INVESTIGATOR">Investigator</option>
                       <option value="LEGAL">Legal</option>
+                      <option value="LEGAL_COUNSEL">Legal Counsel</option>
                       <option value="HR">HR</option>
+                      <option value="EXTERNAL_EXPERT">External Expert</option>
+                      <option value="AUDITOR">Auditor</option>
                       <option value="BE_AUTHORIZED">BE Authorized</option>
                       <option value="DPO_AUDITOR">DPO Auditor</option>
                       <option value="VIEWER">Viewer</option>

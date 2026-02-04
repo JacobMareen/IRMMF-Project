@@ -84,3 +84,42 @@ def ensure_indexes() -> None:
             )
         )
 
+
+def ensure_audit_immutability() -> None:
+    """Best-effort guardrails to keep audit logs append-only in dev."""
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                CREATE OR REPLACE FUNCTION prevent_audit_mutation()
+                RETURNS trigger AS $$
+                BEGIN
+                    RAISE EXCEPTION 'Audit logs are append-only';
+                END;
+                $$ LANGUAGE plpgsql;
+                """
+            )
+        )
+        conn.execute(
+            text(
+                """
+                DO $$
+                BEGIN
+                    IF to_regclass('public.case_audit_events') IS NOT NULL THEN
+                        IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_case_audit_immutable') THEN
+                            CREATE TRIGGER trg_case_audit_immutable
+                            BEFORE UPDATE OR DELETE ON case_audit_events
+                            FOR EACH ROW EXECUTE FUNCTION prevent_audit_mutation();
+                        END IF;
+                    END IF;
+                    IF to_regclass('public.pia_audit_events') IS NOT NULL THEN
+                        IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_pia_audit_immutable') THEN
+                            CREATE TRIGGER trg_pia_audit_immutable
+                            BEFORE UPDATE OR DELETE ON pia_audit_events
+                            FOR EACH ROW EXECUTE FUNCTION prevent_audit_mutation();
+                        END IF;
+                    END IF;
+                END $$;
+                """
+            )
+        )

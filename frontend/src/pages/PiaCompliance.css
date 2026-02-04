@@ -90,6 +90,13 @@
   gap: 12px;
 }
 
+.pia-case-hub,
+.pia-workflow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .pia-section-title {
   font-size: 1.4rem;
   color: var(--brand-gold);
@@ -170,6 +177,29 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 14px;
+}
+
+.pia-workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.pia-workflow-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 8px 30px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pia-workflow-title {
+  font-weight: 700;
+  color: var(--brand-gold);
+  font-family: 'League Spartan', sans-serif;
 }
 
 .pia-roadmap-card {
@@ -336,8 +366,17 @@
 
 .pia-case-actions {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 10px;
+  align-items: center;
+}
+
+.pia-case-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: var(--text-sub);
 }
 
 .pia-evidence-inputs {
@@ -451,9 +490,59 @@
   color: var(--brand-gold);
 }
 
+.pia-overlay .overlay-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pia-overlay-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pia-overlay-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--text-sub);
+  font-size: 0.82rem;
+}
+
+.pia-overlay-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 16px;
+}
+
+.pia-overlay-section {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+[data-theme='light'] .pia-overlay-section {
+  background: rgba(223, 230, 238, 0.3);
+}
+
+.pia-overlay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
 @media (max-width: 900px) {
   .pia-hero {
     grid-template-columns: 1fr;
   }
 
+  .pia-overlay-grid {
+    grid-template-columns: 1fr;
+  }
 }

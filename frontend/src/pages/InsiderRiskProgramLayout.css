@@ -1,0 +1,70 @@
+.irp-shell {
+  padding: 24px;
+}
+
+.irp-shell-header {
+  margin-bottom: 16px;
+}
+
+.irp-shell-header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.irp-shell-subtitle {
+  margin-top: 6px;
+  color: var(--text-sub);
+}
+
+.irp-shell-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.irp-shell-tab {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+.irp-shell-tab.active {
+  background: var(--brand-gold);
+  color: var(--brand-navy);
+  border-color: var(--brand-gold);
+}
+
+.irp-shell-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.irp-shell .btn {
+  padding: 8px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--brand-gold);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.irp-shell .btn.btn-primary {
+  background: var(--brand-gold);
+  color: var(--brand-navy);
+  border-color: var(--brand-gold);
+}
+
+.irp-shell .btn.btn-secondary {
+  background: transparent;
+  color: var(--brand-gold);
+}
+
+.irp-shell .btn.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}

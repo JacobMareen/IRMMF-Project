@@ -52,7 +52,7 @@ export const apiFetchRoot = (path: string, init: RequestInit = {}) => {
   return fetch(url, { ...init, headers })
 }
 
-const parseError = async (res: Response) => {
+export const readApiError = async (res: Response) => {
   const text = await res.text()
   if (!text) return `Request failed (${res.status})`
   try {
@@ -66,7 +66,7 @@ const parseError = async (res: Response) => {
 export const apiJson = async <T>(path: string, init: RequestInit = {}) => {
   const res = await apiFetch(path, init)
   if (!res.ok) {
-    throw new Error(await parseError(res))
+    throw new Error(await readApiError(res))
   }
   const text = await res.text()
   return (text ? JSON.parse(text) : null) as T
@@ -75,7 +75,7 @@ export const apiJson = async <T>(path: string, init: RequestInit = {}) => {
 export const apiJsonRoot = async <T>(path: string, init: RequestInit = {}) => {
   const res = await apiFetchRoot(path, init)
   if (!res.ok) {
-    throw new Error(await parseError(res))
+    throw new Error(await readApiError(res))
   }
   const text = await res.text()
   return (text ? JSON.parse(text) : null) as T
@@ -84,7 +84,7 @@ export const apiJsonRoot = async <T>(path: string, init: RequestInit = {}) => {
 export const apiBlob = async (path: string, init: RequestInit = {}) => {
   const res = await apiFetch(path, init)
   if (!res.ok) {
-    throw new Error(await parseError(res))
+    throw new Error(await readApiError(res))
   }
   return res.blob()
 }

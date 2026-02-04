@@ -1,7 +1,7 @@
 .recommendations-page {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 0;
 }
 
 .rec-header {
@@ -559,73 +559,6 @@
   to {
     transform: rotate(360deg);
   }
-}
-
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 20;
-  padding: 24px;
-}
-
-.modal.active {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.modal-content {
-  background: var(--bg-card);
-  border-radius: 12px;
-  width: 100%;
-  max-width: 720px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header,
-.modal-footer {
-  padding: 16px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.modal-footer {
-  border-top: 1px solid var(--border-color);
-  border-bottom: none;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.modal-body {
-  padding: 16px;
-}
-
-.form-group {
-  margin-bottom: 12px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--text-sub);
-}
-
-.form-group select,
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-input);
-  color: var(--text-main);
-}
-
-textarea {
-  min-height: 100px;
 }
 
 @media (max-width: 900px) {
