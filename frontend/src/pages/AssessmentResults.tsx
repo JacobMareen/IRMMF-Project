@@ -3,6 +3,10 @@ import Chart from 'chart.js/auto'
 import './AssessmentResults.css'
 import { describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
 import { apiFetchRoot, API_BASE, readApiError } from '../lib/api'
+import { AssessmentNav } from '../components/AssessmentNav'
+import { getDomainMeta } from '../utils/domainMetadata'
+import { PageHeader } from '../components/PageHeader'
+import { InfoOverlay } from '../components/InfoOverlay'
 
 type AxisScore = { axis?: string; code?: string; score?: number }
 type Recommendation = {
@@ -12,6 +16,10 @@ type Recommendation = {
   rationale?: string
 }
 type ArchetypeDetails = {
+  description?: string
+  strengths?: string[]
+  weaknesses?: string[]
+  peer_comparison?: string
   rationale?: string[]
 }
 type MaturityScores = {
@@ -207,21 +215,23 @@ const AssessmentResults = () => {
 
   return (
     <section className="ar-page">
-      <div className="ar-header">
-        <div>
-          <h1>Results Dashboard</h1>
-          <p className="ar-subtitle">
-            Assessment ID: <strong>{assessmentId || 'Not set'}</strong>
-          </p>
-        </div>
-        <div className="ar-header-actions">
-          <button className="ar-btn ar-btn-outline" onClick={() => handleExport('csv')}>
-            📥 Report (.csv)
-          </button>
-          <button className="ar-btn ar-btn-muted" onClick={() => handleExport('json')}>
-            💾 Backup (.json)
-          </button>
-        </div>
+      <PageHeader
+        title="Results Dashboard"
+        subtitle={`Assessment ID: ${assessmentId || 'Not set'}`}
+        actions={
+          <>
+            <button className="ar-btn ar-btn-outline" onClick={() => handleExport('csv')}>
+              📥 Report (.csv)
+            </button>
+            <button className="ar-btn ar-btn-muted" onClick={() => handleExport('json')}>
+              💾 Backup (.json)
+            </button>
+          </>
+        }
+      />
+
+      <div style={{ marginBottom: '20px' }}>
+        <AssessmentNav assessmentId={assessmentId} />
       </div>
 
       {status ? <div className="ar-card">{status}</div> : null}
@@ -230,36 +240,78 @@ const AssessmentResults = () => {
         <>
           <section className="ar-grid">
             <div className="ar-card">
-              <div className="ar-card-title">Archetype</div>
+              <div className="ar-card-title">
+                Archetype
+                <InfoOverlay title="Archetypes">
+                  The persona that best describes your current risk posture based on the assessment.
+                </InfoOverlay>
+              </div>
               <div className="ar-metric">{payload?.archetype || '—'}</div>
             </div>
             <div className="ar-card">
-              <div className="ar-card-title">Trust Index</div>
+              <div className="ar-card-title">
+                Trust Index
+                <InfoOverlay title="Trust Index">
+                  A composite score (0-100) reflecting the overall health of your insider risk program. Higher is better.
+                </InfoOverlay>
+              </div>
               <div className="ar-metric">{summary.trust_index ?? '—'}</div>
             </div>
             <div className="ar-card">
-              <div className="ar-card-title">Friction Score</div>
+              <div className="ar-card-title">
+                Friction Score
+                <InfoOverlay title="Friction Score">
+                  A measure of the operational burden your controls place on employees. Lower is better.
+                </InfoOverlay>
+              </div>
               <div className="ar-metric">{summary.friction_score ?? '—'}</div>
             </div>
             <div className="ar-card">
-              <div className="ar-card-title">Evidence Confidence</div>
+              <div className="ar-card-title" title="The average confidence level of the evidence provided to support your answers.">
+                Evidence Confidence ⓘ
+              </div>
               <div className="ar-metric">{summary.evidence_confidence_avg ?? '—'}</div>
             </div>
           </section>
 
           <section className="ar-panel-grid">
-            <div className="ar-card">
-              <div className="ar-card-title">Archetype Rationale</div>
-              {rationale.length ? (
-                <div className="ar-list">
-                  {rationale.map((line) => (
-                    <div key={line} className="ar-list-item">
-                      {line}
+            <div className="ar-card" style={{ gridColumn: 'span 1' }}>
+              <div className="ar-card-title">Risk Persona Analysis</div>
+              {payload?.archetype_details ? (
+                <div className="ar-persona-grid">
+                  <div className="ar-persona-desc">
+                    <strong>{payload.archetype}</strong>
+                    <p>{payload.archetype_details.description || 'No description available.'}</p>
+                  </div>
+
+                  <div className="ar-persona-metrics">
+                    {payload.archetype_details.peer_comparison && (
+                      <div className="ar-peer-comp">
+                        <em>{payload.archetype_details.peer_comparison}</em>
+                      </div>
+                    )}
+
+                    <div className="ar-tags-group">
+                      <div className="ar-tag-label">Strengths:</div>
+                      <div className="ar-tags">
+                        {payload.archetype_details.strengths?.map(s => (
+                          <span key={s} className="ar-tag success">{s}</span>
+                        )) || <span className="ar-muted">None listed</span>}
+                      </div>
                     </div>
-                  ))}
+
+                    <div className="ar-tags-group">
+                      <div className="ar-tag-label">Key Risks:</div>
+                      <div className="ar-tags">
+                        {payload.archetype_details.weaknesses?.map(w => (
+                          <span key={w} className="ar-tag warning">{w}</span>
+                        )) || <span className="ar-muted">None listed</span>}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <div className="ar-muted">No rationale available.</div>
+                <div className="ar-muted">No persona analysis available.</div>
               )}
             </div>
             <div className="ar-card">
@@ -365,6 +417,25 @@ const AssessmentResults = () => {
                         style={{ width: `${Math.min(100, Math.max(0, axis.score ?? 0))}%` }}
                       />
                     </div>
+                    {/* Render Capabilities */}
+                    {(() => {
+                      const meta = getDomainMeta(axis.axis || axis.code || '')
+                      if (meta && meta.capabilities && meta.capabilities.length > 0) {
+                        return (
+                          <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-sub)' }}>
+                            <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>Capabilities evaluated:</div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                              {meta.capabilities.map(cap => (
+                                <span key={cap} style={{ background: 'var(--bg-main)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                                  {cap}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      }
+                      return null
+                    })()}
                   </div>
                 ))
               ) : (

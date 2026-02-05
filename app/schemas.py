@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 # --- Outputs ---
 class AnswerOptionOut(BaseModel):
@@ -41,6 +41,21 @@ class ResponseCreate(BaseModel):
     is_deferred: bool = False
     is_flagged: bool = False
     origin: Optional[str] = None
+
+    @field_validator('score')
+    @classmethod
+    def validate_score(cls, v: float) -> float:
+        if not (0 <= v <= 4):
+            # Allow -1 for special "N/A" cases if needed, but standard is 0-4
+            raise ValueError('Score must be between 0 and 4')
+        return v
+
+    @field_validator('confidence')
+    @classmethod
+    def validate_confidence(cls, v: Optional[float]) -> Optional[float]:
+        if v is not None and not (0.0 <= v <= 1.0):
+            raise ValueError('Confidence must be between 0.0 and 1.0')
+        return v
 
     
 class ResumptionState(BaseModel):

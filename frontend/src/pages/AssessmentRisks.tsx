@@ -3,19 +3,13 @@ import './AssessmentRisks.css'
 import { describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
 import { apiFetchRoot, readApiError } from '../lib/api'
 
-type RiskEntry = {
-  scenario?: string
-  name?: string
-  category?: string
-  likelihood?: number
-  impact?: number
-  risk_level?: string
-  risk_score?: number
-}
+import { RiskHeatmap, type RiskPoint } from '../components/RiskHeatmap'
+import { AssessmentNav } from '../components/AssessmentNav'
+import { PageHeader } from '../components/PageHeader'
 
 type RiskPayload = {
-  risk_heatmap?: RiskEntry[]
-  top_risks?: RiskEntry[]
+  risk_heatmap?: RiskPoint[]
+  top_risks?: RiskPoint[]
 }
 
 const AssessmentRisks = () => {
@@ -52,17 +46,17 @@ const AssessmentRisks = () => {
 
   const heatmap = payload?.risk_heatmap || []
   const topRisks = payload?.top_risks || []
-  const dotRadius = 8
+
 
   return (
     <section className="rk-page">
-      <div className="rk-header">
-        <div>
-          <h1>Risk Intelligence</h1>
-          <p className="rk-subtitle">
-            Insider risk program view · Assessment ID: <strong>{assessmentId || 'Not set'}</strong>
-          </p>
-        </div>
+      <PageHeader
+        title="Risk Intelligence"
+        subtitle={`Insider risk program view · Assessment ID: ${assessmentId || 'Not set'}`}
+      />
+
+      <div style={{ marginBottom: '20px' }}>
+        <AssessmentNav assessmentId={assessmentId} />
       </div>
 
       {status ? <div className="rk-card">{status}</div> : null}
@@ -72,44 +66,8 @@ const AssessmentRisks = () => {
           <section className="rk-grid">
             <div className="rk-card">
               <div className="rk-card-title">Risk Heatmap</div>
-              <div className="rk-heatmap">
-                <div className="rk-axis-labels">
-                  <span>7</span>
-                  <span>6</span>
-                  <span>5</span>
-                  <span>4</span>
-                  <span>3</span>
-                  <span>2</span>
-                  <span>1</span>
-                </div>
-                <div className="rk-heatmap-grid">
-                  {heatmap.map((r, idx) => {
-                    const likelihood = Math.min(7, Math.max(1, Number(r.likelihood || 1)))
-                    const impact = Math.min(7, Math.max(1, Number(r.impact || 1)))
-                    const x = (likelihood - 1) / 6
-                    const y = (impact - 1) / 6
-                    const left = `clamp(${dotRadius}px, ${x * 100}%, calc(100% - ${dotRadius}px))`
-                    const top = `clamp(${dotRadius}px, ${(1 - y) * 100}%, calc(100% - ${dotRadius}px))`
-                    return (
-                      <div
-                        key={`${r.scenario || r.name}-${idx}`}
-                        className={`rk-dot level-${(r.risk_level || 'green').toLowerCase()}`}
-                        style={{ left, top }}
-                        title={`${r.scenario || r.name} (L${likelihood} × I${impact})`}
-                      />
-                    )
-                  })}
-                </div>
-                <div className="rk-axis-spacer" />
-                <div className="rk-axis-bottom">
-                  <span>1</span>
-                  <span>2</span>
-                  <span>3</span>
-                  <span>4</span>
-                  <span>5</span>
-                  <span>6</span>
-                  <span>7</span>
-                </div>
+              <div className="rk-heatmap-container">
+                <RiskHeatmap risks={heatmap} size={500} />
               </div>
             </div>
 
@@ -138,18 +96,22 @@ const AssessmentRisks = () => {
               <div className="rk-table">
                 <div className="rk-row rk-header-row">
                   <span>Risk</span>
+                  <span>Category</span>
                   <span>L</span>
                   <span>I</span>
                   <span>Level</span>
                   <span>Score</span>
+                  <span>Treatment</span>
                 </div>
                 {heatmap.map((r, idx) => (
                   <div key={`${r.scenario || r.name}-${idx}`} className="rk-row">
                     <span>{r.scenario || r.name}</span>
+                    <span className="rk-muted">{r.category || '—'}</span>
                     <span>{r.likelihood}</span>
                     <span>{r.impact}</span>
                     <span>{r.risk_level}</span>
                     <span>{r.risk_score}</span>
+                    <span className="rk-muted">Not Started</span>
                   </div>
                 ))}
               </div>

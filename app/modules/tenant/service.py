@@ -10,6 +10,8 @@ from app.modules.tenant.schemas import (
     TenantHolidayOut,
     TenantSettingsIn,
     TenantSettingsOut,
+    RegistrationRequest,
+    RegistrationResponse,
 )
 
 
@@ -146,3 +148,71 @@ class TenantService:
             models.TenantHoliday.id == holiday_id,
         ).delete()
         self.db.commit()
+    def register_tenant(self, payload: RegistrationRequest) -> RegistrationResponse:
+        # 1. Generate unique tenant_key
+        base_key = payload.company_name.lower().replace(" ", "-").replace("'", "").replace(".", "")
+        # Remove non-alphanumeric chars
+        base_key = "".join(c for c in base_key if c.isalnum() or c == "-")
+        
+        # Check uniqueness
+        existing = self.db.query(models.Tenant).filter(models.Tenant.tenant_key == base_key).first()
+        if existing:
+            # Simple suffix logic
+            import random
+            base_key = f"{base_key}-{random.randint(100, 999)}"
+        
+        tenant_key = base_key
+
+        # 2. Check if email already exists globally (optional, but good practice)
+        from app.modules.users.models import User, UserRole
+        existing_user = self.db.query(User).filter(User.email == payload.admin_email).first()
+        if existing_user:
+            raise ValueError(f"User with email {payload.admin_email} already exists.")
+
+        try:
+            # 3. Create Tenant
+            tenant = models.Tenant(
+                tenant_key=tenant_key,
+                tenant_name=payload.company_name,
+                environment_type=payload.environment_type or "Production",
+            )
+            self.db.add(tenant)
+            self.db.flush() # Get ID
+
+            # 4. Create Settings Default
+            settings = models.TenantSettings(
+                tenant_id=tenant.id,
+                company_name=payload.company_name,
+                notifications_enabled=True
+            )
+            self.db.add(settings)
+
+            # 5. Create Admin User
+            user = User(
+                tenant_id=tenant.id,
+                email=payload.admin_email,
+                display_name=payload.admin_name,
+                status="active", # Auto-activate for now
+                invited_at=datetime.now(),
+                last_login_at=None
+            )
+            self.db.add(user)
+            self.db.flush()
+
+            # 6. Assign Admin Role
+            role = UserRole(user_id=user.id, role="ADMIN")
+            self.db.add(role)
+
+            self.db.commit()
+
+            return RegistrationResponse(
+                tenant_key=tenant_key,
+                admin_email=payload.admin_email,
+                status="success",
+                message="Tenant created successfully.",
+                login_url=f"/login?tenant={tenant_key}"
+            )
+
+        except Exception as e:
+            self.db.rollback()
+            raise e

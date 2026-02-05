@@ -1,0 +1,48 @@
+INFO:     Will watch for changes in these directories: ['/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [22492] using StatReload
+INFO:     Started server process [22556]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:60270 - "OPTIONS /api/v1/assessment/IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4/resume HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60271 - "OPTIONS /api/v1/intake/IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60272 - "OPTIONS /api/v1/intake/start HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60273 - "OPTIONS /responses/analysis/IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60274 - "OPTIONS /api/v1/questions/all?assessment_id=IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60272 - "GET /api/v1/intake/start HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60271 - "GET /api/v1/intake/IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60274 - "GET /api/v1/questions/all?assessment_id=IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60270 - "GET /api/v1/assessment/IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4/resume HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60273 - "GET /responses/analysis/IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60291 - "GET /api/v1/intake/IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60292 - "GET /api/v1/intake/start HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60294 - "GET /api/v1/questions/all?assessment_id=IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60290 - "GET /api/v1/assessment/IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4/resume HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60293 - "GET /responses/analysis/IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60291 - "GET /responses/analysis/IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60304 - "GET /api/v1/intake/IRMMF-3JWPt4cr-3jf6Emlf28TSirTDTNREtH4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60303 - "GET /api/v1/intake/start HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in 'app/modules/tenant/schemas.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [22556]
+INFO:     Started server process [22907]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in 'app/modules/tenant/service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [22907]
+INFO:     Started server process [22914]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in 'app/modules/tenant/routes.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [22914]
+INFO:     Started server process [22919]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

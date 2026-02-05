@@ -9,8 +9,10 @@ from fastapi import Depends, HTTPException
 from auth import Principal, get_principal
 
 
+from app.core.settings import settings
+
 def rbac_disabled() -> bool:
-    return os.getenv("DEV_RBAC_DISABLED", "1").lower() in ("1", "true", "yes")
+    return settings.DEV_RBAC_DISABLED
 
 
 def role_set(roles: Iterable[str] | None) -> set[str]:

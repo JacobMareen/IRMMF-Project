@@ -189,9 +189,9 @@
   border-radius: 12px;
   aspect-ratio: 1 / 1;
   background:
-    linear-gradient(to top right, rgba(16,185,129,0.3) 0%, rgba(252,211,77,0.32) 50%, rgba(220,38,38,0.35) 100%),
-    repeating-linear-gradient(0deg, transparent, transparent 14.2%, rgba(255,255,255,0.05) 14.3%),
-    repeating-linear-gradient(90deg, transparent, transparent 14.2%, rgba(255,255,255,0.05) 14.3%);
+    linear-gradient(to top right, rgba(16, 185, 129, 0.3) 0%, rgba(252, 211, 77, 0.32) 50%, rgba(220, 38, 38, 0.35) 100%),
+    repeating-linear-gradient(0deg, transparent, transparent 14.2%, rgba(255, 255, 255, 0.05) 14.3%),
+    repeating-linear-gradient(90deg, transparent, transparent 14.2%, rgba(255, 255, 255, 0.05) 14.3%);
 }
 
 .ah-axis-spacer {
@@ -249,4 +249,60 @@
   .ah-header {
     flex-direction: column;
   }
+}
+
+/* Assessment Hub - Hero Styles */
+.ah-hero-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.ah-hero-content h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ah-hero-content p {
+  color: var(--text-sub);
+  margin-bottom: 1.5rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ah-btn.large {
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+}
+
+.ah-progress-storage {
+  max-width: 400px;
+  margin: 0 auto 1.5rem auto;
+}
+
+.ah-progress-bar {
+  height: 8px;
+  background: var(--bg-main);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.ah-progress-fill {
+  height: 100%;
+  background: var(--primary);
+  /* Fallback if var(--primary) undefined */
+  background-color: #f59e0b;
+  transition: width 0.3s ease;
+}
+
+.ah-progress-text {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  font-weight: 500;
 }

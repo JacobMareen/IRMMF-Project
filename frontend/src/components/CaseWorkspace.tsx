@@ -1,4 +1,5 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import { PageHeader } from './PageHeader'
 import './CaseWorkspace.css'
 
 type CaseWorkspaceProps = {
@@ -24,17 +25,15 @@ const CaseWorkspace = ({
   right,
   className,
 }: CaseWorkspaceProps) => {
-  const TitleTag = titleAs
+  // PageHeader handles title rendering, titleAs is ignored for now but kept in props for compatibility if needed.
   return (
     <section className={['case-workspace', className].filter(Boolean).join(' ')}>
       {title || subtitle || actions ? (
-        <div className="case-workspace-header">
-          <div>
-            {title ? <TitleTag>{title}</TitleTag> : null}
-            {subtitle ? <p className="case-workspace-subtitle">{subtitle}</p> : null}
-          </div>
-          {actions ? <div className="case-workspace-actions">{actions}</div> : null}
-        </div>
+        <PageHeader
+          title={title || ''}
+          subtitle={subtitle}
+          actions={actions}
+        />
       ) : null}
       <div className="case-workspace-grid">
         <div className="case-workspace-card">

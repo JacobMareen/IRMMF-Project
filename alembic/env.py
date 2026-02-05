@@ -20,8 +20,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.db import DEFAULT_DATABASE_URL  # noqa: E402
+from app.core.settings import settings  # noqa: E402
 from app.models import Base  # noqa: E402
+from app.modules.assessment import models as assessment_models  # noqa: F401,E402
 from app.modules.cases import models as case_models  # noqa: F401,E402
 from app.modules.dwf import models as dwf_models  # noqa: F401,E402
 from app.modules.pia import models as pia_models  # noqa: F401,E402
@@ -29,9 +30,10 @@ from app.modules.tenant import models as tenant_models  # noqa: F401,E402
 from app.modules.users import models as user_models  # noqa: F401,E402
 
 # Use DATABASE_URL when provided; otherwise fall back to the dev default.
+# Use DATABASE_URL from settings
 config.set_main_option(
     "sqlalchemy.url",
-    os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL),
+    settings.DATABASE_URL,
 )
 
 target_metadata = Base.metadata

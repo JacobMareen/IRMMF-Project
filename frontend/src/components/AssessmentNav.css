@@ -1,0 +1,40 @@
+.an-nav {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.an-link {
+    color: var(--text-sub);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.an-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.an-link.active {
+    background: var(--brand-gold);
+    color: #000;
+    /* Contrast against gold */
+}
+
+[data-theme='light'] .an-link.active {
+    color: #fff;
+    background: var(--brand-gold);
+}
+
+.an-link.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}

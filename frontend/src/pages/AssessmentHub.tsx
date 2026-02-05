@@ -1,46 +1,47 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './AssessmentHub.css'
-import { clearStoredAssessmentId, describeAssessmentError, getStoredAssessmentId, storeAssessmentId } from '../utils/assessment'
-import { apiFetch, apiFetchRoot, readApiError } from '../lib/api'
+import { clearStoredAssessmentId, getStoredAssessmentId, storeAssessmentId } from '../utils/assessment'
+import { apiFetch } from '../lib/api'
 
-type ResumptionState = {
-  completion_pct?: number
-  reachable_path?: string[]
-  responses?: Record<string, string>
-  deferred_ids?: string[]
-  flagged_ids?: string[]
-}
 
-type RiskEntry = {
-  scenario?: string
-  name?: string
-  likelihood?: number
-  impact?: number
-}
+
+
+import { useAssessmentData } from '../hooks/useAssessmentData'
+import { AssessmentNav } from '../components/AssessmentNav'
+import { useToast } from '../context/ToastContext'
+import FrameworkRadar from '../components/visuals/FrameworkRadar'
+import DomainDetailOverlay from '../components/visuals/DomainDetailOverlay'
+import { FrameworkGuide } from '../components/FrameworkGuide'
+import { PageHeader } from '../components/PageHeader'
 
 const AssessmentHub = () => {
+  const { showToast } = useToast()
   const [assessmentId, setAssessmentId] = useState<string>('')
-  const [completionPct, setCompletionPct] = useState<number | null>(null)
-  const [intakeAnswered, setIntakeAnswered] = useState<number | null>(null)
-  const [intakeTotal, setIntakeTotal] = useState<number | null>(null)
-  const [topRisk, setTopRisk] = useState<string>('—')
-  const [heatmapCount, setHeatmapCount] = useState<number | null>(null)
-  const [statusNote, setStatusNote] = useState<string>('')
-  const [domains, setDomains] = useState<string[]>([])
-  const [allQuestions, setAllQuestions] = useState<Array<{ q_id: string; domain: string }>>([])
-  const [resumeState, setResumeState] = useState<ResumptionState | null>(null)
   const [roleLens, setRoleLens] = useState<string>('overall')
   const [overrideDomains, setOverrideDomains] = useState<Set<string>>(new Set())
+  const [domains, setDomains] = useState<string[]>([])
+  const [allQuestions, setAllQuestions] = useState<Array<{ q_id: string; domain: string }>>([])
 
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
   const navigate = useNavigate()
 
-  const resetAssessment = (note: string) => {
+  const handleReset = () => {
     clearStoredAssessmentId(assessmentId, currentUser)
     setAssessmentId('')
-    setStatusNote(note)
+    showToast('Assessment reset initiated.', 'info')
   }
+
+  const {
+    completionPct,
+    intakeAnswered,
+    intakeTotal,
+    topRisk,
+    heatmapCount,
+    resumeState,
+    statusNote,
+    setStatusNote
+  } = useAssessmentData(assessmentId, currentUser, handleReset)
 
   useEffect(() => {
     setAssessmentId(getStoredAssessmentId(currentUser))
@@ -77,9 +78,7 @@ const AssessmentHub = () => {
           storeAssessmentId(id, currentUser)
         }
       } catch {
-        if (!controller.signal.aborted) {
-          setStatusNote('Unable to resolve assessment ID. Check API status.')
-        }
+        // Handled by hook mostly, but this is init logic
       }
     }
     resolveAssessment()
@@ -91,7 +90,7 @@ const AssessmentHub = () => {
     apiFetch(`/questions/all?assessment_id=${assessmentId}`)
       .then((res) => {
         if (res.status === 404) {
-          resetAssessment('Assessment not found. Creating a new one...')
+          handleReset()
           return []
         }
         return res.ok ? res.json() : []
@@ -124,83 +123,7 @@ const AssessmentHub = () => {
     }
   }, [assessmentId])
 
-  useEffect(() => {
-    if (!assessmentId) return
-    const controller = new AbortController()
-    setStatusNote('')
-
-    Promise.allSettled([
-      apiFetch(`/assessment/${assessmentId}/resume`, { signal: controller.signal }),
-      apiFetch(`/intake/${assessmentId}`, { signal: controller.signal }),
-      apiFetch(`/intake/start`, { signal: controller.signal }),
-      apiFetchRoot(`/responses/analysis/${assessmentId}`, {
-        signal: controller.signal,
-      }),
-    ])
-      .then(async ([resumeResp, intakeResp, intakeStartResp, riskResp]) => {
-        if (resumeResp.status === 'fulfilled' && resumeResp.value.status === 404) {
-          resetAssessment('Assessment not found. Creating a new one...')
-          return
-        }
-        let anyOk = false
-
-        if (resumeResp.status === 'fulfilled' && resumeResp.value.ok) {
-          const state = (await resumeResp.value.json()) as ResumptionState
-          setCompletionPct(state.completion_pct ?? null)
-          setResumeState(state)
-          anyOk = true
-        }
-
-        if (intakeResp.status === 'fulfilled' && intakeResp.value.ok) {
-          const intakeRows = (await intakeResp.value.json()) as Array<{ value?: string | null }>
-          setIntakeAnswered(intakeRows.filter((row) => row.value != null && row.value !== '').length)
-          anyOk = true
-        } else {
-          const storedAnswered = localStorage.getItem(`intake_answered_${assessmentId}`)
-          setIntakeAnswered(storedAnswered ? Number(storedAnswered) : null)
-        }
-
-        if (intakeStartResp.status === 'fulfilled' && intakeStartResp.value.ok) {
-          const intakeQs = (await intakeStartResp.value.json()) as unknown[]
-          setIntakeTotal(Array.isArray(intakeQs) ? intakeQs.length : null)
-          anyOk = true
-        } else {
-          const storedTotal = localStorage.getItem(`intake_total_${assessmentId}`)
-          setIntakeTotal(storedTotal ? Number(storedTotal) : null)
-        }
-
-        if (riskResp.status === 'fulfilled' && riskResp.value.ok) {
-          const data = await riskResp.value.json()
-          const heatmap = Array.isArray(data.risk_heatmap) ? data.risk_heatmap : []
-          setHeatmapCount(heatmap.length)
-          const top = (Array.isArray(data.top_risks) ? data.top_risks : []) as RiskEntry[]
-          const label = top[0]?.scenario || top[0]?.name || '—'
-          setTopRisk(label)
-          anyOk = true
-        }
-
-        if (!anyOk) {
-          let detail = ''
-          if (intakeStartResp.status === 'fulfilled' && !intakeStartResp.value.ok) {
-            detail = await readApiError(intakeStartResp.value)
-          } else if (resumeResp.status === 'fulfilled' && !resumeResp.value.ok) {
-            detail = await readApiError(resumeResp.value)
-          } else if (riskResp.status === 'fulfilled' && !riskResp.value.ok) {
-            detail = await readApiError(riskResp.value)
-          }
-          setStatusNote(describeAssessmentError(detail, 'Assessment data unavailable.'))
-        }
-      })
-      .catch(() => {
-        setStatusNote('Unable to reach the API. Ensure the backend is running, then refresh.')
-        const storedAnswered = localStorage.getItem(`intake_answered_${assessmentId}`)
-        const storedTotal = localStorage.getItem(`intake_total_${assessmentId}`)
-        setIntakeAnswered(storedAnswered ? Number(storedAnswered) : null)
-        setIntakeTotal(storedTotal ? Number(storedTotal) : null)
-      })
-
-    return () => controller.abort()
-  }, [assessmentId])
+  const [activeDomain, setActiveDomain] = useState<any | null>(null)
 
   const domainCards = (() => {
     if (!allQuestions.length || !resumeState?.reachable_path) return []
@@ -219,6 +142,8 @@ const AssessmentHub = () => {
         domain,
         status,
         remaining,
+        answered: answeredCount,
+        total: domainQs.length,
         reachable: reachableInDomain,
       }
     })
@@ -229,6 +154,13 @@ const AssessmentHub = () => {
     if (reachable.length === 0) return
     localStorage.setItem('flow_start_domain', domain)
     navigate('/assessment/flow')
+  }
+
+  const handleStartDomainByName = (domainName: string) => {
+    const card = domainCards.find(d => d.domain === domainName)
+    if (card) {
+      handleStartDomain(card.domain, card.reachable)
+    }
   }
 
   const persistOverrideDomains = (next: Set<string>) => {
@@ -244,8 +176,10 @@ const AssessmentHub = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ override_depth: enabled }),
       })
+      showToast(`Deep dive questions ${enabled ? 'enabled' : 'disabled'}.`, 'success')
     } catch {
       setStatusNote('Unable to update override depth. Check API status.')
+      showToast('Failed to update override settings.', 'error')
     }
   }
 
@@ -265,198 +199,155 @@ const AssessmentHub = () => {
     }
   }
 
-  const intakeStatus =
-    intakeAnswered != null && intakeTotal != null
-      ? `${intakeAnswered} / ${intakeTotal}`
-      : '-- / --'
+
 
   return (
     <section className="ah-page">
-      <div className="ah-header">
-        <div>
-          <h1>Assessment Hub</h1>
-          <p className="ah-subtitle">Assessment status, intake flow, and risk insights.</p>
-          {statusNote ? <div className="ah-status-note">{statusNote}</div> : null}
-        </div>
-        <div className="ah-actions">
-          <button className="ah-btn secondary" onClick={() => navigate('/assessment/intake')} disabled={!assessmentId}>
-            Start Intake
-          </button>
-          <button className="ah-btn secondary" onClick={() => navigate('/assessment/results')} disabled={!assessmentId}>
-            View Results
-          </button>
-          <button className="ah-btn secondary" onClick={() => navigate('/assessment/flow')} disabled={!assessmentId}>
-            Assessment Flow
-          </button>
-          <button className="ah-btn secondary" onClick={() => navigate('/insider-risk-program/risks')} disabled={!assessmentId}>
-            Risks
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Assessment Hub"
+        subtitle="Assessment status, intake flow, and risk insights."
+        statusNote={statusNote}
+        actions={<FrameworkGuide />}
+      />
 
-      <section className="ah-grid">
-        <div className="ah-card">
-          <div className="ah-card-title">Assessment Status</div>
-          <p>Resume where you left off or create a new assessment.</p>
-          <div className="ah-status-row">
-            <span>Current assessment</span>
-            <strong>{assessmentId ? assessmentId : 'Not set'}</strong>
-          </div>
-          <div className="ah-status-row">
-            <span>Progress</span>
-            <strong>{completionPct != null ? `${completionPct}%` : '--%'}</strong>
-          </div>
-        </div>
 
-        <div className="ah-card">
-          <div className="ah-card-title">Intake Progress</div>
-          <p>Complete intake to unlock kick-start and routing.</p>
-          <div className="ah-status-row">
-            <span>Answered</span>
-            <strong>{intakeStatus}</strong>
-          </div>
-          <div className="ah-status-row">
-            <span>Status</span>
-            <strong>{intakeAnswered && intakeAnswered > 0 ? 'In progress' : 'Pending'}</strong>
-          </div>
-        </div>
+      <AssessmentNav assessmentId={assessmentId} />
 
-        <div className="ah-card">
-          <div className="ah-card-title">Risk Snapshot</div>
-          <p>Top risks and heatmap from the latest analysis run.</p>
-          <div className="ah-status-row">
-            <span>Top risk</span>
-            <strong>{topRisk}</strong>
-          </div>
-          <div className="ah-status-row">
-            <span>Heatmap coverage</span>
-            <strong>{heatmapCount != null ? heatmapCount : '--'}</strong>
-          </div>
-        </div>
-      </section>
-
-      <section className="ah-section">
-        <div className="ah-section-title">Risk Heatmap</div>
-        <div className="ah-heatmap">
-          <div className="ah-axis-labels">
-            <span>7</span>
-            <span>6</span>
-            <span>5</span>
-            <span>4</span>
-            <span>3</span>
-            <span>2</span>
-            <span>1</span>
-          </div>
-          <div className="ah-heatmap-grid" />
-          <div className="ah-axis-spacer" />
-          <div className="ah-axis-bottom">
-            <span>1</span>
-            <span>2</span>
-            <span>3</span>
-            <span>4</span>
-            <span>5</span>
-            <span>6</span>
-            <span>7</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="ah-section">
-        <div className="ah-section-title">Results & Review</div>
-        <div className="ah-review-grid">
-          <div className="ah-card">
-            <div className="ah-card-title">Results Dashboard</div>
-            <p>Archetype, axis scores, and benchmarking will render here.</p>
-            <button className="ah-btn secondary" onClick={() => navigate('/assessment/results')} disabled={!assessmentId}>
-              Open Results
-            </button>
-          </div>
-          <div className="ah-card">
-            <div className="ah-card-title">Review Queue</div>
-            <p>Flagged and deferred questions will be listed in this panel.</p>
-            <button className="ah-btn secondary" onClick={() => navigate('/assessment/review')} disabled={!assessmentId}>
-              Open Review
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {assessmentId && domainCards.length > 0 ? (
+      {/* Rapid Benchmark Hero (Triage Mode) */}
+      {intakeAnswered != null && intakeTotal != null && intakeAnswered < intakeTotal ? (
         <section className="ah-section">
-          <div className="ah-section-title">Domain Progress</div>
-          <div className="ah-domain-grid">
-            {domainCards.map((card) => (
-              <div key={card.domain} className={`ah-domain-card ${card.status}`}>
-                <div className="ah-domain-title">{card.domain}</div>
-                <div className="ah-domain-meta">
-                  {card.status === 'completed' ? 'Path complete' : `~${card.remaining} potential remaining`}
+          <div className="ah-hero-card">
+            <div className="ah-hero-content">
+              <h2>Step 1: Rapid Benchmark</h2>
+              <p>Complete the {intakeTotal}-question triage to establish your preliminary risk profile and unlock the full framework.</p>
+              <div className="ah-progress-storage">
+                <div className="ah-progress-bar">
+                  <div
+                    className="ah-progress-fill"
+                    style={{ width: `${(intakeAnswered / intakeTotal) * 100}%` }}
+                  />
                 </div>
-                <button
-                  className="ah-btn secondary"
-                  onClick={() => handleStartDomain(card.domain, card.reachable)}
-                  disabled={card.reachable.length === 0}
-                >
-                  Open Domain
-                </button>
+                <span className="ah-progress-text">{intakeAnswered} / {intakeTotal} Answered</span>
               </div>
-            ))}
+              <button
+                className="ah-btn primary large"
+                onClick={() => navigate('/assessment/intake')}
+              >
+                {intakeAnswered === 0 ? 'Start Rapid Benchmark' : 'Continue Triage'}
+              </button>
+            </div>
           </div>
         </section>
       ) : null}
 
-      {assessmentId ? (
-        <section className="ah-controls ah-controls-bottom">
-          <div className="ah-card">
-            <div className="ah-card-title">Role Lens (view-only)</div>
-            <p>Filters will map to role tags once metadata is available.</p>
-            <select
-              className="ah-select"
-              value={roleLens}
-              onChange={(event) => handleRoleLensChange(event.target.value)}
-            >
-              <option value="overall">Overall</option>
-              <option value="ciso">CISO</option>
-              <option value="ia">Internal Audit</option>
-              <option value="hr">HR</option>
-            </select>
+      {/* Framework Radar Section */}
+      {assessmentId && domainCards.length > 0 && (intakeAnswered === intakeTotal) ? (
+        <section className="ah-section">
+          <div className="ah-section-title">Framework Coverage (Full Assessment)</div>
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
+            <FrameworkRadar
+              domains={domainCards}
+              onDomainClick={setActiveDomain}
+            />
           </div>
-          <div className="ah-card">
-            <div className="ah-card-title">Explore Deeper Questions</div>
-            <p>Select domains to include deeper items. Overrides are excluded from benchmarks.</p>
-            <label className="ah-toggle">
-              <input
-                type="checkbox"
-                checked={overrideDomains.size > 0}
-                onChange={(event) => {
-                  if (!event.target.checked) {
-                    const cleared = new Set<string>()
-                    setOverrideDomains(cleared)
-                    persistOverrideDomains(cleared)
-                    syncOverrideDepth(false)
-                  }
-                }}
-              />
-              Enable
-            </label>
-            <details className="ah-domain-picker">
-              <summary>Domains</summary>
-              <div className="ah-domain-list">
-                {domains.map((domain) => (
-                  <label key={domain}>
-                    <input
-                      type="checkbox"
-                      checked={overrideDomains.has(domain)}
-                      onChange={(event) => toggleDomainOverride(domain, event.target.checked)}
-                    />
-                    {domain}
-                  </label>
-                ))}
-              </div>
-            </details>
-          </div>
+
+          <DomainDetailOverlay
+            domainData={activeDomain}
+            onClose={() => setActiveDomain(null)}
+            onOpen={handleStartDomainByName}
+            overrideEnabled={activeDomain ? overrideDomains.has(activeDomain.domain) : false}
+            onToggleOverride={(enabled) => activeDomain && toggleDomainOverride(activeDomain.domain, enabled)}
+          />
         </section>
       ) : null}
-    </section>
+
+      {/* Standard Grid (Hidden during Triage for focus) */}
+      {intakeAnswered === intakeTotal && (<>
+        <section className="ah-grid">
+          <div className="ah-card">
+            <div className="ah-card-title">Assessment Status</div>
+            <p>Resume where you left off or create a new assessment.</p>
+            <div className="ah-status-row">
+              <span>Current assessment</span>
+              <strong>{assessmentId ? assessmentId : 'Not set'}</strong>
+            </div>
+            <div className="ah-status-row">
+              <span>Progress</span>
+              <strong>{completionPct != null ? `${completionPct}%` : '--%'}</strong>
+            </div>
+          </div>
+
+          <div className="ah-card">
+            <div className="ah-card-title">Rapid Benchmark</div>
+            <p>Initial triage complete.</p>
+            <div className="ah-status-row">
+              <span>Status</span>
+              <strong><span style={{ color: 'var(--success)' }}>✓ Complete</span></strong>
+            </div>
+            <div className="ah-status-row">
+              <span>Next Step</span>
+              <strong>Deep Dive</strong>
+            </div>
+          </div>
+
+          <div className="ah-card">
+            <div className="ah-card-title">Risk Snapshot</div>
+            <p>Top risks and heatmap from the latest analysis run.</p>
+            <div className="ah-status-row">
+              <span>Top risk</span>
+              <strong>{topRisk}</strong>
+            </div>
+            <div className="ah-status-row">
+              <span>Heatmap coverage</span>
+              <strong>{heatmapCount != null ? heatmapCount : '--'}</strong>
+            </div>
+          </div>
+        </section>
+
+
+
+        <section className="ah-section">
+          <div className="ah-section-title">Results & Review</div>
+          <div className="ah-review-grid">
+            <div className="ah-card">
+              <div className="ah-card-title">Results Dashboard</div>
+              <p>Archetype, axis scores, and benchmarking will render here.</p>
+              <button className="ah-btn secondary" onClick={() => navigate('/assessment/results')} disabled={!assessmentId}>
+                Open Results
+              </button>
+            </div>
+            <div className="ah-card">
+              <div className="ah-card-title">Review Queue</div>
+              <p>Flagged and deferred questions will be listed in this panel.</p>
+              <button className="ah-btn secondary" onClick={() => navigate('/assessment/review')} disabled={!assessmentId}>
+                Open Review
+              </button>
+            </div>
+          </div>
+        </section>
+      </>)}
+
+      {
+        assessmentId ? (
+          <section className="ah-controls ah-controls-bottom">
+            <div className="ah-card">
+              <div className="ah-card-title">Role Lens (view-only)</div>
+              <p>Filters will map to role tags once metadata is available.</p>
+              <select
+                className="ah-select"
+                value={roleLens}
+                onChange={(event) => handleRoleLensChange(event.target.value)}
+              >
+                <option value="overall">Overall</option>
+                <option value="ciso">CISO</option>
+                <option value="ia">Internal Audit</option>
+                <option value="hr">HR</option>
+              </select>
+            </div>
+          </section>
+        ) : null
+      }
+    </section >
   )
 }
 

@@ -84,4 +84,17 @@ class TenantHolidayOut(BaseModel):
     id: int
     holiday_date: str
     label: Optional[str] = None
-    created_at: datetime
+
+class RegistrationRequest(BaseModel):
+    company_name: str
+    admin_email: str
+    admin_name: str
+    environment_type: Optional[str] = "Production"
+
+class RegistrationResponse(BaseModel):
+    tenant_key: str
+    admin_email: str
+    status: str
+    message: str
+    login_url: Optional[str] = None
+

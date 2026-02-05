@@ -1,3 +1,68 @@
+/* Dashboard Chart Layouts */
+.cc-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.cc-chart-container {
+  background: var(--bg-surface-hover, rgba(255, 255, 255, 0.05));
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cc-chart-container h3 {
+  font-size: 0.9rem;
+  color: var(--text-muted, #94a3b8);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cc-loading-chart {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.cc-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+}
+
+.cc-metric-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cc-metric-tile span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.cc-metric-tile strong {
+  font-size: 1.1rem;
+  color: var(--text-main);
+}
+
+@media (max-width: 768px) {
+  .cc-charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Original Styles */
 .cc-page {
   display: flex;
   flex-direction: column;

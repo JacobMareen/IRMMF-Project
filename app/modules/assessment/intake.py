@@ -4,7 +4,7 @@ import os
 from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import insert
 
-from app import models
+from app.modules.assessment import models
 
 
 class AssessmentIntakeService:

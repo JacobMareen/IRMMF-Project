@@ -4,35 +4,7 @@
   gap: 18px;
 }
 
-.case-flow-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: center;
-}
-
-.case-flow-meta {
-  color: var(--text-sub);
-  font-size: 0.9rem;
-}
-
-.case-flow-list {
-  margin: 8px 0 0;
-  padding-left: 18px;
-  color: var(--text-sub);
-}
-
-.case-flow-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.case-flow-step-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
+/* Header styles handled by PageHeader component */
 
 .case-flow-info {
   border: 1px solid var(--border-color);

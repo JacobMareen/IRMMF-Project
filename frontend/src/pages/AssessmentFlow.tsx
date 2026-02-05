@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch, readApiError } from '../lib/api'
 import './AssessmentFlow.css'
 import { clearStoredAssessmentId, describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
+import { useToast } from '../context/ToastContext'
+import { AssessmentNav } from '../components/AssessmentNav'
+import { PageHeader } from '../components/PageHeader'
 
 type AnswerOption = { a_id: string; answer_text: string; base_score: number; tags?: string }
 type Question = {
@@ -124,9 +127,11 @@ const AssessmentFlow = () => {
   } | null>(null)
   const [evidenceChecks, setEvidenceChecks] = useState<Record<string, boolean>>({})
   const [hasEvidence, setHasEvidence] = useState(true)
-  const [logicToast, setLogicToast] = useState<string | null>(null)
+  // const [logicToast, setLogicToast] = useState<string | null>(null) // REMOVED
   const [evidenceMissingRequired, setEvidenceMissingRequired] = useState<string[]>([])
   const currentQIdRef = useRef<string | null>(null)
+
+  const { showToast } = useToast()
 
   useEffect(() => {
     setAssessmentId(getStoredAssessmentId(currentUser))
@@ -351,8 +356,7 @@ const AssessmentFlow = () => {
       }
     }
     if (data.logic_reason) {
-      setLogicToast(data.logic_reason)
-      window.setTimeout(() => setLogicToast(null), 2500)
+      showToast(data.logic_reason, 'info', 4000)
     }
   }
 
@@ -415,8 +419,7 @@ const AssessmentFlow = () => {
     const missingRequired = required.filter((key) => !evidenceChecks[key])
     setEvidenceMissingRequired(missingRequired)
     if (hasEvidence && missingRequired.length) {
-      setLogicToast('Complete required evidence checks before continuing.')
-      window.setTimeout(() => setLogicToast(null), 2500)
+      showToast('Complete required evidence checks before continuing.', 'warning')
       return
     }
     const evidencePayload = {
@@ -497,6 +500,20 @@ const AssessmentFlow = () => {
     })
   }
 
+  // Render helper to wrap content with PageHeader and Nav
+  const renderLayout = (content: React.ReactNode) => (
+    <section className="af-page">
+      <PageHeader
+        title="Question Flow"
+        subtitle={`Assessment ID: ${assessmentId || 'Not set'}`}
+      />
+      <div style={{ marginBottom: '20px' }}>
+        <AssessmentNav assessmentId={assessmentId} />
+      </div>
+      {content}
+    </section>
+  )
+
   if (!assessmentId) {
     return (
       <div className="af-card">
@@ -510,11 +527,11 @@ const AssessmentFlow = () => {
   }
 
   if (status) {
-    return <div className="af-card">{status}</div>
+    return renderLayout(<div className="af-card">{status}</div>)
   }
 
   if (requiresIntake) {
-    return (
+    return renderLayout(
       <div className="af-card">
         <h2>Intake Required</h2>
         <p>Complete intake before the assessment flow unlocks.</p>
@@ -526,20 +543,19 @@ const AssessmentFlow = () => {
   }
 
   if (!currentQuestion) {
-    return <div className="af-card">No questions available.</div>
+    return renderLayout(<div className="af-card">No questions available.</div>)
   }
 
   const policy = pendingEvidence ? EVIDENCE_POLICIES[pendingEvidence.policy_id] : null
 
   const currentLabel = `${currentIndex + 1} / ${reachable.length || 0}`
 
-  return (
-    <section className="af-page">
-      {logicToast ? <div className="af-toast">{logicToast}</div> : null}
+  return renderLayout(
+    <>
       <div className={`af-layout ${sidebarCollapsed ? 'collapsed' : ''}`}>
         <aside className={`af-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
           <div className="af-sidebar-header">
-            <div className="af-sidebar-title">Assessment Progress</div>
+            <div className="af-sidebar-title">Progress</div>
             <button className="af-collapse" onClick={() => setSidebarCollapsed((prev) => !prev)} title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
               {sidebarCollapsed ? '→' : '←'}
             </button>
@@ -806,7 +822,7 @@ const AssessmentFlow = () => {
           </div>
         </div>
       </div>
-    </section>
+    </>
   )
 }
 

@@ -1,0 +1,72 @@
+.rh-heatmap {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    grid-template-rows: 1fr 22px;
+    gap: 8px;
+    align-items: stretch;
+    aspect-ratio: 1 / 1;
+}
+
+.rh-axis-labels,
+.rh-axis-bottom {
+    color: var(--text-sub, #94a3b8);
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.rh-axis-bottom {
+    grid-column: 2 / 3;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.rh-heatmap-grid {
+    position: relative;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border-radius: 12px;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    background:
+        linear-gradient(to top right, rgba(16, 185, 129, 0.3) 0%, rgba(252, 211, 77, 0.32) 50%, rgba(220, 38, 38, 0.35) 100%),
+        repeating-linear-gradient(0deg, transparent, transparent 14.2%, rgba(255, 255, 255, 0.05) 14.3%),
+        repeating-linear-gradient(90deg, transparent, transparent 14.2%, rgba(255, 255, 255, 0.05) 14.3%);
+}
+
+.rh-dot {
+    position: absolute;
+    border-radius: 999px;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(0, 0, 0, 0.35);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background: #fbbf24;
+    transition: transform 0.2s ease;
+}
+
+.rh-dot:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+    z-index: 10;
+}
+
+.rh-dot.level-green {
+    background: #34d399;
+}
+
+.rh-dot.level-yellow {
+    background: #fbbf24;
+}
+
+.rh-dot.level-amber {
+    background: #f59e0b;
+}
+
+.rh-dot.level-red {
+    background: #f87171;
+}
+
+.rh-axis-spacer {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+}

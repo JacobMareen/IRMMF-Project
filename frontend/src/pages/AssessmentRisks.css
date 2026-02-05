@@ -63,11 +63,14 @@
   border: 1px solid var(--border-color);
   border-radius: 12px;
   aspect-ratio: 1 / 1;
+  max-width: 500px;
+  /* USER FIX: constrain chart size */
+  max-height: 500px;
   overflow: hidden;
   background:
-    linear-gradient(to top right, rgba(16,185,129,0.3) 0%, rgba(252,211,77,0.32) 50%, rgba(220,38,38,0.35) 100%),
-    repeating-linear-gradient(0deg, transparent, transparent 14.2%, rgba(255,255,255,0.05) 14.3%),
-    repeating-linear-gradient(90deg, transparent, transparent 14.2%, rgba(255,255,255,0.05) 14.3%);
+    linear-gradient(to top right, rgba(16, 185, 129, 0.3) 0%, rgba(252, 211, 77, 0.32) 50%, rgba(220, 38, 38, 0.35) 100%),
+    repeating-linear-gradient(0deg, transparent, transparent 14.2%, rgba(255, 255, 255, 0.05) 14.3%),
+    repeating-linear-gradient(90deg, transparent, transparent 14.2%, rgba(255, 255, 255, 0.05) 14.3%);
 }
 
 .rk-dot {
@@ -129,10 +132,11 @@
 
 .rk-row {
   display: grid;
-  grid-template-columns: 1fr 60px 60px 120px 80px;
+  grid-template-columns: 2fr 1.2fr 40px 40px 90px 60px 100px;
   padding: 10px 14px;
   border-bottom: 1px solid var(--border-color);
   background: rgba(0, 0, 0, 0.1);
+  align-items: center;
 }
 
 .rk-row:last-child {

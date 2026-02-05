@@ -3,7 +3,7 @@ from typing import List, Optional
 from sqlalchemy import case
 from sqlalchemy.orm import Session
 from sqlalchemy.dialects.postgresql import insert # USE POSTGRES DIALECT
-from app import models
+from app.modules.assessment import models
 from app.models import utcnow
 
 class QuestionRepository:

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { apiJson } from '../lib/api'
 import './CommandCenter.css'
+import { CaseStatusChart } from '../components/charts/CaseStatusChart'
+import { GateThroughputChart } from '../components/charts/GateThroughputChart'
 
 type ModuleEntry = {
   label: string
@@ -32,7 +34,6 @@ const CommandCenter = () => {
   const [registryText, setRegistryText] = useState('Loading module metadata...')
   const [moduleCount, setModuleCount] = useState('4 active')
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
-  const [dashboardStatus, setDashboardStatus] = useState('Loading dashboard...')
 
   useEffect(() => {
     apiJson<Record<string, ModuleEntry>>('/modules')
@@ -48,19 +49,13 @@ const CommandCenter = () => {
     apiJson<DashboardData>('/dashboard')
       .then((data) => {
         setDashboard(data)
-        setDashboardStatus('Live')
+
       })
       .catch(() => {
-        setDashboardStatus('Dashboard unavailable (API offline).')
+        console.error('Dashboard unavailable')
       })
   }, [])
 
-  const openCases = dashboard?.status_counts?.OPEN ?? 0
-  const onHoldCases = dashboard?.status_counts?.ON_HOLD ?? 0
-  const investigationCases = dashboard?.stage_counts?.INVESTIGATION ?? 0
-  const legitimacyRate = dashboard?.gate_completion?.legitimacy?.rate ?? 0
-  const credentialingRate = dashboard?.gate_completion?.credentialing?.rate ?? 0
-  const adversarialRate = dashboard?.gate_completion?.adversarial?.rate ?? 0
   const alerts = dashboard?.alerts ?? []
   const seriousCauseCases = dashboard?.serious_cause_cases ?? []
 
@@ -101,37 +96,42 @@ const CommandCenter = () => {
         </div>
         <div className="cc-card">
           <h2>Case Operations</h2>
-          <div className="cc-row">
-            <span>Total cases</span>
-            <strong>{dashboard ? dashboard.total_cases : '--'}</strong>
+          <div className="cc-charts-row">
+            <div className="cc-chart-container">
+              <h3>Case Status</h3>
+              {dashboard ? (
+                <CaseStatusChart
+                  open={dashboard.status_counts?.OPEN ?? 0}
+                  onHold={dashboard.status_counts?.ON_HOLD ?? 0}
+                  closed={dashboard.total_cases - (dashboard.status_counts?.OPEN ?? 0) - (dashboard.status_counts?.ON_HOLD ?? 0)}
+                />
+              ) : (
+                <div className="cc-loading-chart">Loading...</div>
+              )}
+            </div>
+            <div className="cc-chart-container">
+              <h3>Gate Throughput</h3>
+              {dashboard ? (
+                <GateThroughputChart
+                  legitimacy={dashboard.gate_completion?.legitimacy?.rate ?? 0}
+                  credentialing={dashboard.gate_completion?.credentialing?.rate ?? 0}
+                  adversarial={dashboard.gate_completion?.adversarial?.rate ?? 0}
+                />
+              ) : (
+                <div className="cc-loading-chart">Loading...</div>
+              )}
+            </div>
           </div>
-          <div className="cc-row">
-            <span>Open / On hold</span>
-            <strong>{dashboard ? `${openCases} / ${onHoldCases}` : '--'}</strong>
-          </div>
-          <div className="cc-row">
-            <span>In investigation</span>
-            <strong>{dashboard ? investigationCases : '--'}</strong>
-          </div>
-          <div className="cc-row">
-            <span>Serious cause enabled</span>
-            <strong>{dashboard ? dashboard.serious_cause_enabled : '--'}</strong>
-          </div>
-          <div className="cc-row">
-            <span>Avg days open</span>
-            <strong>{dashboard ? dashboard.avg_days_open : '--'}</strong>
-          </div>
-          <div className="cc-row">
-            <span>Avg days in stage</span>
-            <strong>{dashboard ? dashboard.avg_days_in_stage : '--'}</strong>
-          </div>
-          <div className="cc-row">
-            <span>Gate completion (L/C/A)</span>
-            <strong>{dashboard ? `${legitimacyRate}% / ${credentialingRate}% / ${adversarialRate}%` : '--'}</strong>
-          </div>
-          <div className="cc-row">
-            <span>Dashboard status</span>
-            <strong>{dashboardStatus}</strong>
+
+          <div className="cc-metrics-grid">
+            <div className="cc-metric-tile">
+              <span>Avg days open</span>
+              <strong>{dashboard ? dashboard.avg_days_open : '--'}</strong>
+            </div>
+            <div className="cc-metric-tile">
+              <span>In investigation</span>
+              <strong>{dashboard ? dashboard.stage_counts?.INVESTIGATION ?? 0 : '--'}</strong>
+            </div>
           </div>
         </div>
       </div>

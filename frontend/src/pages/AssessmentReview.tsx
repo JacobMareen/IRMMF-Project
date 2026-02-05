@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import './AssessmentReview.css'
 import { describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
 import { apiFetch, apiFetchRoot, readApiError } from '../lib/api'
+import { PageHeader } from '../components/PageHeader'
 
 type AnswerOption = { a_id: string; answer_text: string; base_score: number }
 type Question = {
@@ -58,8 +59,8 @@ const AssessmentReview = () => {
     }
     setStatus('Loading review table...')
     Promise.all([
-    apiFetchRoot(`/responses/table/${assessmentId}`),
-    apiFetch(`/intake/${assessmentId}`),
+      apiFetchRoot(`/responses/table/${assessmentId}`),
+      apiFetch(`/intake/${assessmentId}`),
     ])
       .then(async ([reviewResp, intakeResp]) => {
         if (!reviewResp.ok) {
@@ -146,17 +147,15 @@ const AssessmentReview = () => {
 
   return (
     <section className="rv-page">
-      <div className="rv-header">
-        <div>
-          <h1>Review Queue</h1>
-          <p className="rv-subtitle">
-            Assessment ID: <strong>{assessmentId || 'Not set'}</strong>
-          </p>
-        </div>
-        <button className="rv-btn" onClick={exportCsv}>
-          Export CSV
-        </button>
-      </div>
+      <PageHeader
+        title="Review Queue"
+        subtitle={`Assessment ID: ${assessmentId || 'Not set'}`}
+        actions={
+          <button className="rv-btn" onClick={exportCsv}>
+            Export CSV
+          </button>
+        }
+      />
 
       {status ? <div className="rv-card">{status}</div> : null}
 

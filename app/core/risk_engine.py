@@ -10,6 +10,8 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import yaml
 
+from app.core.settings import settings
+
 AXES = ("G", "E", "T", "L", "H", "V", "R", "F", "W")
 CURVE_TYPES = {"threshold", "standard", "logarithmic", "enhanced_sigmoid"}
 RISK_SCALE_MAX = 7
@@ -21,7 +23,7 @@ def _default_config_path() -> Path:
     # Config lives at repo-root ./config to keep it editable without code changes.
     base_dir = Path(__file__).resolve().parent
     repo_root = base_dir.parent.parent
-    return repo_root / "config" / "risk_scenarios_simple.yaml"
+    return repo_root / settings.RISK_CONFIG_PATH
 
 
 def _resolve_config_path(path: Optional[str]) -> Path:

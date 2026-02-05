@@ -9,8 +9,9 @@ import pandas as pd
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app import models
+from app.modules.assessment import models
 from app.db import SessionLocal, engine, ensure_pg_extensions
+from app.core.settings import settings
 
 
 def sha256_file(path: str) -> str:
@@ -69,9 +70,9 @@ This script supports two modes:
    - The script can keep multiple banks side-by-side.
 """
 
-    excel_file = os.getenv("IRMMF_EXCEL_FILE", "IRMMF_QuestionBank_v10_StreamlinedIntake_20260117.xlsx")
+    excel_file = settings.IRMMF_EXCEL_FILE
     if not os.path.exists(excel_file):
-        raise FileNotFoundError(f"{excel_file} not found. Set IRMMF_EXCEL_FILE.")
+        raise FileNotFoundError(f"{excel_file} not found. Check IRMMF_EXCEL_FILE setting.")
 
     print(f"📄 Using Excel file: {excel_file}")
 
@@ -79,7 +80,7 @@ This script supports two modes:
     models.Base.metadata.create_all(bind=engine)
 
     source_hash = sha256_file(excel_file)
-    version = os.getenv("QUESTION_BANK_VERSION") or _utcnow().strftime("bank-%Y%m%d-%H%M%S")
+    version = settings.QUESTION_BANK_VERSION or _utcnow().strftime("bank-%Y%m%d-%H%M%S")
 
     q_df = pd.read_excel(excel_file, sheet_name="Questions").fillna("")
     a_df = pd.read_excel(excel_file, sheet_name="AnswerOptions").fillna("")
@@ -88,6 +89,22 @@ This script supports two modes:
 
     has_title = "Question Title" in q_df.columns
     print("✅ Found 'Question Title' column in Questions sheet." if has_title else "ℹ️ No 'Question Title' column found.")
+
+    # Validate required columns
+    REQUIRED_Q_COLS = {
+        "Q-ID", "IRMMF Domain", "Question Text", 
+        "Pts_G", "Pts_E", "Pts_T", "Pts_L", "Pts_H", 
+        "Pts_V", "Pts_R", "Pts_F", "Pts_W"
+    }
+    REQUIRED_A_COLS = {"A-ID", "Q-ID", "Option #", "BaseScore"}
+    
+    missing_q = REQUIRED_Q_COLS - set(q_df.columns)
+    if missing_q:
+        raise ValueError(f"❌ Missing required columns in 'Questions' sheet: {missing_q}")
+        
+    missing_a = REQUIRED_A_COLS - set(a_df.columns)
+    if missing_a:
+        raise ValueError(f"❌ Missing required columns in 'AnswerOptions' sheet: {missing_a}")
 
     db: Session = SessionLocal()
     try:
@@ -285,4 +302,4 @@ This script supports two modes:
 
 
 if __name__ == "__main__":
-    ingest(truncate_bank=bool(os.getenv("TRUNCATE_BANK", "").lower() in ("1", "true", "yes")))
+    ingest(truncate_bank=settings.TRUNCATE_BANK)

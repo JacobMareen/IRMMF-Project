@@ -11,6 +11,8 @@ from app.modules.tenant.schemas import (
     TenantHolidayOut,
     TenantSettingsIn,
     TenantSettingsOut,
+    RegistrationRequest,
+    RegistrationResponse,
 )
 from app.modules.tenant.service import TenantService
 
@@ -82,3 +84,15 @@ def delete_tenant_holiday(
         return {"status": "deleted"}
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+
+@router.post("/api/v1/register", response_model=RegistrationResponse)
+def register_tenant_endpoint(
+    payload: RegistrationRequest,
+    service: TenantService = Depends(get_tenant_service),
+):
+    try:
+        return service.register_tenant(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Internal Server Error during registration")

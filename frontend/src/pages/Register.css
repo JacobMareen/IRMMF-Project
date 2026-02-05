@@ -1,0 +1,166 @@
+.register-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+.register-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg-content);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+}
+
+.success-card {
+    text-align: center;
+}
+
+.register-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.register-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.register-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.register-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: left;
+}
+
+.register-form input {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.register-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-color-dim);
+}
+
+.register-btn,
+.btn-primary {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    background: var(--primary-color);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+}
+
+.register-btn:hover,
+.btn-primary:hover {
+    background: var(--primary-color-hover);
+}
+
+.register-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    text-align: center;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.status-message {
+    color: var(--primary-color);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.login-link {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.login-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+.success-details {
+    background: var(--bg-surface);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: left;
+    border: 1px solid var(--border-color);
+}
+
+.success-details p {
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.success-details strong {
+    color: var(--text-primary);
+    margin-right: 0.5rem;
+}
+
+.tenant-key {
+    background: var(--bg-content);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 1.1em;
+    color: var(--accent-color);
+    border: 1px solid var(--border-color);
+}
+
+.note {
+    font-size: 0.85rem;
+    margin-top: 1rem !important;
+    font-style: italic;
+    color: var(--text-tertiary);
+}

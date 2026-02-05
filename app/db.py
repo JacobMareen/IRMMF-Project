@@ -19,18 +19,13 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 
-DEFAULT_DATABASE_URL = "postgresql+psycopg://localhost:5432/irmmf_db"
-
-
-def _database_url() -> str:
-    return os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
-
+from app.core.settings import settings
 
 engine = create_engine(
-    _database_url(),
+    settings.DATABASE_URL,
     pool_pre_ping=True,
-    pool_size=int(os.getenv("DB_POOL_SIZE", "5")),
-    max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "10")),
+    pool_size=settings.DB_POOL_SIZE,
+    max_overflow=settings.DB_MAX_OVERFLOW,
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

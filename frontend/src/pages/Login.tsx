@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import './Login.css'
 import { apiFetch } from '../lib/api'
 
@@ -7,16 +7,35 @@ const DEFAULT_TENANT_KEY = 'default'
 
 const Login = () => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  // State
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [tenantKey, setTenantKey] = useState('')
   const [status, setStatus] = useState('Enter your email to sign in.')
 
   useEffect(() => {
+    // Check if already logged in
     const user = localStorage.getItem('irmmf_user')
     if (user) {
       navigate('/', { replace: true })
     }
-  }, [navigate])
+
+    // Auto-fill from URL or params
+    const emailParam = searchParams.get('email')
+    if (emailParam) setUsername(emailParam)
+
+    const tenantParam = searchParams.get('tenant')
+    if (tenantParam) {
+      setTenantKey(tenantParam)
+    } else {
+      // Fallback to stored tenant or default
+      const storedTenant = localStorage.getItem('irmmf_tenant')
+      setTenantKey(storedTenant || DEFAULT_TENANT_KEY)
+    }
+
+  }, [navigate, searchParams])
 
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme') || 'dark'
@@ -25,13 +44,15 @@ const Login = () => {
 
   const handleLogin = async () => {
     const user = username.trim()
+    const tKey = tenantKey.trim() || DEFAULT_TENANT_KEY
+
     if (!user) {
       setStatus('Enter an email address.')
       return
     }
     setStatus('Signing in...')
     try {
-      const resp = await apiFetch(`/auth/login?tenant_key=${DEFAULT_TENANT_KEY}`, {
+      const resp = await apiFetch(`/auth/login?tenant_key=${tKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -56,7 +77,10 @@ const Login = () => {
       if (roles) {
         localStorage.setItem('irmmf_roles', roles)
       }
-      localStorage.setItem('irmmf_tenant', DEFAULT_TENANT_KEY)
+
+      // Save the tenant key used for login
+      localStorage.setItem('irmmf_tenant', tKey)
+
       window.dispatchEvent(new Event('irmmf_user_change'))
       try {
         const latestResp = await apiFetch(`/assessment/user/${storedUser}/latest`)
@@ -98,6 +122,15 @@ const Login = () => {
         </div>
         <div className="login-form">
           <label>
+            Tenant Context
+            <input
+              type="text"
+              placeholder="default"
+              value={tenantKey}
+              onChange={(event) => setTenantKey(event.target.value)}
+            />
+          </label>
+          <label>
             Email
             <input
               type="text"
@@ -118,7 +151,16 @@ const Login = () => {
           <button className="login-btn" onClick={handleLogin}>
             Sign In
           </button>
+
           <div className="login-status">{status}</div>
+
+          <div className="login-link" style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+            <p style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Don't have a workspace?</p>
+            <Link to="/register" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 600 }}>
+              Create New Tenant
+            </Link>
+          </div>
+
         </div>
       </div>
     </section>

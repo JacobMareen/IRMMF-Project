@@ -4,31 +4,7 @@
   gap: 24px;
 }
 
-.case-workspace-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 18px;
-}
-
-.case-workspace-header h1,
-.case-workspace-header h2 {
-  color: var(--brand-gold);
-  font-family: 'League Spartan', sans-serif;
-  font-weight: 700;
-  margin: 0;
-}
-
-.case-workspace-subtitle {
-  color: var(--text-sub);
-  margin-top: 6px;
-}
-
-.case-workspace-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
+/* Header styles handled by PageHeader component */
 
 .case-workspace-grid {
   display: grid;

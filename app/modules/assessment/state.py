@@ -3,7 +3,8 @@ from typing import Any, Dict, List
 import secrets
 from sqlalchemy.dialects.postgresql import insert
 
-from app import models, schemas
+from app import schemas
+from app.modules.assessment import models
 
 
 class AssessmentStateService:

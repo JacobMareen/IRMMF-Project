@@ -333,8 +333,79 @@
     grid-template-columns: 1fr;
   }
 
+
   .ar-header {
     flex-direction: column;
     gap: 12px;
   }
+}
+
+/* Rich Archetype Persona Styles */
+.ar-persona-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.ar-persona-desc strong {
+  display: block;
+  font-size: 1.1rem;
+  color: var(--brand-gold);
+  margin-bottom: 6px;
+}
+
+.ar-persona-desc p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-sub);
+  margin: 0;
+}
+
+.ar-peer-comp {
+  background: rgba(91, 192, 222, 0.1);
+  border-left: 3px solid #5bc0de;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.ar-tags-group {
+  margin-bottom: 10px;
+}
+
+.ar-tag-label {
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ar-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ar-tag {
+  font-size: 0.85rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+}
+
+.ar-tag.success {
+  border-color: #10b981;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.ar-tag.warning {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
 }

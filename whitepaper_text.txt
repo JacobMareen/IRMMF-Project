@@ -1,0 +1,249 @@
+IRMMF Methodology & Framework White Paper (Alpha)
+Insider Risk & Threat Management — Adaptive Assessment, Scoring, and Advisory Outputs
+Version 0.1 • 2026-01-11 (UTC) Belfort Advisory (draft)
+
+Confidential draft. For design review and pilot planning only.
+
+Table of contents
+Note: This document is generated during alpha. If you need an auto-updating Table of Contents, open in Word and insert a TOC (References → Table of Contents).
+Executive summary
+IRMMF is a proprietary methodology and assessment platform for Insider Risk and Threat Management (IRTM). It combines governance, legal, human, technical, and operational signals into a single coherent maturity model and produces C-level outputs that translate assessment results into a pragmatic multi-year IRTM program.
+What IRMMF is
+IRMMF is not a “survey.” It is an adaptive, evidence-aware assessment system designed to:
+Route each organization through an appropriate depth of assessment (light to deep) using intake-driven logic.
+Ask only questions that are relevant and reachable based on gatekeeper outcomes and maturity signals.
+Score across two dimensions simultaneously: (1) framework domains and (2) cross-cutting axes of control quality.
+Generate an archetype-based narrative and prioritized program roadmap suitable for executive decision-making.
+Target audience & use contexts
+Primary users are CISOs and internal audit leads. Secondary stakeholders include HR, legal/privacy, IT operations, risk management, and executive leadership. IRMMF supports onboarding, periodic audits, targeted investigations, and self-assessments. The platform is designed so different roles can contribute without forcing disclosure of sensitive artifacts.
+The IRMMF framework
+IRMMF defines insider risk maturity across 9 domains and measures quality through 9 cross-cutting axes. Domains describe “what” capabilities exist. Axes describe “how well” they work in practice (governance strength, execution consistency, legal defensibility, friction management, and so on).
+Domains (capability areas)
+Domain
+Purpose (one-line)
+1. Strategy & Governance
+Mandate, sponsorship, scope, ownership, funding, and program management.
+2. Threat Model & Operations
+Scenarios, deterrence, hunting, intelligence, and operational loop.
+3. Risk Management
+Inventory, assessment, treatment, and exceptions aligned to business risk.
+4. Legal, Privacy & Ethics
+Lawful basis, proportionality, transparency, and defensibility.
+5. Human-Centric Culture
+Speak-up, fairness, training, and behavioral norms shaping insider risk.
+6. Technical Controls
+Identity, data, endpoint, network, and tooling controls for insider pathways.
+7. Behavioral Analytics & Detection
+Signals, detection logic, tuning, and monitoring for insider behaviors.
+8. Investigation & Response
+Triage, investigations, HR/legal coordination, and response execution.
+9. Performance & Resilience
+Metrics, assurance, exercises, learning, and sustained effectiveness.
+Axes (quality lenses)
+Axis
+Definition
+G
+Governance — Mandate, sponsorship, funding, decision rights, oversight cadence.
+E
+Execution — Operational consistency; repeatable habits and adoption.
+T
+Technical Orchestration — Automation and integration of monitoring/detection/respond.
+L
+Legal & Privacy — Defensibility, proportionality, transparency, lawful basis, auditability.
+H
+Human Sentiment — Psychological safety, speak-up culture, fairness perception.
+V
+Visibility — Sensitive assets/systems, data flows, access concentration.
+R
+Resilience — Case handling, investigations, exercises, recovery and learning.
+F
+Friction Management — Ability to reduce bypass pressure; usability and exception management.
+W
+Control Lag Management — Ability to adapt controls quickly during change events.
+IRMMF method at a glance
+
+Example axis profile output
+
+Current framework coverage by domain
+
+Methodology
+1) Intake (privacy-first)
+IRMMF starts with a short intake that captures the minimum necessary context for routing, benchmarking, and interpretation without collecting company names. The intake uses categories (e.g., sector band, headcount band, data sensitivity band, regulatory exposure band). The user can add identifying details only later, at report export.
+2) Depth routing with override (alpha)
+A routing engine maps intake to an initial assessment depth (Light, Standard, Deep). In alpha, a “go deeper anyway” toggle is available for power users to override the recommended depth. Depth influences which question tiers are eligible to be asked, not the scoring model itself.
+3) Adaptive questioning and reachable paths
+IRMMF uses gatekeeper questions (BranchType = Gatekeeper) to unlock or suppress downstream questions. This prevents low-maturity organizations from being overwhelmed while still allowing “shadow maturity” to surface through optional deepening prompts and targeted probes.
+Dynamic sidebar: show only reachable questions; hide locked questions until unlocked.
+“Parking lot” view: allow users to bookmark questions for later without losing context.
+Stop-and-resume: if a user exits, provide a next-best-question suggestion based on the current reachable frontier.
+4) Evidence without file uploads
+To avoid NDA friction and non-response, IRMMF does not require artifact uploads during assessment. Instead, each relevant question can trigger evidence micro-questions that validate the maturity and complexity of the claimed control. These micro-questions are tailored per question (based on its EvidencePolicyID) and adjust confidence in the score, not only the score itself.
+EvidencePolicyID types currently defined in the bank:
+EvidencePolicyID
+Intent
+GOV_STD
+Governance standard — Prefer artifact evidence for BaseScore≥3; recency class: governance.
+RISK_STD
+Risk/targeting standard — Prefer evidence for BaseScore≥3; sample outputs encouraged.
+OPS_STD
+Operational standard — Operational examples acceptable for BaseScore 2–3; evidence for 4.
+CULT_SOFT
+Culture soft — Self-report acceptable up to 3; evidence strengthens CI, not required for 3.
+LEG_STRICT
+Legal strict — Tier A cap low; BaseScore≥3 expects at least artifacts; 4 expects proof/audit.
+HUMAN_BIO
+Human (Bio-Social) — For Verified score 4: requires Tier C BIO_TELEM evidence + documented intervention protocol ('fitness for duty'). Up to 3 may use artifacts/self-report with reduced CI.
+FRICTION_AI
+Friction/AI Arbitrage — To score above 3, require evidence of shadow AI/bypass tracking (CASB, proxy logs, egress controls) and an approved AI pathway.
+TECH_STRICT
+Technical strict — High scores require operational proof: logging integrity, retention, and tested detection/response automation; artifacts alone cap at 3.5.
+5) Scoring and structural integrity
+IRMMF computes results across domains and axes. Each question contributes to one or two axes (Axis1/Axis2) with weights (W1/W2), and also maps to a domain/function/sub-capability. Questions include criticality (CW) and a threshold (TH) to support structural integrity rules.
+Structural Integrity Floor (alpha penalty): for foundational questions (e.g., CW > 1.2) that are failed (answer score < TH), IRMMF applies a multiplicative floor penalty (e.g., 0.3) to prevent “paper maturity” where policies exist but operational reality is weak.
+6) Archetypes and recommendation bank
+IRMMF translates the numerical profile into a single primary archetype, supported by a recommendation bank that selects prioritized actions based on weak axes, weak domains, and integrity penalties. The system is designed so new archetypes and recommendations can be added without changing scoring formulas.
+7) Benchmarking (internal + external)
+Benchmarking starts with internal datasets. The design supports later external benchmarking via privacy-preserving peer-group definitions (e.g., sector band + region band + size band), using only aggregated statistics.
+Platform outputs
+IRMMF produces (1) an executive report with narrative and program plan, (2) a role-based dashboard (CISO, audit, HR), (3) a domain-by-domain matrix view for fast review, and (4) an export package for advisory delivery.
+Architecture principles (business-proofing)
+Modular engines: intake routing, adaptive pathing, scoring, archetypes, and reporting are separate services/modules.
+Versioned question banks and immutable assessment snapshots for audit defensibility.
+Privacy-first data minimization: anonymous assessments by default, with opt-in identification at export.
+Connector roadmap: metadata-only integrations (counts, timestamps) before any content-level collection.
+
+Appendix A — Domain taxonomy (from current question bank)
+Below is the framework taxonomy inferred from the current Excel question bank. It lists functions and sub-capabilities per domain. This taxonomy is used for filtering, dashboards, and reporting.
+1. Strategy & Governance
+Organization & RACI
+Cross-functional steering committee
+Operational working group (ITWG/triage cell)
+RACI & decision rights
+Stakeholder engagement & trust plan
+Program Management
+Charter & authority model
+Executive sponsorship & oversight cadence
+Funding & resourcing model (OpEx/CapEx)
+IRTM mission & scope statement
+Multi-year strategy & roadmap
+Program integration architecture
+Scope & Boundaries
+Exceptions & risk acceptance
+Scope boundary control
+2. Threat Model & Operations
+Deterrence & Disruption
+Deterrence strategy
+Rapid disruption playbooks
+Sensitive transition workflow (flight-risk)
+Intelligence & Learning Loop
+Case-to-control feedback loop
+Threat Hunting & Validation
+Detection validation & regression testing
+Hypothesis-driven insider threat hunting
+Threat Taxonomy & Scenarios
+Insider archetype taxonomy
+Objective & harm catalogue
+Role-based threat modeling
+Threat path (TTP-style) library
+3. Risk Management
+Assessment & Analysis
+Insider-focused BIA
+Risk appetite & tolerance
+Scenario modeling & prioritization
+Inventory & Scope
+Critical process mapping
+Crown jewels/HVA identification
+Third-party/contractor scoping
+Risk Treatment & Exceptions
+Scenario-driven treatment plans
+4. Legal, Privacy & Ethics
+Compliance & Policy
+Ethical Monitoring Framework
+Policy & Standards Suite
+Regulatory & Contractual Mapping
+Works Council / Labor Alignment
+Oversight & Safeguards
+Monitoring Access Governance
+Review, Redress & Assurance
+Privacy Engineering
+DPIA/PIA per Use-Case
+Data Minimization & Purpose Limitation
+Retention, Purging & Legal Hold
+Tiered Visibility & Controlled Deanonymization
+5. Human-Centric Culture
+Awareness & Wellbeing
+Manager Behavioral Signal Training
+Speak-Up Culture & Psychological Safety
+Targeted Awareness & Social Engineering Resilience
+Human Lifecycle
+Empathetic Offboarding Protocols
+Enhanced JML Synchronization
+Sensitive Transitions Workflow
+Personnel Security
+High-Risk Role Identification & Control Tiers
+People-Signal Governance
+Tiered Screening & Vetting
+6. Technical Controls
+Data, Endpoint & Cloud Controls
+Collaboration/SaaS sharing controls
+DLP (endpoint + cloud + SaaS)
+DevOps/source code & secrets protections
+EDR for insider use-cases
+Removable media & port control
+Identity & Access
+Least privilege & role engineering
+MFA/adaptive access & device posture
+PAM & privileged session governance
+Service account/API token governance
+Logging & Telemetry Strategy
+Central logging integrity & retention
+Scenario-to-telemetry mapping
+Physical/OT Overlay
+OT privileged access & engineering workstation governance
+Physical access governance (critical areas)
+7. Behavioral Analytics & Detection
+Detection Engineering
+Alert triage workflow & quality management
+Coverage mapping (scenario→telemetry→detection→response)
+Detection lifecycle management
+Modeling & Detection
+Risk scoring governance
+Scenario-based rules
+UEBA baselines & anomaly detection
+Signal Fusion
+Context enrichment (role/HVA/sensitivity/project)
+Identity resolution & entity mapping
+Multi-source ingestion & onboarding
+8. Investigation & Response
+Incident Action
+Containment & eradication actions
+Crisis management & communications
+Insider response playbooks (by scenario)
+Law enforcement & external liaison
+Operational Readiness
+Case management (process + tooling)
+Forensic readiness & evidence preservation
+Multidisciplinary triage (ITWG) operations
+Privacy guardrails for investigations
+Remediation & Follow-up
+Root cause analysis & corrective actions
+9. Performance & Resilience
+Assurance & Metrics
+Control testing & continuous assurance
+KPI/KRI framework & dashboards
+Maturity benchmarking & audit readiness
+Resilience & Continuity
+BCP/DR for insider-caused damage
+Recovery playbooks & trust restoration
+Testing & Exercising
+Purple-team / simulation of insider paths
+Tabletop exercise (TTX) program
+
+Appendix B — Protecting IRMMF intellectual property
+This section is practical guidance, not legal advice. For formal protection and commercial readiness, consult an IP attorney.
+Copyright: the framework text, question bank wording, scoring narrative, and report templates are copyrightable as written works. Add a clear copyright notice in the UI, exports, and repository.
+Trade secrets: keep the scoring weights, archetype rules, and recommendation bank logic confidential; enforce access controls; use NDAs with contractors and pilot clients.
+Trademarks: consider registering a brand name (and logo) for the methodology and platform; this protects market identity.
+Contracts: include Terms of Use that prohibit copying/reverse engineering of the question bank and reports; add pilot agreements with confidentiality and limited license clauses.
+Database rights (EU): structured datasets may have additional protection; keep provenance and change logs.
+Operational controls: watermark reports, embed version IDs, and maintain an audit trail of bank versions and scoring parameters.

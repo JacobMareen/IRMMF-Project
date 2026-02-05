@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { API_ROOT } from '../lib/api'
+import { client, API_ROOT } from '../api/client'
 import './ExternalInbox.css'
 
 type ExternalMessage = {
@@ -31,7 +31,7 @@ const ExternalInbox = () => {
       return
     }
     setLoading(true)
-    fetch(`${API_ROOT}/api/external/inbox?case_id=${encodeURIComponent(caseId)}&token=${encodeURIComponent(token)}`)
+    client.fetch(`/api/external/inbox?case_id=${encodeURIComponent(caseId)}&token=${encodeURIComponent(token)}`, {}, true)
       .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((payload: ExternalInboxResponse) => {
         setData(payload)
@@ -58,7 +58,7 @@ const ExternalInbox = () => {
       return
     }
     setLoading(true)
-    fetch(`${API_ROOT}/api/external/inbox?case_id=${encodeURIComponent(caseId)}&token=${encodeURIComponent(token)}`, {
+    client.fetch(`/api/external/inbox?case_id=${encodeURIComponent(caseId)}&token=${encodeURIComponent(token)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ body: message.trim() }),

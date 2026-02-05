@@ -1,7 +1,7 @@
 """Assessment analytics and scoring outputs."""
 from typing import Any, Dict, List
 
-from app import models
+from app.modules.assessment import models
 
 
 class AssessmentAnalysisService:
@@ -18,7 +18,7 @@ class AssessmentAnalysisService:
             for r in responses
             if r.q_id in reachable and not r.is_deferred and (r.origin or "adaptive") != "override"
         ]
-        result = self.scoring_engine.compute_analysis(all_qs, valid_responses, evidence, intake_tags)
+        result = self.scoring_engine.compute_analysis(all_qs, valid_responses, evidence, intake_tags, db=self.db)
         result["assessment_id"] = assessment_id  # Add assessment_id for recommendation matching
         result["recommendations"] = self._build_recommendations(result)
         # Expanded includes override answers for a deeper maturity snapshot.
@@ -26,7 +26,7 @@ class AssessmentAnalysisService:
             r for r in responses
             if r.q_id in reachable and not r.is_deferred
         ]
-        expanded = self.scoring_engine.compute_analysis(all_qs, expanded_responses, evidence, intake_tags)
+        expanded = self.scoring_engine.compute_analysis(all_qs, expanded_responses, evidence, intake_tags, db=self.db)
         result["maturity_scores"] = {
             "baseline": result.get("summary", {}),
             "expanded": expanded.get("summary", {}),

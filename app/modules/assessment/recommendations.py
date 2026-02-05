@@ -2,7 +2,7 @@
 from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
-from app import models
+from app.modules.assessment import models
 from app.core.repositories import RecommendationRepository
 from app.models import utcnow
 

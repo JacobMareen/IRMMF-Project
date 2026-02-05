@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch, readApiError } from '../lib/api'
 import './AssessmentIntake.css'
 import { describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
+import { AssessmentNav } from '../components/AssessmentNav'
+import { PageHeader } from '../components/PageHeader'
 
 type IntakeOption = { value: string; display_order?: number }
 type IntakeQuestion = {
@@ -248,14 +250,14 @@ const AssessmentIntake = () => {
 
   return (
     <section className="ai-page">
-      <div className="ai-header">
-        <div>
-          <h1>Intake</h1>
-          <p className="ai-subtitle">
-            Assessment ID: <strong>{assessmentId}</strong>
-          </p>
-        </div>
-        <div className="ai-progress">{progress}</div>
+      <PageHeader
+        title="Intake"
+        subtitle={`Assessment ID: ${assessmentId}`}
+        actions={<div className="ai-progress">{progress}</div>}
+      />
+
+      <div style={{ marginBottom: '20px' }}>
+        <AssessmentNav assessmentId={assessmentId} />
       </div>
 
       <div className="ai-card ai-scrape">

@@ -6,7 +6,8 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from auth import get_principal, Principal
-from app import models, schemas
+from app import schemas
+from app.modules.assessment import models
 from app.db import get_db
 from app.modules.assessment.service import AssessmentService
 from app.modules.assessment.scraper import scrape_and_analyze_website, suggest_intake_answers

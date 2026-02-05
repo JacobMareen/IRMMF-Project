@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { API_ROOT } from '../lib/api'
+import { client, API_ROOT } from '../api/client'
 import './ExternalDropbox.css'
 
 const ExternalDropbox = () => {
@@ -18,7 +18,7 @@ const ExternalDropbox = () => {
     }
     setLoading(true)
     setStatus('Submitting...')
-    fetch(`${API_ROOT}/api/external/dropbox`, {
+    client.fetch(`/api/external/dropbox`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

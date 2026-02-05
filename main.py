@@ -23,11 +23,18 @@ from app.modules.insider_program.routes import router as insider_program_router
 from app.security.audit import AuditContext, reset_audit_context, set_audit_context
 from app.security.rate_limit import RateLimiter, load_rate_limit_config, resolve_client_ip
 
-# 1. Initialize Database Tables (safe to run on restart)
-init_database()
+from contextlib import asynccontextmanager
+from app.core.settings import settings
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    init_database()
+    yield
+    # Shutdown (if needed)
 
 # 2. Setup FastAPI App
-app = FastAPI(title="IRMMF Command Center", version="6.1-Alpha")
+app = FastAPI(title=settings.APP_TITLE, version=settings.APP_VERSION, lifespan=lifespan)
 
 # Central module registry (modules are peers).
 module_registry = register_modules()
