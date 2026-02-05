@@ -109,7 +109,7 @@ class TestAssessmentSubmission:
     @pytest.mark.critical
     def test_submit_response(self, client, sample_question, db):
         """Should submit a response successfully."""
-        from app.models import Answer
+        from app.modules.assessment.models import Answer
         
         # Get first answer for this question
         answer = db.query(Answer).filter(Answer.question_id == sample_question.id).first()

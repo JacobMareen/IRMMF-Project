@@ -201,6 +201,10 @@
   gap: 8px;
 }
 
+.cases-muted {
+  color: var(--text-sub);
+}
+
 .cases-section-title {
   color: var(--brand-gold);
   font-size: 0.85rem;

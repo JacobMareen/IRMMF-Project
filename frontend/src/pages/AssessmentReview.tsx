@@ -3,6 +3,7 @@ import './AssessmentReview.css'
 import { describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
 import { apiFetch, apiFetchRoot, readApiError } from '../lib/api'
 import { PageHeader } from '../components/PageHeader'
+import { getDomainMeta } from '../utils/domainMetadata'
 
 type AnswerOption = { a_id: string; answer_text: string; base_score: number }
 type Question = {
@@ -184,8 +185,32 @@ const AssessmentReview = () => {
             .map((domain) => (
               <details key={domain} className="rv-card" open>
                 <summary className="rv-summary">
-                  {domain} ({groupedRows[domain].length})
+                  {(() => {
+                    const meta = getDomainMeta(domain)
+                    return (
+                      <div className="rv-summary-main">
+                        <div className="rv-summary-title">
+                          <span className="rv-summary-icon">{meta.icon}</span>
+                          <span>{meta.label}</span>
+                          <span className="rv-summary-count">({groupedRows[domain].length})</span>
+                        </div>
+                        <span className="rv-summary-sub">{meta.description}</span>
+                      </div>
+                    )
+                  })()}
                 </summary>
+                <div className="rv-domain-meta">
+                  {(() => {
+                    const meta = getDomainMeta(domain)
+                    return meta.capabilities && meta.capabilities.length ? (
+                      <div className="rv-domain-tags">
+                        {meta.capabilities.map((cap) => (
+                          <span key={cap} className="rv-domain-tag">{cap}</span>
+                        ))}
+                      </div>
+                    ) : null
+                  })()}
+                </div>
                 <div className="rv-table">
                   <div className="rv-row rv-header-row">
                     <span>Question</span>

@@ -102,6 +102,10 @@ const Cases = () => {
   })
   const [subjectsAdded, setSubjectsAdded] = useState<SubjectDraft[]>([])
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null)
+  const [breakGlassOpen, setBreakGlassOpen] = useState(false)
+  const [breakGlassReason, setBreakGlassReason] = useState('')
+  const [breakGlassDuration, setBreakGlassDuration] = useState(60)
+  const [breakGlassExpiresAt, setBreakGlassExpiresAt] = useState<number | null>(null)
 
   const loadCases = () => {
     apiJson<CaseRecord[]>('/cases')
@@ -130,6 +134,28 @@ const Cases = () => {
     if (hours < 24) return `${hours}h`
     const days = Math.ceil(hours / 24)
     return `${days}d`
+  }
+
+  const getBreakGlassExpiry = (caseId: string) => {
+    const stored = localStorage.getItem(`break_glass_${caseId}`)
+    if (!stored) return null
+    try {
+      const parsed = JSON.parse(stored) as { expiresAt?: number }
+      if (parsed.expiresAt && parsed.expiresAt > Date.now()) {
+        return parsed.expiresAt
+      }
+    } catch {
+      // ignore malformed storage
+    }
+    localStorage.removeItem(`break_glass_${caseId}`)
+    return null
+  }
+
+  const isPiiUnlocked = (caseId: string) => Boolean(getBreakGlassExpiry(caseId))
+
+  const maskCaseText = (value: string | null | undefined, fallback: string, caseId: string) => {
+    if (isPiiUnlocked(caseId)) return value || ''
+    return fallback
   }
 
   const computeRiskScore = (impact: number, probability: number) =>
@@ -329,6 +355,49 @@ const Cases = () => {
       .catch(() => setStatus('Failed to update status.'))
   }
 
+  const lockPII = () => {
+    if (!selectedCaseId) return
+    localStorage.removeItem(`break_glass_${selectedCaseId}`)
+    setBreakGlassExpiresAt(null)
+    setStatus('PII view locked.')
+  }
+
+  const submitBreakGlass = () => {
+    if (!selectedCaseId) return
+    const reason = breakGlassReason.trim()
+    if (!reason) {
+      setStatus('Break-glass reason is required.')
+      return
+    }
+    const duration = Math.min(480, Math.max(15, Number(breakGlassDuration) || 60))
+    apiFetch(`/cases/${selectedCaseId}/break-glass`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reason,
+        scope: 'case_list',
+        duration_minutes: duration,
+      }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const payload = await res.json().catch(() => null)
+          throw new Error(payload?.detail || 'Failed to record break-glass action.')
+        }
+        return res.json()
+      })
+      .then(() => {
+        const expiresAt = Date.now() + duration * 60 * 1000
+        localStorage.setItem(`break_glass_${selectedCaseId}`, JSON.stringify({ expiresAt }))
+        setBreakGlassExpiresAt(expiresAt)
+        setBreakGlassReason('')
+        setBreakGlassDuration(duration)
+        setBreakGlassOpen(false)
+        setStatus(`PII unlocked for ${duration} minutes.`)
+      })
+      .catch((err) => setStatus(err instanceof Error ? err.message : 'Failed to record break-glass action.'))
+  }
+
   const closeCase = (item: CaseRecord) => {
     if (item.is_anonymized) {
       setStatus('Cannot close an anonymized case.')
@@ -355,12 +424,36 @@ const Cases = () => {
   const triageProbabilityOption = TRIAGE_PROBABILITY_LEVELS.find((option) => option.value === triageDraft.probability)
   const triageRiskOption = TRIAGE_RISK_LEVELS.find((option) => option.value === triageDraft.risk_score)
   const createSteps = ['Basics', 'Intake details', 'Triage', 'Subjects']
+  const piiUnlockedSelected = selectedCaseId ? isPiiUnlocked(selectedCaseId) : false
+  const breakGlassUntil =
+    piiUnlockedSelected && breakGlassExpiresAt ? new Date(breakGlassExpiresAt).toLocaleTimeString() : ''
 
   useEffect(() => {
     if (selectedCaseId && !selectedCase) {
       setSelectedCaseId(null)
     }
   }, [selectedCaseId, selectedCase])
+
+  useEffect(() => {
+    if (!selectedCaseId) {
+      setBreakGlassExpiresAt(null)
+      setBreakGlassOpen(false)
+      return
+    }
+    const expiry = getBreakGlassExpiry(selectedCaseId)
+    setBreakGlassExpiresAt(expiry)
+  }, [selectedCaseId])
+
+  useEffect(() => {
+    if (!breakGlassExpiresAt || !selectedCaseId) return
+    const timer = window.setInterval(() => {
+      if (Date.now() > breakGlassExpiresAt) {
+        localStorage.removeItem(`break_glass_${selectedCaseId}`)
+        setBreakGlassExpiresAt(null)
+      }
+    }, 30000)
+    return () => window.clearInterval(timer)
+  }, [breakGlassExpiresAt, selectedCaseId])
 
   useEffect(() => {
     document.body.classList.toggle('modal-open', overlayOpen)
@@ -406,7 +499,7 @@ const Cases = () => {
                   <div key={item.case_id} className="cases-item">
                     <div className="cases-item-header">
                       <div>
-                        <strong>{item.title}</strong>
+                        <strong>{maskCaseText(item.title, 'Sensitive case', item.case_id)}</strong>
                         <div className="cases-meta">
                           {item.case_id} · {item.jurisdiction}
                           {item.vip_flag ? ' · VIP' : ''}
@@ -441,6 +534,9 @@ const Cases = () => {
                           </button>
                         )}
                         <span className="cases-tag">{item.status}</span>
+                        <span className={`cases-tag ${isPiiUnlocked(item.case_id) ? 'warning' : ''}`}>
+                          PII {isPiiUnlocked(item.case_id) ? 'Unlocked' : 'Locked'}
+                        </span>
                       </div>
                     </div>
                     {hasJurisdiction ? (
@@ -450,7 +546,13 @@ const Cases = () => {
                     ) : null}
                     {isCollapsed ? null : (
                       <div className="cases-item-body">
-                        <p>{item.summary || 'No summary provided yet.'}</p>
+                        <p>
+                          {maskCaseText(
+                            item.summary || 'No summary provided yet.',
+                            'Summary hidden. Break glass to view.',
+                            item.case_id
+                          )}
+                        </p>
                         <div className="cases-meta-row">
                           <span className="cases-meta">Stage: {item.stage}</span>
                           <span className="cases-meta">Owner: {item.created_by || 'Unassigned'}</span>
@@ -866,20 +968,45 @@ const Cases = () => {
           <div className="overlay-panel wide" onClick={(event) => event.stopPropagation()}>
             <div className="overlay-header">
               <div>
-                <h3 className="overlay-title">{selectedCase.title}</h3>
+                <h3 className="overlay-title">
+                  {maskCaseText(selectedCase.title, 'Sensitive case', selectedCase.case_id)}
+                </h3>
                 <div className="overlay-subtitle">
                   {selectedCase.case_id} · {selectedCase.jurisdiction}
                 </div>
               </div>
               <div className="cases-inline">
                 <span className="cases-tag">{selectedCase.status}</span>
+                <span className={`cases-tag ${piiUnlockedSelected ? 'warning' : ''}`}>
+                  PII {piiUnlockedSelected ? 'Unlocked' : 'Locked'}
+                </span>
+                {breakGlassUntil ? <span className="cases-muted">until {breakGlassUntil}</span> : null}
+                {piiUnlockedSelected ? (
+                  <button className="cases-btn outline" onClick={lockPII}>
+                    Lock PII
+                  </button>
+                ) : (
+                  <button
+                    className="cases-btn outline"
+                    onClick={() => setBreakGlassOpen(true)}
+                    disabled={selectedCase.is_anonymized}
+                  >
+                    Break Glass
+                  </button>
+                )}
                 <button className="overlay-close" onClick={() => setSelectedCaseId(null)} aria-label="Close">
                   ×
                 </button>
               </div>
             </div>
             <div className="overlay-body">
-              <p className="cases-muted">{selectedCase.summary || 'No summary provided yet.'}</p>
+              <p className="cases-muted">
+                {maskCaseText(
+                  selectedCase.summary || 'No summary provided yet.',
+                  'Summary hidden. Break glass to view.',
+                  selectedCase.case_id
+                )}
+              </p>
               <div className="cases-meta-row">
                 <span className="cases-meta">Stage: {selectedCase.stage}</span>
                 <span className="cases-meta">Owner: {selectedCase.created_by || 'Unassigned'}</span>
@@ -945,6 +1072,45 @@ const Cases = () => {
             </div>
           </div>
         ) : null}
+      </div>
+
+      <div className={`modal ${breakGlassOpen ? 'active' : ''}`}>
+        <div className="modal-content">
+          <div className="modal-header">
+            <h3>Break Glass: Reveal PII</h3>
+          </div>
+          <div className="modal-body">
+            <p className="cases-muted">
+              This action is logged. Provide a justification to reveal sensitive details for a limited time.
+            </p>
+            <label>
+              Justification
+              <textarea
+                value={breakGlassReason}
+                onChange={(event) => setBreakGlassReason(event.target.value)}
+                placeholder="Reason for accessing sensitive identities"
+              />
+            </label>
+            <label>
+              Duration (minutes)
+              <input
+                type="number"
+                min={15}
+                max={480}
+                value={breakGlassDuration}
+                onChange={(event) => setBreakGlassDuration(Number(event.target.value))}
+              />
+            </label>
+          </div>
+          <div className="modal-footer">
+            <button className="cases-btn outline" onClick={() => setBreakGlassOpen(false)}>
+              Cancel
+            </button>
+            <button className="cases-btn" onClick={submitBreakGlass}>
+              Unlock PII
+            </button>
+          </div>
+        </div>
       </div>
     </>
   )

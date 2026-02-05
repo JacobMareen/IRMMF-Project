@@ -17,6 +17,7 @@ from app.modules.cases.schemas import (
     CASE_STAGES,
     CaseAcknowledgeMissed,
     CaseAdversarialForm,
+    CaseBreakGlassRequest,
     CaseApplyPlaybook,
     CaseAuditEventOut,
     CaseContentFlagOut,
@@ -2551,6 +2552,32 @@ class CaseService:
         self.db.commit()
         self.db.refresh(case)
         return self._serialize_case(case)
+
+    def break_glass(
+        self,
+        case_id: str,
+        payload: CaseBreakGlassRequest,
+        principal: Principal,
+    ) -> dict:
+        case = self._get_case_or_raise(case_id, principal=principal)
+        duration = payload.duration_minutes or 60
+        duration = min(480, max(15, duration))
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=duration)
+        details = {
+            "reason": payload.reason,
+            "scope": payload.scope,
+            "duration_minutes": duration,
+            "expires_at": expires_at.isoformat(),
+        }
+        self._log_audit_event(
+            case_id=case.case_id,
+            event_type="break_glass",
+            actor=principal.subject,
+            message="Break-glass access granted.",
+            details=details,
+        )
+        self.db.commit()
+        return {"status": "ok", "expires_at": expires_at}
 
     def _get_case_or_raise(
         self,

@@ -308,6 +308,33 @@ class CaseAnonymizeRequest(BaseModel):
     reason: Optional[str] = None
 
 
+class CaseBreakGlassRequest(BaseModel):
+    reason: str
+    scope: Optional[str] = None
+    duration_minutes: Optional[int] = 60
+
+    @field_validator("reason")
+    @classmethod
+    def validate_reason(cls, value: str) -> str:
+        if not value or not value.strip():
+            raise ValueError("Break-glass reason required")
+        return value.strip()
+
+    @field_validator("duration_minutes")
+    @classmethod
+    def validate_duration(cls, value: Optional[int]) -> Optional[int]:
+        if value is None:
+            return value
+        if value < 5 or value > 480:
+            raise ValueError("Duration must be between 5 and 480 minutes")
+        return value
+
+
+class CaseBreakGlassOut(BaseModel):
+    status: str
+    expires_at: datetime
+
+
 class CaseApplyPlaybook(BaseModel):
     playbook_key: str
 

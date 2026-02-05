@@ -47,6 +47,54 @@
   margin-bottom: 12px;
 }
 
+.rv-summary-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rv-summary-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand-gold);
+  font-weight: 700;
+}
+
+.rv-summary-icon {
+  font-size: 1.1rem;
+}
+
+.rv-summary-count {
+  font-weight: 600;
+  color: var(--text-sub);
+}
+
+.rv-summary-sub {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  font-weight: 400;
+}
+
+.rv-domain-meta {
+  margin-bottom: 12px;
+}
+
+.rv-domain-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rv-domain-tag {
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  background: var(--bg-input);
+}
+
 .rv-muted {
   color: var(--text-sub);
 }

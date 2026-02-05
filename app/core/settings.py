@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     # Analysis & Risk
     RISK_CONFIG_PATH: str = "config/risk_scenarios_simple.yaml"
 
+    # AI Report Branding
+    AI_REPORT_LOGO_PATH: Optional[str] = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -12,8 +12,9 @@ This document consolidates all technical, operational, and user documentation fo
 5. [Insider Risk Program Module](#insider-risk-program-module)
 6. [Assessment Module](#assessment-module)
 7. [Technical Implementation](#technical-implementation)
-8. [Deployment & Operations](#deployment--operations)
-9. [User Guides](#user-guides)
+8. [UX & Architecture Improvement Plan](#ux--architecture-improvement-plan)
+9. [Deployment & Operations](#deployment--operations)
+10. [User Guides](#user-guides)
 
 ---
 
@@ -193,6 +194,98 @@ The Assessment Module (v10) focuses on a streamlined intake process and maturity
 *   **AssessmentFlow.tsx:** Maturity assessment runner with neuro-adaptive branching.
 *   **CommandCenter.tsx:** Operational dashboard.
 *   **Settings.tsx:** Tenant configuration (Jurisdiction rules, Holidays).
+
+---
+
+## UX & Architecture Improvement Plan
+
+### Goal Description
+Enhance the user friendliness and professional feel of the application while robustifying the backend architecture. This plan covers the work done to fix scoring bias and the ongoing refactoring.
+
+### Phase 1: Core Scoring & Risk Model (Completed)
+**Problem:** "0" scores for low maturity (Harmonic Mean bias).
+**Solution:** Implemented Hybrid Scoring (75% Arithmetic + 25% Harmonic) in `app/core/engines.py`.
+**Validation:** Verified via unit tests and UI checks.
+
+### Phase 2: Refactoring & Stability (Completed)
+**Risk Heatmap:** Extracted to `frontend/src/components/RiskHeatmap.tsx` and fixed sizing/alignment.
+**Config:** Moved hardcoded paths to `app/core/settings.py`.
+**Hooks:** Created `frontend/src/hooks/useAssessmentData.ts` to clean up `frontend/src/pages/AssessmentHub.tsx`.
+**DevOps:** Created `dev.sh` for unified startup.
+
+### Phase 3: Visual Dashboard (Completed)
+*   `frontend/src/components/charts/CaseStatusChart.tsx`: Doughnut chart showing Open vs. Closed vs. On-Hold cases.
+*   `frontend/src/components/charts/GateThroughputChart.tsx`: Bar chart showing completion rates for key gates.
+*   `frontend/src/components/charts/ChartConfig.ts`: Centralized Chart.js registration.
+
+### Phase 4: Interactive Feedback (Completed)
+**Toast System:** Global toast provider for better error/success messaging.
+**Integration:** Integrated `useToast` into `frontend/src/pages/AssessmentHub.tsx` for user actions.
+**Theming:** Updated toast CSS to use global variables (light/dark mode support).
+
+### Phase 5: Robustness (Completed)
+**Schemas:** Verified field validators (min/max scores 0-4) in `ResponseCreate`.
+**Ingestion:** Added validation for Excel column headers to prevent runtime errors.
+
+### Phase 6: Framework Visualization (Completed)
+**Goal:** Replace standard progress cards with an interactive "Risk Radar" or "Framework Shield".
+**Component:** `frontend/src/components/visuals/FrameworkRadar.tsx` using SVG for radial progress segments.
+**Interaction:** Hover for summary, click for detailed `frontend/src/components/visuals/DomainDetailOverlay.tsx` with capabilities.
+**Education:** Added `frontend/src/components/FrameworkGuide.tsx` modal to explain the methodology (Domains + Axes).
+
+### Phase 7: Advanced Intelligence (Executive Reporting)
+**Executive Summary Generation:** Implement an AI-driven report generator (using `app/modules/ai`) that consumes assessment results (`ResultsPayload`) and produces a C-level narrative.
+**Content:** Auto-generate High-Level Recommendations, Key Findings, and Business Impact Analysis based on maturity scores and gaps.
+**Format:** Exportable PDF/HTML format designed for board presentation.
+**Risk Treatment:** Interactive treatment planning module (current placeholder in Risks view).
+**AI Analysis:** Free-text intake analysis (requires new `app/modules/ai` backend service).
+
+### Phase 8: Content & Depth (Planned)
+**Methodology Guide:** Expand `frontend/src/components/FrameworkGuide.tsx` into a comprehensive, readable manual.
+**Capabilities Integration:** Integrate domain capability tags into Assessment Results and scoring views to provide granular context.
+
+### Phase 9: Strategic Enhancements (Based on Industry Analysis)
+**Third-Party Risk Module:** Add assessment criteria for Trusted Partners and Supply Chain (Ref: DTEX, Leidos).
+**Maturity Mapper:** Map IRMMF Archetypes to industry-standard 1-5 Maturity Levels (Ad-hoc -> Optimized) for CISO reporting (Ref: CMMI, Cyberhaven).
+**Socio-Technical Profiling:** Distinguish between Malicious vs Negligent risk indicators in the dashboard (Ref: Orange Cyberdefense STS Theory).
+**Global Benchmarking:** Create a Scenario Benchmark view to compare scores against simulated Industry/Sector averages (Ref: Gurucul, Ponemon).
+**Board-Ready Reporting:** Generate PDF Executive Summaries focusing on Business Value and ROI rather than just technical scores.
+
+### Phase 10: Case Management Maturity (Refining Evidence & Workflow)
+**Privacy-First Workflow:** Implement Anonymized by Default views for analysts, revealing PII only with Break Glass justification (Ref: DTEX, Proofpoint).
+**Update:** Break-glass endpoint + UI added in Case Flow and Case list overlays; PII masking applied to subjects, evidence labels, reporter messages, legal holds, expert access, case titles/summaries, and notes. PII entry fields (subjects, evidence, legal holds, experts, notes, reporter replies) now require break-glass unlock. Audit event logged for break-glass actions.
+**Investigator Audit Trail:** Log every action taken by the investigator (viewing evidence, unmasking users) to ensure watching-the-watcher compliance.
+**Integrated Feedback Loop:** Right-sized response workflow (send micro-learning or nudge emails for low-risk negligence) (Ref: Code42 Instructor).
+**Legal-Ready Packaging:** One-click Case Export that bundles timeline, evidence, and audit logs into a tamper-evident ZIP for HR/Legal handoff.
+
+### Phase 11: Adaptive Methodology (The Triage Pivot)
+**Rapid Benchmark (Tier 1):** Promote the 25-question Intake module to be the default starting experience.
+**Unified Schema (Refactor):** Merge `IntakeQuestion` and `Question` tables. Treat Intake as Tier 0 questions to simplify DB and remove redundant tables.
+**Smart Extension:** Use Gatekeeper Logic to dynamically unlock Deep Dive tiers based on Tier 0 answers.
+**Score Integrity:** Tag assessment results as `CONFIDENCE_LEVEL: LOW` (Rapid) vs `CONFIDENCE_LEVEL: HIGH` (Full) to prevent apples-to-oranges benchmarking.
+**Gatekeeper Logic:** Ensure Rapid answers automatically close/open downstream Deep Dive sections.
+**Engagement Mechanics:** Ghost Bars (show potential score on Radar chart), incentive teasers (Unlock Domain Analysis), and extension workflow UI to invite users to unlock domains after Rapid Benchmark.
+
+### Phase 12: UX Polish & Content Enrichment
+**Info Overlays:** Standardized clickable info icons that trigger a click-outside-to-close overlay for definitions (replacing simple browser tooltips).
+**Rich Archetypes:** Expand archetype definitions from bullet points to full prose with peer comparison context.
+**Registration Portal:** Self-service registration flow that creates a dedicated tenant/user (removing manual SQL provisioning).
+
+### Phase 13: Strategic Enablers (Based on Global/Belgian Analysis)
+**Structural Integrity Floor:** Implement a multiplicative penalty in scoring for organizations that have policies (BaseScore) but fail execution (Axis E), preventing paper maturity.
+**Evidence-Aware Assessment:** Add confidence adjusters based on micro-questions (e.g., specific MFA type, RMM tool usage) to refine scores.
+**Shadow Worker Detection:** Add risk scenarios for Remote Management Tools (AnyDesk/RustDesk) and Timezone Anomalies to detect proxy workers (Ref: North Korean checks).
+**Belgian Compliance Module:** CBA No. 81 alignment with tiered visibility (PII hidden by default until Break Glass procedure is logged).
+**Works Council Logic:** `EvidencePolicyID: LEG_STRICT` requires DPIA/Works Council approval for high maturity scores in Domain 4.
+**Signal Fusion:** Backend logic to correlate disparate signals (Auth Event + Geolocation + HID presence) into a single high-fidelity risk score.
+
+### Verification Plan
+**Rapid Mode:** Start new assessment and verify only 25 questions load.
+**Engagement:** Verify Ghost Bars appear on the Radar when hovering locked domains.
+**Logic Check:** Answer No to a gatekeeper and verify related deep dive questions are skipped/closed.
+**Benchmarking:** Verify Rapid results do not overwrite Full benchmarks in the dashboard.
+**Dashboard:** Load Command Center and verify charts render with correct data.
+**Toasts:** Trigger a save/submit action and verify the animated toast appears.
 
 ---
 

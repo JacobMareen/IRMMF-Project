@@ -352,6 +352,11 @@ const CaseFlow = () => {
   const [expertStatus, setExpertStatus] = useState('')
   const [reporterMessages, setReporterMessages] = useState<CaseReporterMessage[]>([])
   const [reporterReply, setReporterReply] = useState('')
+  const [piiUnlocked, setPiiUnlocked] = useState(false)
+  const [breakGlassOpen, setBreakGlassOpen] = useState(false)
+  const [breakGlassReason, setBreakGlassReason] = useState('')
+  const [breakGlassDuration, setBreakGlassDuration] = useState(60)
+  const [breakGlassExpiresAt, setBreakGlassExpiresAt] = useState<number | null>(null)
   const [auditEvents, setAuditEvents] = useState<CaseAuditEvent[]>([])
   const [auditActorFilter, setAuditActorFilter] = useState('')
   const [auditFromFilter, setAuditFromFilter] = useState('')
@@ -487,6 +492,14 @@ const CaseFlow = () => {
   const relationLabel = (value: string) =>
     LINK_RELATION_OPTIONS.find((option) => option.value === value)?.label || value
   const normalizeName = (value?: string | null) => (value || '').trim().toLowerCase()
+  const breakGlassKey = caseId ? `break_glass_${caseId}` : ''
+  const maskFieldValue = (value?: string | null) => {
+    if (piiUnlocked) return value || ''
+    return value ? 'Hidden' : ''
+  }
+  const maskText = (value?: string | null, fallback = 'Hidden') => (piiUnlocked ? value || '' : fallback)
+  const maskIndexed = (value: string, index: number, label: string) =>
+    piiUnlocked ? value : `${label} ${index + 1}`
   const investigatorName = credentialingGate.investigator_name
   const decisionMakerName = seriousDraft.decision_maker
   const roleSeparationConflicts: string[] = []
@@ -641,6 +654,44 @@ const CaseFlow = () => {
     loadReporterMessages()
     loadAuditEvents()
   }, [caseId])
+
+  useEffect(() => {
+    if (!caseId) return
+    if (!breakGlassKey) return
+    const stored = localStorage.getItem(breakGlassKey)
+    if (!stored) {
+      setPiiUnlocked(false)
+      setBreakGlassExpiresAt(null)
+      return
+    }
+    try {
+      const parsed = JSON.parse(stored) as { expiresAt?: number }
+      if (parsed.expiresAt && parsed.expiresAt > Date.now()) {
+        setPiiUnlocked(true)
+        setBreakGlassExpiresAt(parsed.expiresAt)
+      } else {
+        localStorage.removeItem(breakGlassKey)
+        setPiiUnlocked(false)
+        setBreakGlassExpiresAt(null)
+      }
+    } catch {
+      localStorage.removeItem(breakGlassKey)
+      setPiiUnlocked(false)
+      setBreakGlassExpiresAt(null)
+    }
+  }, [caseId, breakGlassKey])
+
+  useEffect(() => {
+    if (!breakGlassExpiresAt || !breakGlassKey) return
+    const timer = window.setInterval(() => {
+      if (Date.now() > breakGlassExpiresAt) {
+        localStorage.removeItem(breakGlassKey)
+        setPiiUnlocked(false)
+        setBreakGlassExpiresAt(null)
+      }
+    }, 30000)
+    return () => window.clearInterval(timer)
+  }, [breakGlassExpiresAt, breakGlassKey])
 
   const filteredAuditEvents = useMemo(() => {
     if (!auditFromFilter && !auditToFilter) {
@@ -1714,6 +1765,53 @@ const CaseFlow = () => {
       .catch(() => setStatus('Failed to update status.'))
   }
 
+  const lockPII = () => {
+    if (!breakGlassKey) return
+    localStorage.removeItem(breakGlassKey)
+    setPiiUnlocked(false)
+    setBreakGlassExpiresAt(null)
+    setStatus('PII view locked.')
+  }
+
+  const submitBreakGlass = () => {
+    if (!caseId) return
+    const reason = breakGlassReason.trim()
+    if (!reason) {
+      setStatus('Break-glass reason is required.')
+      return
+    }
+    const duration = Math.min(480, Math.max(15, Number(breakGlassDuration) || 60))
+    apiFetch(`/cases/${caseId}/break-glass`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reason,
+        scope: 'case_flow',
+        duration_minutes: duration,
+      }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const payload = await res.json().catch(() => null)
+          throw new Error(payload?.detail || 'Failed to record break-glass action.')
+        }
+        return res.json()
+      })
+      .then(() => {
+        const expiresAt = Date.now() + duration * 60 * 1000
+        if (breakGlassKey) {
+          localStorage.setItem(breakGlassKey, JSON.stringify({ expiresAt }))
+        }
+        setPiiUnlocked(true)
+        setBreakGlassExpiresAt(expiresAt)
+        setBreakGlassReason('')
+        setBreakGlassDuration(duration)
+        setBreakGlassOpen(false)
+        setStatus(`PII unlocked for ${duration} minutes.`)
+      })
+      .catch((err) => setStatus(err instanceof Error ? err.message : 'Failed to record break-glass action.'))
+  }
+
   if (!caseData) {
     return <div className="case-flow">Loading case...</div>
   }
@@ -1723,6 +1821,8 @@ const CaseFlow = () => {
   const triageImpactOption = TRIAGE_IMPACT_LEVELS.find((option) => option.value === triageGate.impact)
   const triageProbabilityOption = TRIAGE_PROBABILITY_LEVELS.find((option) => option.value === triageGate.probability)
   const triageRiskOption = TRIAGE_RISK_LEVELS.find((option) => option.value === triageGate.risk_score)
+  const breakGlassUntil = breakGlassExpiresAt ? new Date(breakGlassExpiresAt).toLocaleTimeString() : ''
+  const canEditPII = piiUnlocked && !isAnonymized
 
   return (
     <section className="case-flow">
@@ -1739,6 +1839,21 @@ const CaseFlow = () => {
           <div className="case-flow-meta">Immutable ID: {caseData.case_uuid}</div>
         </div>
         <div className="case-flow-actions">
+          <div className="case-flow-pii">
+            <div className="case-flow-pii-row">
+              <span className={`case-flow-pill ${piiUnlocked ? 'good' : ''}`}>PII {piiUnlocked ? 'Unlocked' : 'Locked'}</span>
+              {breakGlassUntil ? <span className="case-flow-muted">until {breakGlassUntil}</span> : null}
+            </div>
+            {piiUnlocked ? (
+              <button className="case-flow-btn outline small" onClick={lockPII}>
+                Lock PII
+              </button>
+            ) : (
+              <button className="case-flow-btn outline small" onClick={() => setBreakGlassOpen(true)} disabled={isAnonymized}>
+                Break Glass
+              </button>
+            )}
+          </div>
           <button className="case-flow-btn" onClick={() => navigate('/case-management/cases')}>
             Back to Cases
           </button>
@@ -1890,18 +2005,18 @@ const CaseFlow = () => {
                   Reporter channel ID (optional)
                   <input
                     type="text"
-                    value={caseMetaDraft.reporter_channel_id}
+                    value={maskFieldValue(caseMetaDraft.reporter_channel_id)}
                     onChange={(e) => setCaseMetaDraft({ ...caseMetaDraft, reporter_channel_id: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={isAnonymized || !piiUnlocked}
                   />
                 </label>
                 <label className="case-flow-label">
                   Reporter key (optional)
                   <input
                     type="text"
-                    value={caseMetaDraft.reporter_key}
+                    value={maskFieldValue(caseMetaDraft.reporter_key)}
                     onChange={(e) => setCaseMetaDraft({ ...caseMetaDraft, reporter_key: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={isAnonymized || !piiUnlocked}
                   />
                 </label>
                 <button className="case-flow-btn outline" onClick={saveCaseDetails} disabled={isAnonymized}>
@@ -2134,7 +2249,7 @@ const CaseFlow = () => {
                     value={subjectDraft.display_name}
                     onChange={(e) => setSubjectDraft({ ...subjectDraft, display_name: e.target.value })}
                     placeholder="Jane Doe"
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -2144,7 +2259,7 @@ const CaseFlow = () => {
                     value={subjectDraft.reference}
                     onChange={(e) => setSubjectDraft({ ...subjectDraft, reference: e.target.value })}
                     placeholder="Employee ID"
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -2154,17 +2269,17 @@ const CaseFlow = () => {
                     value={subjectDraft.manager_name}
                     onChange={(e) => setSubjectDraft({ ...subjectDraft, manager_name: e.target.value })}
                     placeholder="Manager name"
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
-                <button className="case-flow-btn outline" onClick={addSubject} disabled={isAnonymized}>
+                <button className="case-flow-btn outline" onClick={addSubject} disabled={!canEditPII}>
                   Add subject
                 </button>
                 <div className="case-flow-pill-list">
-                  {caseData.subjects.map((subject) => (
-                    <span key={`${subject.subject_type}-${subject.display_name}`} className="case-flow-pill">
-                      {subject.display_name} ({subject.subject_type})
-                      {subject.manager_name ? ` · mgr ${subject.manager_name}` : ''}
+                  {caseData.subjects.map((subject, idx) => (
+                    <span key={`${subject.subject_type}-${subject.display_name}-${idx}`} className="case-flow-pill">
+                      {maskIndexed(subject.display_name, idx, 'Subject')} ({subject.subject_type})
+                      {subject.manager_name ? ` · mgr ${maskText(subject.manager_name, 'Hidden')}` : ''}
                     </span>
                   ))}
                 </div>
@@ -2830,7 +2945,7 @@ const CaseFlow = () => {
                     type="text"
                     value={evidenceDraft.label}
                     onChange={(e) => setEvidenceDraft({ ...evidenceDraft, label: e.target.value })}
-                    disabled={isAnonymized || !!caseData.evidence_locked}
+                    disabled={!canEditPII || !!caseData.evidence_locked}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -2839,7 +2954,7 @@ const CaseFlow = () => {
                     list="evidence-sources"
                     value={evidenceDraft.source}
                     onChange={(e) => setEvidenceDraft({ ...evidenceDraft, source: e.target.value })}
-                    disabled={isAnonymized || !!caseData.evidence_locked}
+                    disabled={!canEditPII || !!caseData.evidence_locked}
                   />
                   <datalist id="evidence-sources">
                     {EVIDENCE_SOURCE_OPTIONS.map((option) => (
@@ -2853,7 +2968,7 @@ const CaseFlow = () => {
                     type="text"
                     value={evidenceDraft.link}
                     onChange={(e) => setEvidenceDraft({ ...evidenceDraft, link: e.target.value })}
-                    disabled={isAnonymized || !!caseData.evidence_locked}
+                    disabled={!canEditPII || !!caseData.evidence_locked}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -2862,21 +2977,21 @@ const CaseFlow = () => {
                     type="text"
                     value={evidenceDraft.evidence_hash}
                     onChange={(e) => setEvidenceDraft({ ...evidenceDraft, evidence_hash: e.target.value })}
-                    disabled={isAnonymized || !!caseData.evidence_locked}
+                    disabled={!canEditPII || !!caseData.evidence_locked}
                     placeholder="SHA-256 or other hash"
                   />
                 </label>
                 <button
                   className="case-flow-btn outline"
                   onClick={addEvidence}
-                  disabled={isAnonymized || !!caseData.evidence_locked}
+                  disabled={!canEditPII || !!caseData.evidence_locked}
                 >
                   Add evidence
                 </button>
                 <div className="case-flow-pill-list">
-                  {caseData.evidence.map((evidence) => (
+                  {caseData.evidence.map((evidence, idx) => (
                     <span key={evidence.evidence_id} className="case-flow-pill">
-                      {evidence.label}
+                      {maskIndexed(evidence.label, idx, 'Evidence')}
                       {evidence.evidence_hash ? ' · hash' : ''}
                     </span>
                   ))}
@@ -2952,7 +3067,7 @@ const CaseFlow = () => {
                           <div className="case-flow-muted">
                             {message.sender} · {new Date(message.created_at).toLocaleString()}
                           </div>
-                          <div>{message.body}</div>
+                          <div>{maskText(message.body, 'Message hidden. Break glass to view.')}</div>
                         </div>
                       ))
                     )}
@@ -2961,7 +3076,7 @@ const CaseFlow = () => {
                       <textarea
                         value={reporterReply}
                         onChange={(e) => setReporterReply(e.target.value)}
-                        disabled={isAnonymized}
+                        disabled={!canEditPII}
                       />
                     </label>
                     <div className="case-flow-inline">
@@ -2970,13 +3085,13 @@ const CaseFlow = () => {
                           key={`template-${idx}`}
                           className="case-flow-btn outline small"
                           onClick={() => setReporterReply(template)}
-                          disabled={isAnonymized}
+                          disabled={!canEditPII}
                         >
                           Use template {idx + 1}
                         </button>
                       ))}
                     </div>
-                    <button className="case-flow-btn outline" onClick={sendReporterReply} disabled={isAnonymized}>
+                    <button className="case-flow-btn outline" onClick={sendReporterReply} disabled={!canEditPII}>
                       Send reply
                     </button>
                   </>
@@ -2995,7 +3110,7 @@ const CaseFlow = () => {
                     type="text"
                     value={legalHoldDraft.contact_name}
                     onChange={(e) => setLegalHoldDraft({ ...legalHoldDraft, contact_name: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -3004,7 +3119,7 @@ const CaseFlow = () => {
                     type="email"
                     value={legalHoldDraft.contact_email}
                     onChange={(e) => setLegalHoldDraft({ ...legalHoldDraft, contact_email: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -3013,7 +3128,7 @@ const CaseFlow = () => {
                     type="text"
                     value={legalHoldDraft.contact_role}
                     onChange={(e) => setLegalHoldDraft({ ...legalHoldDraft, contact_role: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -3035,7 +3150,7 @@ const CaseFlow = () => {
                   <textarea
                     value={legalHoldDraft.preservation_scope}
                     onChange={(e) => setLegalHoldDraft({ ...legalHoldDraft, preservation_scope: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -3044,7 +3159,7 @@ const CaseFlow = () => {
                     type="text"
                     value={legalHoldDraft.access_code}
                     onChange={(e) => setLegalHoldDraft({ ...legalHoldDraft, access_code: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                     placeholder="Leave blank to auto-generate"
                   />
                 </label>
@@ -3056,10 +3171,10 @@ const CaseFlow = () => {
                     onChange={(e) =>
                       setLegalHoldDraft({ ...legalHoldDraft, conflict_override_reason: e.target.value })
                     }
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
-                <button className="case-flow-btn outline" onClick={createLegalHold} disabled={isAnonymized}>
+                <button className="case-flow-btn outline" onClick={createLegalHold} disabled={!canEditPII}>
                   Generate legal hold
                 </button>
                 {legalHoldStatus ? <div className="case-flow-meta">{legalHoldStatus}</div> : null}
@@ -3072,17 +3187,21 @@ const CaseFlow = () => {
                         {hold.hold_id} · {new Date(hold.created_at).toLocaleString()}
                       </div>
                       <div>
-                        <strong>{hold.contact_name}</strong>
-                        {hold.contact_role ? ` · ${hold.contact_role}` : ''}
+                        <strong>{maskText(hold.contact_name, 'Hidden')}</strong>
+                        {hold.contact_role ? ` · ${maskText(hold.contact_role, 'Hidden')}` : ''}
                       </div>
-                      {hold.contact_email ? <div className="case-flow-muted">{hold.contact_email}</div> : null}
+                      {hold.contact_email ? (
+                        <div className="case-flow-muted">{maskText(hold.contact_email, 'Hidden')}</div>
+                      ) : null}
                       {hold.preservation_scope ? (
-                        <div className="case-flow-muted">Scope: {hold.preservation_scope}</div>
+                        <div className="case-flow-muted">Scope: {maskText(hold.preservation_scope, 'Hidden')}</div>
                       ) : null}
                       {hold.delivery_channel ? (
                         <div className="case-flow-muted">Channel: {hold.delivery_channel}</div>
                       ) : null}
-                      {hold.access_code ? <div className="case-flow-tag">Access code: {hold.access_code}</div> : null}
+                      {hold.access_code ? (
+                        <div className="case-flow-tag">Access code: {maskText(hold.access_code, 'Hidden')}</div>
+                      ) : null}
                       {hold.document_id ? (
                         <button
                           className="case-flow-btn outline small"
@@ -3108,7 +3227,7 @@ const CaseFlow = () => {
                     type="email"
                     value={expertDraft.expert_email}
                     onChange={(e) => setExpertDraft({ ...expertDraft, expert_email: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -3117,7 +3236,7 @@ const CaseFlow = () => {
                     type="text"
                     value={expertDraft.expert_name}
                     onChange={(e) => setExpertDraft({ ...expertDraft, expert_name: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -3126,7 +3245,7 @@ const CaseFlow = () => {
                     type="text"
                     value={expertDraft.organization}
                     onChange={(e) => setExpertDraft({ ...expertDraft, organization: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -3134,10 +3253,10 @@ const CaseFlow = () => {
                   <textarea
                     value={expertDraft.reason}
                     onChange={(e) => setExpertDraft({ ...expertDraft, reason: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
-                <button className="case-flow-btn outline" onClick={grantExpertAccess} disabled={isAnonymized}>
+                <button className="case-flow-btn outline" onClick={grantExpertAccess} disabled={!canEditPII}>
                   Grant 48h access
                 </button>
                 {expertStatus ? <div className="case-flow-meta">{expertStatus}</div> : null}
@@ -3147,18 +3266,18 @@ const CaseFlow = () => {
                   expertAccess.map((expert) => (
                     <div key={expert.access_id} className="case-flow-note">
                       <div className="case-flow-muted">
-                        {expert.expert_email} · {expert.status}
+                        {maskText(expert.expert_email, 'Hidden')} · {expert.status}
                       </div>
                       {(expert.expert_name || expert.organization) ? (
                         <div>
-                          {expert.expert_name || 'External expert'}
-                          {expert.organization ? ` · ${expert.organization}` : ''}
+                          {expert.expert_name ? maskText(expert.expert_name, 'External expert') : 'External expert'}
+                          {expert.organization ? ` · ${maskText(expert.organization, 'Hidden')}` : ''}
                         </div>
                       ) : null}
                       <div className="case-flow-muted">
                         Expires {new Date(expert.expires_at).toLocaleString()}
                       </div>
-                      {expert.reason ? <div className="case-flow-muted">Scope: {expert.reason}</div> : null}
+                      {expert.reason ? <div className="case-flow-muted">Scope: {maskText(expert.reason, 'Hidden')}</div> : null}
                       {expert.status === 'active' ? (
                         <button
                           className="case-flow-btn outline small"
@@ -3182,7 +3301,7 @@ const CaseFlow = () => {
                   <select
                     value={noteDraft.note_type}
                     onChange={(e) => setNoteDraft({ ...noteDraft, note_type: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   >
                     {NOTE_TYPE_OPTIONS.map((option) => (
                       <option key={option} value={option}>
@@ -3196,10 +3315,10 @@ const CaseFlow = () => {
                   <textarea
                     value={noteDraft.body}
                     onChange={(e) => setNoteDraft({ ...noteDraft, body: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
-                <button className="case-flow-btn outline" onClick={addNote} disabled={isAnonymized}>
+                <button className="case-flow-btn outline" onClick={addNote} disabled={!canEditPII}>
                   Add note
                 </button>
                 {caseData.notes.length === 0 ? (
@@ -3210,7 +3329,7 @@ const CaseFlow = () => {
                       <div className="case-flow-muted">
                         {note.note_type} · {new Date(note.created_at).toLocaleString()}
                       </div>
-                      <div>{note.body}</div>
+                      <div>{maskText(note.body, 'Note hidden. Break glass to view.')}</div>
                       {note.flags && (note.flags as { requires_review?: boolean }).requires_review ? (
                         <div className="case-flow-warning">Flagged for review</div>
                       ) : null}
@@ -3227,7 +3346,7 @@ const CaseFlow = () => {
                     type="datetime-local"
                     value={meetingDraft.meeting_date}
                     onChange={(e) => setMeetingDraft({ ...meetingDraft, meeting_date: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -3237,7 +3356,7 @@ const CaseFlow = () => {
                     value={meetingDraft.attendees}
                     onChange={(e) => setMeetingDraft({ ...meetingDraft, attendees: e.target.value })}
                     placeholder="Names or roles"
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -3245,7 +3364,7 @@ const CaseFlow = () => {
                   <textarea
                     value={meetingDraft.summary}
                     onChange={(e) => setMeetingDraft({ ...meetingDraft, summary: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
                 <label className="case-flow-label">
@@ -3253,10 +3372,10 @@ const CaseFlow = () => {
                   <textarea
                     value={meetingDraft.minutes}
                     onChange={(e) => setMeetingDraft({ ...meetingDraft, minutes: e.target.value })}
-                    disabled={isAnonymized}
+                    disabled={!canEditPII}
                   />
                 </label>
-                <button className="case-flow-btn outline" onClick={addMeetingNote} disabled={isAnonymized}>
+                <button className="case-flow-btn outline" onClick={addMeetingNote} disabled={!canEditPII}>
                   Add meeting minutes
                 </button>
                 <div className="case-flow-divider" />
@@ -3269,7 +3388,7 @@ const CaseFlow = () => {
                     .map((note) => (
                       <div key={`meeting-${note.id}`} className="case-flow-note">
                         <div className="case-flow-muted">{new Date(note.created_at).toLocaleString()}</div>
-                        <div>{note.body}</div>
+                        <div>{maskText(note.body, 'Meeting note hidden. Break glass to view.')}</div>
                       </div>
                     ))
                 )}
@@ -4055,6 +4174,44 @@ const CaseFlow = () => {
             </div>
           </div>
         ) : null}
+      </div>
+      <div className={`modal ${breakGlassOpen ? 'active' : ''}`}>
+        <div className="modal-content">
+          <div className="modal-header">
+            <h3>Break Glass: Reveal PII</h3>
+          </div>
+          <div className="modal-body">
+            <p className="case-flow-muted">
+              This action is logged to the audit trail. Provide a justification to reveal PII for a limited window.
+            </p>
+            <label className="case-flow-label">
+              Justification
+              <textarea
+                value={breakGlassReason}
+                onChange={(event) => setBreakGlassReason(event.target.value)}
+                placeholder="Reason for accessing sensitive identities"
+              />
+            </label>
+            <label className="case-flow-label">
+              Duration (minutes)
+              <input
+                type="number"
+                min={15}
+                max={480}
+                value={breakGlassDuration}
+                onChange={(event) => setBreakGlassDuration(Number(event.target.value))}
+              />
+            </label>
+          </div>
+          <div className="modal-footer">
+            <button className="case-flow-btn outline" onClick={() => setBreakGlassOpen(false)}>
+              Cancel
+            </button>
+            <button className="case-flow-btn" onClick={submitBreakGlass}>
+              Unlock PII
+            </button>
+          </div>
+        </div>
       </div>
       <div className={`modal ${showSuspensionModal ? 'active' : ''}`}>
         <div className="modal-content">

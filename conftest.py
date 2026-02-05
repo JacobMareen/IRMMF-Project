@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
-from app import models
+from app.modules.assessment import models
 from app.db import SessionLocal
 
 

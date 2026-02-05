@@ -107,3 +107,57 @@ class InsiderRiskRoadmapItem(Base):
     __table_args__ = (
         Index("ix_insider_risk_roadmap_tenant_phase", "tenant_key", "phase"),
     )
+
+
+class ExecutiveSummaryCache(Base):
+    """Cached executive summary output for assessments."""
+    __tablename__ = "ai_executive_summaries"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_key: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    assessment_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    payload_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+
+    summary_text: Mapped[str] = mapped_column(Text, nullable=True)
+    summary_html: Mapped[str] = mapped_column(Text, nullable=True)
+    key_findings: Mapped[list[str]] = mapped_column(JSONB, nullable=True)
+    high_level_recommendations: Mapped[list[str]] = mapped_column(JSONB, nullable=True)
+    maturity_band: Mapped[str] = mapped_column(String(32), nullable=True)
+    average_score: Mapped[float] = mapped_column(Float, nullable=True)
+    generator: Mapped[str] = mapped_column(String(64), nullable=True)
+    metrics: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    pinned_history_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=True, index=True)
+    pinned_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("tenant_key", "assessment_id", name="uq_ai_exec_summary_assessment"),
+        Index("ix_ai_exec_summary_tenant_assessment", "tenant_key", "assessment_id"),
+    )
+
+
+class ExecutiveSummaryHistory(Base):
+    """Historical executive summary outputs for assessments."""
+    __tablename__ = "ai_executive_summary_history"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_key: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    assessment_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    payload_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+
+    summary_text: Mapped[str] = mapped_column(Text, nullable=True)
+    summary_html: Mapped[str] = mapped_column(Text, nullable=True)
+    key_findings: Mapped[list[str]] = mapped_column(JSONB, nullable=True)
+    high_level_recommendations: Mapped[list[str]] = mapped_column(JSONB, nullable=True)
+    maturity_band: Mapped[str] = mapped_column(String(32), nullable=True)
+    average_score: Mapped[float] = mapped_column(Float, nullable=True)
+    generator: Mapped[str] = mapped_column(String(64), nullable=True)
+    metrics: Mapped[dict] = mapped_column(JSONB, nullable=True)
+
+    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    __table_args__ = (
+        Index("ix_ai_exec_summary_history_tenant_assessment", "tenant_key", "assessment_id"),
+    )

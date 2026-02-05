@@ -11,6 +11,8 @@ from app.modules.cases.schemas import (
     CaseAnonymizeRequest,
     CaseAcknowledgeMissed,
     CaseApplyPlaybook,
+    CaseBreakGlassRequest,
+    CaseBreakGlassOut,
     CaseCreate,
     CaseContentFlagOut,
     CaseContentFlagUpdate,
@@ -981,6 +983,19 @@ def anonymize_case(
     try:
         reason = payload.reason if payload else None
         return service.anonymize_case(case_id, principal, reason=reason)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/api/v1/cases/{case_id}/break-glass", response_model=CaseBreakGlassOut)
+def break_glass(
+    case_id: str,
+    payload: CaseBreakGlassRequest,
+    principal: Principal = Depends(require_roles("ADMIN", "INVESTIGATOR", "LEGAL", "HR")),
+    service: CaseService = Depends(get_case_service),
+):
+    try:
+        return service.break_glass(case_id, payload, principal)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 

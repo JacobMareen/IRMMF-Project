@@ -3,13 +3,17 @@ import './RiskHeatmap.css'
 
 export type RiskPoint = {
     id?: string
+    scenario_id?: string
     scenario?: string
     name?: string
     category?: string
+    description?: string
     likelihood?: number
     impact?: number
     risk_level?: string
     risk_score?: number
+    mitigation_score?: number
+    key_gaps?: string[]
 }
 
 type RiskHeatmapProps = {

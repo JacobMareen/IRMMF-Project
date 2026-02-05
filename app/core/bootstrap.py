@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import logging
 
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
 
 from app.core.registry import ModuleRegistry, ModuleSpec
 from app.db import ensure_audit_immutability, ensure_indexes, ensure_pg_extensions, engine
 from app import models
+# Ensure third-party risk models are registered on the shared Base metadata.
+from app.modules.third_party import models as third_party_models  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +20,11 @@ def register_modules() -> ModuleRegistry:
         key="assessment",
         label="Assessments",
         description="IRMMF assessment workflow, scoring, and reporting.",
+    ))
+    registry.register(ModuleSpec(
+        key="ai",
+        label="AI Insights",
+        description="Executive summaries and narrative reporting.",
     ))
     registry.register(ModuleSpec(
         key="dwf",
@@ -38,6 +45,11 @@ def register_modules() -> ModuleRegistry:
         key="insider_program",
         label="Insider Risk Program",
         description="Policy governance, control register, and program actions linked to assessments.",
+    ))
+    registry.register(ModuleSpec(
+        key="third_party",
+        label="Third-Party Risk",
+        description="Trusted partners and supply chain assessments.",
     ))
     return registry
 
@@ -61,6 +73,16 @@ def init_database() -> None:
             except Exception as exc:
                 # Continue startup even if a legacy table conflicts with current metadata.
                 logger.warning("Skipping table %s due to create error: %s", table.name, exc)
+        try:
+            inspector = inspect(conn)
+            if inspector.has_table("ai_executive_summaries"):
+                cols = {col["name"] for col in inspector.get_columns("ai_executive_summaries")}
+                if "pinned_history_id" not in cols:
+                    conn.execute(text("ALTER TABLE ai_executive_summaries ADD COLUMN IF NOT EXISTS pinned_history_id UUID"))
+                if "pinned_at" not in cols:
+                    conn.execute(text("ALTER TABLE ai_executive_summaries ADD COLUMN IF NOT EXISTS pinned_at TIMESTAMPTZ"))
+        except Exception as exc:
+            logger.warning("Skipping AI summary schema adjustments: %s", exc)
     try:
         ensure_indexes()
     except Exception:

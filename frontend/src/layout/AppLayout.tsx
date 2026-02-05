@@ -88,6 +88,9 @@ const AppLayout = () => {
           <NavLink to="/insider-risk-program" className="top-link">
             Insider Risk Program
           </NavLink>
+          <NavLink to="/third-party" className="top-link">
+            Third-Party Risk
+          </NavLink>
           <NavLink to="/workforce" className="top-link">
             Workforce
           </NavLink>
@@ -115,6 +118,9 @@ const AppLayout = () => {
           </NavLink>
           <NavLink to="/insider-risk-program" className="side-link">
             Insider Risk Program
+          </NavLink>
+          <NavLink to="/third-party" className="side-link">
+            Third-Party Risk
           </NavLink>
           <NavLink to="/workforce" className="side-link">
             Dynamic Workforce

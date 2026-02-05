@@ -8,6 +8,7 @@ import AssessmentResults from './pages/AssessmentResults'
 import AssessmentReview from './pages/AssessmentReview'
 import AssessmentRisks from './pages/AssessmentRisks'
 import DynamicWorkforce from './pages/DynamicWorkforce'
+import ThirdPartyRisk from './pages/ThirdPartyRisk'
 import PiaCompliance from './pages/PiaCompliance'
 import Cases from './pages/Cases'
 import CaseFlow from './pages/CaseFlow'
@@ -60,6 +61,7 @@ function App() {
                 <Route path="actions" element={<InsiderRiskProgram view="actions" />} />
               </Route>
               <Route path="workforce" element={<DynamicWorkforce />} />
+              <Route path="third-party" element={<ThirdPartyRisk />} />
               <Route path="case-management" element={<CaseManagement />}>
                 <Route index element={<Navigate to="compliance" replace />} />
                 <Route path="compliance" element={<PiaCompliance />} />

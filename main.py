@@ -14,12 +14,14 @@ from app.core.config import allowed_origins
 from app.db import get_db
 from app.modules.assessment import service as services_module
 from app.modules.assessment.routes import router as assessment_router
+from app.modules.ai.routes import router as ai_router
 from app.modules.dwf.routes import router as dwf_router
 from app.modules.pia.routes import router as pia_router
 from app.modules.tenant.routes import router as tenant_router
 from app.modules.users.routes import router as users_router
 from app.modules.cases.routes import router as cases_router
 from app.modules.insider_program.routes import router as insider_program_router
+from app.modules.third_party.routes import router as third_party_router
 from app.security.audit import AuditContext, reset_audit_context, set_audit_context
 from app.security.rate_limit import RateLimiter, load_rate_limit_config, resolve_client_ip
 
@@ -126,12 +128,14 @@ app.add_middleware(PrincipalContextMiddleware)
 
 # 3. Register module routers
 app.include_router(assessment_router)
+app.include_router(ai_router)
 app.include_router(dwf_router)
 app.include_router(pia_router)
 app.include_router(tenant_router)
 app.include_router(users_router)
 app.include_router(cases_router)
 app.include_router(insider_program_router)
+app.include_router(third_party_router)
 
 
 @app.get("/")

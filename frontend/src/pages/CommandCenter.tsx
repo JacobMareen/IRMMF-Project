@@ -255,6 +255,20 @@ const CommandCenter = () => {
           </div>
 
           <div className="cc-module-card">
+            <div className="cc-tag">Third-Party</div>
+            <h3>Third-Party Risk</h3>
+            <p>Track supplier exposure, partner readiness, and tiered vendor risk across assessments.</p>
+            <div className="cc-actions">
+              <a className="cc-btn primary" href="/third-party">
+                Open Module
+              </a>
+              <a className="cc-btn secondary" href="/third-party">
+                View Portfolio
+              </a>
+            </div>
+          </div>
+
+          <div className="cc-module-card">
             <div className="cc-tag">Upcoming</div>
             <h3>Future Module</h3>
             <p>Reserved for new capabilities (vendor risk, regulatory readiness, executive reporting).</p>

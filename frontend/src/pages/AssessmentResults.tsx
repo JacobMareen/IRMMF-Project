@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Chart from 'chart.js/auto'
 import './AssessmentResults.css'
 import { describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
-import { apiFetchRoot, API_BASE, readApiError } from '../lib/api'
+import { apiFetch, apiFetchRoot, API_BASE, readApiError } from '../lib/api'
 import { AssessmentNav } from '../components/AssessmentNav'
 import { getDomainMeta } from '../utils/domainMetadata'
 import { PageHeader } from '../components/PageHeader'
@@ -52,6 +52,27 @@ type ResultsPayload = {
   risk_heatmap?: unknown[]
 }
 
+type ExecutiveSummary = {
+  assessment_id?: string
+  generated_at?: string
+  generator?: string
+  maturity_band?: string
+  maturity_level?: number | null
+  maturity_label?: string | null
+  average_score?: number
+  summary_text?: string
+  summary_html?: string
+  key_findings?: string[]
+  high_level_recommendations?: string[]
+  pinned_history_id?: string | null
+  pinned_at?: string | null
+}
+
+type ExecutiveSummaryHistory = ExecutiveSummary & {
+  id?: string
+  pinned?: boolean
+}
+
 const AssessmentResults = () => {
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
   const [assessmentId, setAssessmentId] = useState('')
@@ -61,6 +82,12 @@ const AssessmentResults = () => {
   const [showOverlay, setShowOverlay] = useState(false)
   const [radarExpanded, setRadarExpanded] = useState(false)
   const [theme, setTheme] = useState(document.documentElement.getAttribute('data-theme') || 'dark')
+  const [executiveSummary, setExecutiveSummary] = useState<ExecutiveSummary | null>(null)
+  const [summaryStatus, setSummaryStatus] = useState('')
+  const [summaryLoading, setSummaryLoading] = useState(false)
+  const [summaryHistory, setSummaryHistory] = useState<ExecutiveSummaryHistory[]>([])
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [historyStatus, setHistoryStatus] = useState('')
   const [benchmarkFilters, setBenchmarkFilters] = useState(() => ({
     sector: localStorage.getItem('benchmark_filter_sector') || 'all',
     size: localStorage.getItem('benchmark_filter_size') || 'all',
@@ -97,6 +124,107 @@ const AssessmentResults = () => {
       })
   }, [assessmentId])
 
+  const refreshSummary = async (targetAssessmentId: string) => {
+    if (!targetAssessmentId) return
+    try {
+      const resp = await apiFetch(`/ai/executive-summary/${targetAssessmentId}`)
+      if (!resp.ok) return
+      const data = (await resp.json()) as ExecutiveSummary
+      setExecutiveSummary(data)
+    } catch {
+      // Ignore cache lookup failures.
+    }
+  }
+
+  useEffect(() => {
+    if (!assessmentId) return
+    let cancelled = false
+    apiFetch(`/ai/executive-summary/${assessmentId}`)
+      .then(async (res) => {
+        if (!res.ok) return
+        const data = (await res.json()) as ExecutiveSummary
+        if (!cancelled) {
+          setExecutiveSummary(data)
+        }
+      })
+      .catch(() => {
+        // Ignore cache lookup failures.
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [assessmentId])
+
+  const loadSummaryHistory = async (targetAssessmentId: string) => {
+    if (!targetAssessmentId) return
+    setHistoryStatus('Loading summary history...')
+    try {
+      const resp = await apiFetch(`/ai/executive-summary/${targetAssessmentId}/history`)
+      if (!resp.ok) {
+        setHistoryStatus('No summary history found.')
+        setSummaryHistory([])
+        return
+      }
+      const data = (await resp.json()) as ExecutiveSummaryHistory[]
+      setSummaryHistory(Array.isArray(data) ? data : [])
+      setHistoryStatus('')
+    } catch {
+      setHistoryStatus('Unable to load summary history.')
+    }
+  }
+
+  const handlePinHistory = async (historyId: string) => {
+    if (!assessmentId || !historyId) return
+    setSummaryLoading(true)
+    setSummaryStatus('Pinning summary as official...')
+    try {
+      const resp = await apiFetch(`/ai/executive-summary/${assessmentId}/pin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ history_id: historyId }),
+      })
+      if (!resp.ok) {
+        const detail = await readApiError(resp)
+        throw new Error(detail || 'Unable to pin executive summary.')
+      }
+      const data = (await resp.json()) as ExecutiveSummary
+      setExecutiveSummary(data)
+      await loadSummaryHistory(assessmentId)
+      setSummaryStatus('')
+    } catch (err) {
+      setSummaryStatus(err instanceof Error ? err.message : 'Unable to pin executive summary.')
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
+  const handleUnpinHistory = async () => {
+    if (!assessmentId) return
+    setSummaryLoading(true)
+    setSummaryStatus('Removing pinned summary...')
+    try {
+      const resp = await apiFetch(`/ai/executive-summary/${assessmentId}/pin`, {
+        method: 'DELETE',
+      })
+      if (!resp.ok) {
+        const detail = await readApiError(resp)
+        throw new Error(detail || 'Unable to unpin executive summary.')
+      }
+      await refreshSummary(assessmentId)
+      await loadSummaryHistory(assessmentId)
+      setSummaryStatus('')
+    } catch (err) {
+      setSummaryStatus(err instanceof Error ? err.message : 'Unable to unpin executive summary.')
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!assessmentId) return
+    loadSummaryHistory(assessmentId)
+  }, [assessmentId])
+
   useEffect(() => {
     const observer = new MutationObserver(() => {
       setTheme(document.documentElement.getAttribute('data-theme') || 'dark')
@@ -120,6 +248,24 @@ const AssessmentResults = () => {
   const maturityScores = payload?.maturity_scores
   const gapVector = payload?.gap_vector || []
   const capsApplied = payload?.caps_applied || []
+  const gapDomains = useMemo(() => {
+    if (!axes.length) return []
+    return [...axes]
+      .filter((axis) => axis.score != null)
+      .sort((a, b) => (a.score ?? 0) - (b.score ?? 0))
+      .slice(0, 3)
+      .map((axis) => {
+        const meta = getDomainMeta(axis.axis || axis.code || '')
+        return {
+          key: axis.axis || axis.code || meta.label,
+          label: meta.label,
+          description: meta.description,
+          icon: meta.icon,
+          score: axis.score ?? null,
+          capabilities: meta.capabilities || [],
+        }
+      })
+  }, [axes])
   const axesToShow = showExpanded && expandedAxes.length ? expandedAxes : axes
   const benchmarkRows = useMemo(() => {
     if (!axes.length) return []
@@ -140,6 +286,40 @@ const AssessmentResults = () => {
       }
     })
   }, [axes, benchmarkFilters])
+  const mappedMaturity = useMemo(() => {
+    const score = summary.trust_index
+    if (score == null) return null
+    if (score >= 80) return { level: 5, label: 'Optimized' }
+    if (score >= 60) return { level: 4, label: 'Managed' }
+    if (score >= 40) return { level: 3, label: 'Defined' }
+    if (score >= 20) return { level: 2, label: 'Developing' }
+    return { level: 1, label: 'Ad-hoc' }
+  }, [summary.trust_index])
+  const mapperRows = useMemo(() => {
+    const current = mappedMaturity?.level || null
+    return [
+      { level: 1, label: 'Ad-hoc', description: 'Reactive, inconsistent, and undocumented practices.' },
+      { level: 2, label: 'Developing', description: 'Emerging processes with limited repeatability.' },
+      { level: 3, label: 'Defined', description: 'Documented processes with growing consistency.' },
+      { level: 4, label: 'Managed', description: 'Measured, governed, and optimized for effectiveness.' },
+      { level: 5, label: 'Optimized', description: 'Adaptive, resilient, and continuously improving.' },
+    ].map((row) => ({ ...row, active: current === row.level }))
+  }, [mappedMaturity])
+  const capabilityLens = useMemo(() => {
+    if (!axes.length) return []
+    return axes.map((axis) => {
+      const meta = getDomainMeta(axis.axis || axis.code || '')
+      return {
+        key: axis.axis || axis.code || meta.label,
+        label: meta.label,
+        description: meta.description,
+        icon: meta.icon,
+        color: meta.color,
+        capabilities: meta.capabilities || [],
+        score: axis.score ?? null,
+      }
+    })
+  }, [axes])
 
   useEffect(() => {
     if (!payload?.axes?.length || !radarCanvasRef.current) return
@@ -213,6 +393,208 @@ const AssessmentResults = () => {
     window.open(`${API_BASE}/assessment/${assessmentId}/export/${type}`, '_blank')
   }
 
+  const handleGenerateSummary = async () => {
+    if (!payload) {
+      setSummaryStatus('Assessment results are not ready yet.')
+      return
+    }
+    setSummaryLoading(true)
+    setSummaryStatus('Generating executive summary...')
+    try {
+      const resp = await apiFetch('/ai/executive-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assessment_id: assessmentId || null,
+          results: payload,
+          include_html: false,
+          force_refresh: Boolean(executiveSummary),
+        }),
+      })
+      if (!resp.ok) {
+        const detail = await readApiError(resp)
+        throw new Error(detail || 'Unable to generate executive summary.')
+      }
+      const data = (await resp.json()) as ExecutiveSummary
+      setExecutiveSummary(data)
+      setSummaryStatus('')
+      if (assessmentId) {
+        loadSummaryHistory(assessmentId)
+      }
+    } catch (err) {
+      setSummaryStatus(err instanceof Error ? err.message : 'Unable to generate executive summary.')
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
+  const buildSummaryHtml = (summary: ExecutiveSummary) => {
+    const escapeHtml = (value: string) =>
+      value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    const findings = summary.key_findings || []
+    const recs = summary.high_level_recommendations || []
+    const listToHtml = (items: string[]) =>
+      items.length ? items.map((item) => `<li>${escapeHtml(item)}</li>`).join('') : '<li>No items available.</li>'
+
+    return [
+      '<!doctype html>',
+      '<html lang="en">',
+      '<head><meta charset="utf-8" /><title>Executive Summary</title></head>',
+      '<body style="font-family: Arial, sans-serif; margin: 32px; color: #1f2937;">',
+      '<h1>Executive Summary</h1>',
+      `<p>${escapeHtml(summary.summary_text || 'Summary unavailable.')}</p>`,
+      '<h2>Key Findings</h2>',
+      `<ul>${listToHtml(findings)}</ul>`,
+      '<h2>High-Level Recommendations</h2>',
+      `<ul>${listToHtml(recs)}</ul>`,
+      '</body></html>',
+    ].join('')
+  }
+
+  const handleDownloadSummary = async () => {
+    if (!payload) {
+      setSummaryStatus('Assessment results are not ready yet.')
+      return
+    }
+    setSummaryLoading(true)
+    setSummaryStatus('Preparing executive summary download...')
+    try {
+      const resp = await apiFetch('/ai/executive-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assessment_id: assessmentId || null,
+          results: payload,
+          include_html: true,
+          force_refresh: false,
+        }),
+      })
+      if (!resp.ok) {
+        const detail = await readApiError(resp)
+        throw new Error(detail || 'Unable to generate executive summary.')
+      }
+      const data = (await resp.json()) as ExecutiveSummary
+      const html = data.summary_html || buildSummaryHtml(data)
+      const blob = new Blob([html], { type: 'text/html' })
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `executive_summary_${assessmentId || 'assessment'}.html`
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(url)
+      setSummaryStatus('')
+    } catch (err) {
+      setSummaryStatus(err instanceof Error ? err.message : 'Unable to generate executive summary.')
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
+  const handleDownloadPdf = async () => {
+    if (!payload) {
+      setSummaryStatus('Assessment results are not ready yet.')
+      return
+    }
+    setSummaryLoading(true)
+    setSummaryStatus('Preparing executive summary PDF...')
+    try {
+      const resp = await apiFetch('/ai/executive-summary/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assessment_id: assessmentId || null,
+          results: payload,
+          force_refresh: false,
+        }),
+      })
+      if (!resp.ok) {
+        const detail = await readApiError(resp)
+        throw new Error(detail || 'Unable to generate executive summary PDF.')
+      }
+      const blob = await resp.blob()
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `executive_summary_${assessmentId || 'assessment'}.pdf`
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(url)
+      setSummaryStatus('')
+    } catch (err) {
+      setSummaryStatus(err instanceof Error ? err.message : 'Unable to generate executive summary PDF.')
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
+  const handleDownloadDocx = async () => {
+    if (!payload) {
+      setSummaryStatus('Assessment results are not ready yet.')
+      return
+    }
+    setSummaryLoading(true)
+    setSummaryStatus('Preparing executive summary DOCX...')
+    try {
+      const resp = await apiFetch('/ai/executive-summary/docx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assessment_id: assessmentId || null,
+          results: payload,
+          force_refresh: false,
+        }),
+      })
+      if (!resp.ok) {
+        const detail = await readApiError(resp)
+        throw new Error(detail || 'Unable to generate executive summary DOCX.')
+      }
+      const blob = await resp.blob()
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `executive_summary_${assessmentId || 'assessment'}.docx`
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(url)
+      setSummaryStatus('')
+    } catch (err) {
+      setSummaryStatus(err instanceof Error ? err.message : 'Unable to generate executive summary DOCX.')
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
+  const downloadHistoryExport = async (historyId: string, format: 'pdf' | 'docx' | 'html') => {
+    if (!historyId) return
+    setSummaryLoading(true)
+    setSummaryStatus(`Preparing executive summary ${format.toUpperCase()}...`)
+    try {
+      const resp = await apiFetch(`/ai/executive-summary/history/${historyId}/${format}`)
+      if (!resp.ok) {
+        const detail = await readApiError(resp)
+        throw new Error(detail || `Unable to download executive summary ${format.toUpperCase()}.`)
+      }
+      const blob = await resp.blob()
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `executive_summary_${historyId}.${format}`
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(url)
+      setSummaryStatus('')
+    } catch (err) {
+      setSummaryStatus(err instanceof Error ? err.message : `Unable to download executive summary ${format.toUpperCase()}.`)
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
   return (
     <section className="ar-page">
       <PageHeader
@@ -267,10 +649,199 @@ const AssessmentResults = () => {
               <div className="ar-metric">{summary.friction_score ?? '—'}</div>
             </div>
             <div className="ar-card">
+              <div className="ar-card-title">
+                Maturity Level
+                <InfoOverlay title="Maturity Level">
+                  A CISO-friendly 1-5 maturity mapping (Ad-hoc to Optimized) based on the overall trust score.
+                </InfoOverlay>
+              </div>
+              <div className="ar-metric">
+                {mappedMaturity ? `L${mappedMaturity.level} · ${mappedMaturity.label}` : '—'}
+              </div>
+            </div>
+            <div className="ar-card">
               <div className="ar-card-title" title="The average confidence level of the evidence provided to support your answers.">
                 Evidence Confidence ⓘ
               </div>
               <div className="ar-metric">{summary.evidence_confidence_avg ?? '—'}</div>
+            </div>
+          </section>
+
+          <section className="ar-card ar-section">
+            <div className="ar-card-header">
+              <div>
+                <div className="ar-card-title">Executive Summary</div>
+                <div className="ar-muted">Generate a board-ready narrative from the assessment results.</div>
+              </div>
+              <div className="ar-header-actions">
+                <button
+                  className="ar-btn ar-btn-outline"
+                  onClick={handleGenerateSummary}
+                  disabled={summaryLoading}
+                >
+                  {summaryLoading ? 'Generating...' : executiveSummary ? 'Regenerate Summary' : 'Generate Summary'}
+                </button>
+                <button
+                  className="ar-btn ar-btn-muted"
+                  onClick={handleDownloadSummary}
+                  disabled={summaryLoading}
+                >
+                  Download HTML
+                </button>
+                <button
+                  className="ar-btn ar-btn-muted"
+                  onClick={handleDownloadPdf}
+                  disabled={summaryLoading}
+                >
+                  Download PDF
+                </button>
+                <button
+                  className="ar-btn ar-btn-muted"
+                  onClick={handleDownloadDocx}
+                  disabled={summaryLoading}
+                >
+                  Download DOCX
+                </button>
+              </div>
+            </div>
+            {summaryStatus ? <div className="ar-muted">{summaryStatus}</div> : null}
+            {executiveSummary ? (
+              <>
+                <div className="ar-summary-text">{executiveSummary.summary_text || 'Summary unavailable.'}</div>
+                <div className="ar-summary-meta">
+                  {executiveSummary.maturity_band ? `Maturity: ${executiveSummary.maturity_band}` : 'Maturity: —'}
+                  {executiveSummary.average_score != null ? ` · Avg Score: ${executiveSummary.average_score}/100` : ''}
+                  {executiveSummary.maturity_level
+                    ? ` · Level ${executiveSummary.maturity_level}${executiveSummary.maturity_label ? ` (${executiveSummary.maturity_label})` : ''}`
+                    : ''}
+                  {executiveSummary.generated_at
+                    ? ` · Generated: ${new Date(executiveSummary.generated_at).toLocaleString()}`
+                    : ''}
+                  {executiveSummary.pinned_history_id ? ' · Official (Pinned)' : ''}
+                  {executiveSummary.pinned_at
+                    ? ` · Pinned: ${new Date(executiveSummary.pinned_at).toLocaleString()}`
+                    : ''}
+                </div>
+                <div className="ar-summary-grid">
+                  <div className="ar-summary-block">
+                    <div className="ar-summary-label">Key Findings</div>
+                    <ul className="ar-summary-list">
+                      {(executiveSummary.key_findings || []).length ? (
+                        executiveSummary.key_findings?.map((item) => <li key={item}>{item}</li>)
+                      ) : (
+                        <li>No findings generated yet.</li>
+                      )}
+                    </ul>
+                  </div>
+                  <div className="ar-summary-block">
+                    <div className="ar-summary-label">High-Level Recommendations</div>
+                    <ul className="ar-summary-list">
+                      {(executiveSummary.high_level_recommendations || []).length ? (
+                        executiveSummary.high_level_recommendations?.map((item) => <li key={item}>{item}</li>)
+                      ) : (
+                        <li>No recommendations generated yet.</li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="ar-muted">No executive summary generated yet.</div>
+            )}
+            <div className="ar-summary-history">
+              <div className="ar-summary-history-header">
+                <div className="ar-summary-label">Summary History</div>
+                <button
+                  className="ar-btn ar-btn-muted"
+                  onClick={() => setHistoryOpen((prev) => !prev)}
+                  disabled={summaryLoading}
+                >
+                  {historyOpen ? 'Hide History' : 'Show History'}
+                </button>
+              </div>
+              {historyOpen ? (
+                historyStatus ? (
+                  <div className="ar-muted">{historyStatus}</div>
+                ) : summaryHistory.length ? (
+                  <div className="ar-summary-history-list">
+                    {summaryHistory.map((item) => (
+                      <div key={item.id || item.generated_at} className="ar-summary-history-item">
+                        <div className="ar-summary-history-meta">
+                          <div className="ar-summary-history-title">
+                            <strong>{item.maturity_band || 'Maturity'}</strong>
+                            {item.pinned ? <span className="ar-badge">Pinned</span> : null}
+                          </div>
+                          <span>
+                            {item.generated_at ? new Date(item.generated_at).toLocaleString() : 'Unknown date'}
+                          </span>
+                        </div>
+                        <div className="ar-summary-history-text">
+                          {item.summary_text ? item.summary_text.slice(0, 160) : 'No summary text.'}
+                        </div>
+                        <div className="ar-summary-history-level">
+                          {item.maturity_level
+                            ? `Level ${item.maturity_level}${item.maturity_label ? ` · ${item.maturity_label}` : ''}`
+                            : 'Level —'}
+                        </div>
+                        <div className="ar-summary-history-actions">
+                          <button
+                            className="ar-btn ar-btn-outline"
+                            onClick={() =>
+                              setExecutiveSummary({
+                                ...item,
+                                pinned_history_id: item.pinned ? item.id : null,
+                                pinned_at: item.pinned ? executiveSummary?.pinned_at : null,
+                              })
+                            }
+                          >
+                            Load
+                          </button>
+                          {item.pinned ? (
+                            <button
+                              className="ar-btn ar-btn-muted"
+                              onClick={handleUnpinHistory}
+                              disabled={summaryLoading}
+                            >
+                              Unpin
+                            </button>
+                          ) : (
+                            <button
+                              className="ar-btn ar-btn-muted"
+                              onClick={() => handlePinHistory(item.id || '')}
+                              disabled={!item.id || summaryLoading}
+                            >
+                              Pin
+                            </button>
+                          )}
+                          <button
+                            className="ar-btn ar-btn-muted"
+                            onClick={() => downloadHistoryExport(item.id || '', 'pdf')}
+                            disabled={!item.id || summaryLoading}
+                          >
+                            PDF
+                          </button>
+                          <button
+                            className="ar-btn ar-btn-muted"
+                            onClick={() => downloadHistoryExport(item.id || '', 'docx')}
+                            disabled={!item.id || summaryLoading}
+                          >
+                            DOCX
+                          </button>
+                          <button
+                            className="ar-btn ar-btn-muted"
+                            onClick={() => downloadHistoryExport(item.id || '', 'html')}
+                            disabled={!item.id || summaryLoading}
+                          >
+                            HTML
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="ar-muted">No history available yet.</div>
+                )
+              ) : null}
             </div>
           </section>
 
@@ -352,6 +923,42 @@ const AssessmentResults = () => {
           </section>
 
           <section className="ar-card ar-section">
+            <div className="ar-card-title">Capability Gaps</div>
+            <div className="ar-muted">
+              Lowest-scoring domains that represent the highest impact uplift opportunities.
+            </div>
+            {gapDomains.length ? (
+              <div className="ar-gap-grid">
+                {gapDomains.map((domain) => (
+                  <div key={domain.key} className="ar-gap-card">
+                    <div className="ar-gap-header">
+                      <div className="ar-gap-title">
+                        <span className="ar-gap-icon">{domain.icon}</span>
+                        <span>{domain.label}</span>
+                      </div>
+                      <span className="ar-gap-score">
+                        {domain.score != null ? `${Math.round(domain.score)}%` : '—'}
+                      </span>
+                    </div>
+                    <div className="ar-gap-desc">{domain.description}</div>
+                    {domain.capabilities.length ? (
+                      <div className="ar-gap-tags">
+                        {domain.capabilities.map((cap) => (
+                          <span key={cap} className="ar-gap-tag">{cap}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="ar-muted">No capability tags listed.</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="ar-muted">No gap data available yet.</div>
+            )}
+          </section>
+
+          <section className="ar-card ar-section">
             <div className="ar-card-title">Maturity Scores</div>
             {payload?.maturity_explanation ? (
               <div className="ar-muted">{payload.maturity_explanation}</div>
@@ -371,6 +978,22 @@ const AssessmentResults = () => {
                   Friction {maturityScores?.expanded?.friction_score ?? '—'}
                 </div>
               </div>
+            </div>
+          </section>
+
+          <section className="ar-card ar-section">
+            <div className="ar-card-title">Maturity Mapper</div>
+            <div className="ar-muted">
+              A 1-5 interpretation scale for executives, mapped to the current trust score.
+            </div>
+            <div className="ar-mapper-table">
+              {mapperRows.map((row) => (
+                <div key={row.level} className={`ar-mapper-row ${row.active ? 'active' : ''}`}>
+                  <span className="ar-mapper-level">L{row.level}</span>
+                  <span className="ar-mapper-label">{row.label}</span>
+                  <span className="ar-mapper-desc">{row.description}</span>
+                </div>
+              ))}
             </div>
           </section>
 
@@ -475,6 +1098,42 @@ const AssessmentResults = () => {
                 </div>
               )}
             </div>
+          </section>
+
+          <section className="ar-card ar-section">
+            <div className="ar-card-title">Capability Lens</div>
+            <div className="ar-muted">
+              Capability tags connect each domain score to the specific workstreams required to improve maturity.
+            </div>
+            {capabilityLens.length ? (
+              <div className="ar-capability-grid">
+                {capabilityLens.map((domain) => (
+                  <div key={domain.key} className="ar-capability-card">
+                    <div className="ar-capability-header">
+                      <div className="ar-capability-title">
+                        <span className="ar-capability-icon">{domain.icon}</span>
+                        <span>{domain.label}</span>
+                      </div>
+                      <span className="ar-capability-score">
+                        {domain.score != null ? `${Math.round(domain.score)}%` : '—'}
+                      </span>
+                    </div>
+                    <div className="ar-capability-desc">{domain.description}</div>
+                    {domain.capabilities.length ? (
+                      <div className="ar-capability-tags">
+                        {domain.capabilities.map((cap) => (
+                          <span key={cap} className="ar-capability-tag">{cap}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="ar-muted">No capabilities listed.</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="ar-muted">No capability data available.</div>
+            )}
           </section>
 
           <section className="ar-card ar-section">
