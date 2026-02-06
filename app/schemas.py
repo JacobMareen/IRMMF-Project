@@ -70,3 +70,4 @@ class ResumptionState(BaseModel):
     completion_pct: Optional[int] = None
     depth: Optional[str] = None
     override_depth: Optional[bool] = None
+    market_research_opt_in: bool = False

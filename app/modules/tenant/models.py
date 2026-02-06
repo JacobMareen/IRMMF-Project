@@ -60,6 +60,8 @@ class TenantSettings(Base):
     tenant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False, unique=True, index=True)
 
     company_name: Mapped[str] = mapped_column(String(255), nullable=True)
+    industry_sector: Mapped[str] = mapped_column(String(255), nullable=True)
+    employee_count: Mapped[str] = mapped_column(String(64), nullable=True)
     default_jurisdiction: Mapped[str] = mapped_column(String(64), nullable=False, default="Belgium")
     investigation_mode: Mapped[str] = mapped_column(String(32), nullable=False, default="standard")
     retention_days: Mapped[int] = mapped_column(Integer, nullable=False, default=365)

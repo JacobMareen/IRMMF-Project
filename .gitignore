@@ -22,3 +22,4 @@ venv/
 # Local logs
 uvicorn.log
 nohup.out
+.log

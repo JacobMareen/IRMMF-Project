@@ -136,6 +136,8 @@ app.include_router(users_router)
 app.include_router(cases_router)
 app.include_router(insider_program_router)
 app.include_router(third_party_router)
+from app.modules.sso.routes import router as sso_router
+app.include_router(sso_router)
 
 
 @app.get("/")
@@ -152,29 +154,30 @@ def list_modules():
     return {k: vars(v) for k, v in module_registry.list_modules().items()}
 
 
-@app.get("/api/v1/debug/intake_counts")
-def debug_intake_counts(db: Session = Depends(get_db)):
-    counts = {
-        "dim_intake_questions": db.execute(text("SELECT COUNT(*) FROM dim_intake_questions")).scalar(),
-        "dim_intake_list_options": db.execute(text("SELECT COUNT(*) FROM dim_intake_list_options")).scalar(),
-    }
-    sample = db.execute(
-        text(
-            """
-            SELECT intake_q_id, section, question_text
-            FROM dim_intake_questions
-            ORDER BY intake_q_id
-            LIMIT 1
-            """
-        )
-    ).mappings().first()
-    counts["sample_question"] = sample
-    counts["services_file"] = services_module.__file__
-    counts["intake_fn_line"] = services_module.AssessmentService.get_intake_questions.__code__.co_firstlineno
-    service_payload = services_module.AssessmentService(db).get_intake_questions()
-    counts["service_payload_len"] = len(service_payload)
-    counts["service_payload_sample"] = service_payload[:2]
-    counts["intake_route_handlers"] = [
-        route.name for route in app.routes if getattr(route, "path", None) == "/api/v1/intake/start"
-    ]
-    return counts
+if settings.DEBUG:
+    @app.get("/api/v1/debug/intake_counts")
+    def debug_intake_counts(db: Session = Depends(get_db)):
+        counts = {
+            "dim_intake_questions": db.execute(text("SELECT COUNT(*) FROM dim_intake_questions")).scalar(),
+            "dim_intake_list_options": db.execute(text("SELECT COUNT(*) FROM dim_intake_list_options")).scalar(),
+        }
+        sample = db.execute(
+            text(
+                """
+                SELECT intake_q_id, section, question_text
+                FROM dim_intake_questions
+                ORDER BY intake_q_id
+                LIMIT 1
+                """
+            )
+        ).mappings().first()
+        counts["sample_question"] = sample
+        counts["services_file"] = services_module.__file__
+        counts["intake_fn_line"] = services_module.AssessmentService.get_intake_questions.__code__.co_firstlineno
+        service_payload = services_module.AssessmentService(db).get_intake_questions()
+        counts["service_payload_len"] = len(service_payload)
+        counts["service_payload_sample"] = service_payload[:2]
+        counts["intake_route_handlers"] = [
+            route.name for route in app.routes if getattr(route, "path", None) == "/api/v1/intake/start"
+        ]
+        return counts

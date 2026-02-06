@@ -1382,3 +1382,36 @@ risks:
   impact_rules:
   - condition: default
     value: 3
+- id: Foreign_Influence
+  name: Foreign Influence & Corruption
+  category: Espionage & Corruption
+  description: Risk of foreign espionage (FOCI), bribery (FCPA), or procurement fraud.
+  axes:
+    G: 0.35
+    L: 0.25
+    V: 0.20
+    H: 0.15
+    E: 0.05
+  curves:
+    G: standard
+    L: threshold
+    V: standard
+    H: logarithmic
+    E: standard
+  impact_rules:
+  - condition: Defense & National Security
+    value: 7
+  - condition: Government / Public Sector
+    value: 6
+  - condition: Financial Services
+    value: 6
+  - condition: Technology / Software / IT Services
+    value: 6
+  - condition: Healthcare & Life Sciences
+    value: 5
+  - condition: Energy & Utilities
+    value: 5
+  - condition: Manufacturing / Industrial
+    value: 5
+  - condition: default
+    value: 3

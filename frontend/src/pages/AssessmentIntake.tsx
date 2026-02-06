@@ -27,12 +27,6 @@ const AssessmentIntake = () => {
   const [index, setIndex] = useState(0)
   const [status, setStatus] = useState<string>('')
   const [loading, setLoading] = useState(true)
-  const [scrapeUrl, setScrapeUrl] = useState('')
-  const [scrapeStatus, setScrapeStatus] = useState('')
-  const [scrapeLoading, setScrapeLoading] = useState(false)
-  const [scrapePreview, setScrapePreview] = useState<Record<string, unknown> | null>(null)
-  const [scrapeSuggestions, setScrapeSuggestions] = useState<Record<string, string>>({})
-  const [scrapeSelected, setScrapeSelected] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     setAssessmentId(getStoredAssessmentId(currentUser))
@@ -147,82 +141,6 @@ const AssessmentIntake = () => {
     }
   }
 
-  const handleScrape = async () => {
-    if (!assessmentId) return
-    if (!scrapeUrl.trim()) {
-      setScrapeStatus('Enter a website URL to analyze.')
-      return
-    }
-    setScrapeLoading(true)
-    setScrapeStatus('')
-    try {
-      const resp = await apiFetch(`/intake/scrape`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          base_url: scrapeUrl.trim(),
-          assessment_id: assessmentId,
-          persist: false,
-        }),
-      })
-      if (!resp.ok) {
-        const err = await resp.json().catch(() => ({}))
-        throw new Error(err.detail || 'Failed to scrape website.')
-      }
-      const data = (await resp.json()) as {
-        suggested_intake?: Record<string, string>
-        analysis?: Record<string, unknown>
-      }
-      setScrapePreview(data.analysis || null)
-      if (data.suggested_intake) {
-        setScrapeSuggestions(data.suggested_intake)
-        const selections: Record<string, boolean> = {}
-        Object.keys(data.suggested_intake).forEach((key) => {
-          selections[key] = true
-        })
-        setScrapeSelected(selections)
-      }
-      setScrapeStatus('Review the suggested answers before applying.')
-    } catch (err) {
-      setScrapeStatus(err instanceof Error ? err.message : 'Failed to scrape website.')
-    } finally {
-      setScrapeLoading(false)
-    }
-  }
-
-  const toggleScrapeSelection = (key: string) => {
-    setScrapeSelected((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
-
-  const applyScrapeSelections = async (persist: boolean) => {
-    const picked: Record<string, string> = {}
-    Object.entries(scrapeSuggestions).forEach(([key, value]) => {
-      if (scrapeSelected[key]) {
-        picked[key] = value
-      }
-    })
-    if (!Object.keys(picked).length) {
-      setScrapeStatus('Select at least one suggestion to apply.')
-      return
-    }
-    const merged = { ...draft, ...picked }
-    setDraft(merged)
-    const firstUnanswered = questions.findIndex((q) => !merged[q.intake_q_id])
-    if (firstUnanswered >= 0) {
-      setIndex(firstUnanswered)
-    }
-    if (persist) {
-      try {
-        await submitDraft(merged)
-        setScrapeStatus('Selected answers applied and saved.')
-      } catch {
-        setScrapeStatus('Applied locally, but failed to save.')
-      }
-      return
-    }
-    setScrapeStatus('Selected answers applied locally. Save to persist.')
-  }
-
   if (loading) {
     return <div className="ai-card">Loading intake...</div>
   }
@@ -258,79 +176,6 @@ const AssessmentIntake = () => {
 
       <div style={{ marginBottom: '20px' }}>
         <AssessmentNav assessmentId={assessmentId} />
-      </div>
-
-      <div className="ai-card ai-scrape">
-        <div className="ai-scrape-row">
-          <div>
-            <h2>Auto-fill from website</h2>
-            <p className="ai-guidance">
-              Paste the company’s public URL to infer intake details (industry, region, size).
-            </p>
-          </div>
-        </div>
-        <div className="ai-scrape-controls">
-          <input
-            className="ai-text ai-scrape-input"
-            value={scrapeUrl}
-            onChange={(event) => setScrapeUrl(event.target.value)}
-            placeholder="https://company.com"
-          />
-          <button className="ai-btn primary" onClick={handleScrape} disabled={scrapeLoading}>
-            {scrapeLoading ? 'Analyzing...' : 'Analyze & Fill'}
-          </button>
-        </div>
-        {scrapePreview ? (
-          <div className="ai-scrape-preview">
-            {['industries', 'regions', 'regulations', 'company_scale'].map((key) => {
-              const value = scrapePreview[key]
-              if (!value || (Array.isArray(value) && value.length === 0)) return null
-              const items = Array.isArray(value) ? value : [value]
-              return (
-                <div key={key} className="ai-scrape-meta">
-                  <span className="ai-scrape-label">{key.replace('_', ' ')}</span>
-                  <div className="ai-scrape-pill-row">
-                    {items.map((item) => (
-                      <span key={String(item)} className="ai-scrape-pill">
-                        {String(item)}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        ) : null}
-        {Object.keys(scrapeSuggestions).length ? (
-          <div className="ai-scrape-suggestions">
-            <div className="ai-scrape-suggestions-header">
-              <span>Suggested intake answers</span>
-              <span className="ai-scrape-hint">Select what you want to apply.</span>
-            </div>
-            <div className="ai-scrape-suggestion-list">
-              {Object.entries(scrapeSuggestions).map(([key, value]) => (
-                <label key={key} className="ai-scrape-suggestion">
-                  <input
-                    type="checkbox"
-                    checked={!!scrapeSelected[key]}
-                    onChange={() => toggleScrapeSelection(key)}
-                  />
-                  <span className="ai-scrape-key">{key.replace(/_/g, ' ')}</span>
-                  <span className="ai-scrape-value">{value}</span>
-                </label>
-              ))}
-            </div>
-            <div className="ai-scrape-apply">
-              <button className="ai-btn secondary" onClick={() => applyScrapeSelections(false)}>
-                Apply Selection
-              </button>
-              <button className="ai-btn primary" onClick={() => applyScrapeSelections(true)}>
-                Apply & Save
-              </button>
-            </div>
-          </div>
-        ) : null}
-        {scrapeStatus ? <div className="ai-status">{scrapeStatus}</div> : null}
       </div>
 
       <div className="ai-card">

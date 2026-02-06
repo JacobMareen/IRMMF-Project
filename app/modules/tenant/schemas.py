@@ -10,6 +10,8 @@ class TenantSettingsIn(BaseModel):
     tenant_name: Optional[str] = None
     environment_type: Optional[str] = None
     company_name: Optional[str] = None
+    industry_sector: Optional[str] = None
+    employee_count: Optional[str] = None
     default_jurisdiction: Optional[str] = None
     investigation_mode: Optional[str] = None
     retention_days: Optional[int] = None
@@ -60,6 +62,8 @@ class TenantSettingsOut(BaseModel):
     tenant_name: str
     environment_type: str
     company_name: Optional[str] = None
+    industry_sector: Optional[str] = None
+    employee_count: Optional[str] = None
     default_jurisdiction: str
     investigation_mode: str
     retention_days: int
@@ -87,6 +91,8 @@ class TenantHolidayOut(BaseModel):
 
 class RegistrationRequest(BaseModel):
     company_name: str
+    industry_sector: Optional[str] = None
+    employee_count: Optional[str] = None
     admin_email: str
     admin_name: str
     environment_type: Optional[str] = "Production"

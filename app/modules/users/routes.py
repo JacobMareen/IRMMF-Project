@@ -5,9 +5,20 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.modules.users.schemas import LoginResponse, UserInviteIn, UserLoginIn, UserOut, UserRolesUpdate
+from app.modules.users.schemas import (
+    LoginResponse,
+    UserInviteIn,
+    UserLoginIn,
+    UserOut,
+    UserRolesUpdate,
+    TenantLookupRequest,
+    TenantLookupResponse,
+    TermsStatus,
+    TermsAccept,
+)
 from app.modules.users.service import UserService
 from app.security.rbac import require_roles
+from auth import get_principal, Principal, Request
 
 
 router = APIRouter()
@@ -52,6 +63,42 @@ def login_user(
         return service.login(tenant_key, payload.email)
     except ValueError as exc:
         raise HTTPException(status_code=401, detail=str(exc))
+
+
+@router.post("/api/v1/auth/lookup-tenant", response_model=TenantLookupResponse)
+def lookup_tenant(
+    payload: TenantLookupRequest,
+    service: UserService = Depends(get_user_service),
+):
+    """Find all tenants associated with an email address."""
+    tenants = service.lookup_tenants(payload.email)
+    return {"tenants": tenants}
+
+
+@router.get("/api/v1/auth/terms/status", response_model=TermsStatus)
+def get_terms_status(
+    principal: Principal = Depends(get_principal),
+    service: UserService = Depends(get_user_service),
+):
+    """Check if the current user has accepted the latest T&C."""
+    return service.get_terms_status(principal.user_id)
+
+
+@router.post("/api/v1/auth/terms/accept")
+def accept_terms(
+    payload: TermsAccept,
+    request: Request,
+    principal: Principal = Depends(get_principal),
+    service: UserService = Depends(get_user_service),
+):
+    """Accept the T&C."""
+    service.accept_terms(
+        user_id=principal.user_id,
+        version=payload.version,
+        ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent")
+    )
+    return {"status": "ok"}
 
 
 @router.put("/api/v1/users/{user_id}/roles", response_model=UserOut)

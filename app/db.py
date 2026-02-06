@@ -26,6 +26,7 @@ engine = create_engine(
     pool_pre_ping=True,
     pool_size=settings.DB_POOL_SIZE,
     max_overflow=settings.DB_MAX_OVERFLOW,
+    connect_args={"sslmode": "require"} if settings.DB_SSL_REQUIRED else {},
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

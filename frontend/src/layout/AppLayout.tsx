@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import './AppLayout.css'
 
+import TermsOfServiceModal from '../components/TermsOfServiceModal'
+
 const AppLayout = () => {
   const [logoSrc, setLogoSrc] = useState<string | null>(null)
   const [theme, setTheme] = useState<string>('dark')
@@ -72,6 +74,7 @@ const AppLayout = () => {
 
   return (
     <div className="app-shell">
+      <TermsOfServiceModal />
       <header className="app-header">
         <div className="brand">
           {logoSrc ? <img className="brand-logo" src={logoSrc} alt="IRMMF logo" /> : null}

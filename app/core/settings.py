@@ -10,9 +10,16 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+psycopg://localhost:5432/irmmf_db"
     DB_POOL_SIZE: int = 5
     DB_MAX_OVERFLOW: int = 10
+    DB_SSL_REQUIRED: bool = False  # Set to True in Production
     
     # Security
+    DEBUG: bool = True  # Enable debug routes
+    CORS_ALLOW_ALL: bool = False # If True, allow ["*"]; otherwise restricted.
     DEV_RBAC_DISABLED: bool = True
+    SECRET_KEY: str = "dev-secret-key-change-in-prod"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    MAX_USERS_PER_TENANT: int = 5
     
     # Rate Limiting
     IRMMF_RATE_LIMIT_ENABLED: bool = True

@@ -12,6 +12,7 @@ class AssessmentStateService:
         self,
         tenant_key: str = "default",
         user_id: str | None = None,
+        market_research_opt_in: bool = False,
     ) -> str:
         """Generate a secure assessment key server-side."""
         secure_key = f"IRMMF-{secrets.token_urlsafe(24)}"
@@ -20,6 +21,7 @@ class AssessmentStateService:
             tenant_key=tenant_key,
             is_active=True,
             user_id=user_id,
+            market_research_opt_in=market_research_opt_in,
         )
         self.db.add(new_assessment)
         self.db.commit()
@@ -300,6 +302,7 @@ class AssessmentStateService:
             "override_depth": bool(record.override_depth),
             "depth_suggestion": self._suggest_depth(record, kickstart),
             "depth_mode": self._normalize_depth(record.depth or self._suggest_depth(record, kickstart)),
+            "market_research_opt_in": bool(record.market_research_opt_in),
         }
 
     def get_questions_for_assessment(self, assessment_id: str) -> List[models.Question]:

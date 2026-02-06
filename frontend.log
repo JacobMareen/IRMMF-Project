@@ -3,11 +3,76 @@
 > vite
 
 
-  VITE v7.3.1  ready in 788 ms
+  VITE v7.3.1  ready in 314 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
-12:03:18 PM [vite] (client) hmr update /src/App.tsx
-12:03:42 PM [vite] (client) hmr update /src/App.tsx
-12:03:43 PM [vite] (client) hmr update /src/pages/Login.tsx
-12:04:05 PM [vite] (client) hmr update /src/pages/Register.tsx
+9:27:19 AM [vite] (client) hmr update /src/pages/AssessmentIntake.tsx
+9:27:19 AM [vite] Internal server error: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/AssessmentIntake.tsx: Missing semicolon. (31:9)
+
+  29 |   const [loading, setLoading] = useState(true)
+  30 |
+> 31 |     < div className = "ai-card" >
+     |          ^
+  32 |         <div className="ai-section">{question.section || 'Intake'}</div>
+  33 |         <h2 className="ai-question">{question.question_text || question.intake_q_id}</h2>
+  34 |   { question.guidance ? <div className="ai-guidance">{question.guidance}</div> : null }
+  Plugin: vite:react-babel
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/AssessmentIntake.tsx:31:9
+  29 |    const [loading, setLoading] = useState(true)
+  30 |  
+  31 |      < div className = "ai-card" >
+     |           ^
+  32 |          <div className="ai-section">{question.section || 'Intake'}</div>
+  33 |          <h2 className="ai-question">{question.question_text || question.intake_q_id}</h2>
+      at constructor (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptParserMixin.semicolon (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:6895:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13221:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9408:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12841:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12757:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12737:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13306:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13299:10)
+      at TypeScriptParserMixin.parseBlock (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13287:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12090:24)
+      at TypeScriptParserMixin.parseArrowExpression (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12065:10)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:11677:12)
+      at TypeScriptParserMixin.parseExprAtom (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:11321:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:4764:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:11071:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:11056:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:11036:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9827:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10889:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10894:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10871:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10821:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9776:20)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10790:39
+      at TypeScriptParserMixin.allowInAnd (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12411:16)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10790:17)
+      at TypeScriptParserMixin.parseVar (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13374:91)
+      at TypeScriptParserMixin.parseVarStatement (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13220:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9408:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12841:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12757:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12734:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13306:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13299:10)
+      at TypeScriptParserMixin.parseProgram (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12612:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12602:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14478:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10116:18)
+      at parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14512:38)
+      at parser (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/parser/index.js:41:34)
+      at parser.next (<anonymous>)
+      at normalizeFile (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+      at normalizeFile.next (<anonymous>)
+      at run (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/index.js:22:50)
+      at run.next (<anonymous>)
+      at transform (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transform.js:22:33)
+9:28:04 AM [vite] (client) hmr update /src/pages/AssessmentIntake.tsx

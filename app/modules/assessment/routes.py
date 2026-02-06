@@ -10,7 +10,6 @@ from app import schemas
 from app.modules.assessment import models
 from app.db import get_db
 from app.modules.assessment.service import AssessmentService
-from app.modules.assessment.scraper import scrape_and_analyze_website, suggest_intake_answers
 from app.security.access import ensure_tenant_match, is_admin, rbac_disabled, require_tenant
 
 
@@ -173,7 +172,12 @@ def start_assessment(
     tenant_key = principal.tenant_key or "default"
     # Dev-only fallback: replace with real login-derived user_id and tenant_key once auth is enabled.
     resolved_user = user_id or principal.subject
-    new_key = service.create_new_assessment(tenant_key=tenant_key, user_id=resolved_user)
+    opt_in = payload.get("market_research_opt_in", False) if payload else False
+    new_key = service.create_new_assessment(
+        tenant_key=tenant_key, 
+        user_id=resolved_user,
+        market_research_opt_in=opt_in
+    )
     return {"assessment_id": new_key}
 
 
@@ -266,31 +270,6 @@ def submit_intake(
         raise HTTPException(status_code=500, detail="Internal Server Error during intake submit")
 
 
-@router.post("/api/v1/intake/scrape")
-async def scrape_intake(
-    payload: dict,
-    principal: Principal = Depends(get_principal),
-    db: Session = Depends(get_db),
-    service: AssessmentService = Depends(get_service),
-):
-    base_url = payload.get("base_url")
-    assessment_id = payload.get("assessment_id")
-    persist = bool(payload.get("persist"))
-    if not base_url:
-        raise HTTPException(status_code=400, detail="base_url is required")
-    result = await scrape_and_analyze_website(base_url)
-    if "error" in result:
-        raise HTTPException(status_code=400, detail=result["error"])
-    intake_options = service.get_intake_options()
-    suggested = suggest_intake_answers(result, intake_options)
-    if persist and assessment_id:
-        _ensure_assessment_access(assessment_id, principal, db)
-        service.submit_intake(assessment_id, suggested)
-    return {
-        "analysis": result,
-        "suggested_intake": suggested,
-        "persisted": bool(persist and assessment_id),
-    }
 
 
 @router.get("/api/v1/intake/{assessment_id}")

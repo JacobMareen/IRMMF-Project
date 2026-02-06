@@ -25,7 +25,7 @@ def role_set(roles: Iterable[str] | None) -> set[str]:
 
 
 def is_admin(principal: Principal) -> bool:
-    return "ADMIN" in role_set(principal.roles)
+    return "SUPER_ADMIN" in role_set(principal.roles)
 
 
 def require_tenant(principal: Principal) -> str:

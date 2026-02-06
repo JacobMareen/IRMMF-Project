@@ -5,7 +5,13 @@ import os
 from typing import List
 
 
+from app.core.settings import settings
+
+
 def allowed_origins() -> List[str]:
+    if settings.CORS_ALLOW_ALL:
+        return ["*"]
+
     local_origins = [
         "http://127.0.0.1:5500",
         "http://localhost:5500",

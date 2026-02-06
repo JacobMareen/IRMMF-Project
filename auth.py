@@ -15,10 +15,12 @@ You can also pass a tenant key via X-IRMMF-KEY for early multi-tenant testing.
 from __future__ import annotations
 
 import os
+import secrets
 from dataclasses import dataclass
 from typing import Optional, List, Mapping
 
 from fastapi import Depends, Header, HTTPException, Request
+from app.security.jwt import verify_token
 
 
 @dataclass
@@ -66,7 +68,7 @@ def _default_roles() -> List[str]:
     env_roles = os.getenv("DEV_ROLES")
     if env_roles:
         return [role.strip().upper() for role in env_roles.split(",") if role.strip()]
-    return ["ADMIN"]
+    return ["SUPER_ADMIN", "ADMIN"]
 
 
 def _resolve_roles(raw_roles: Optional[str]) -> List[str]:
@@ -102,14 +104,25 @@ def _build_principal(
         raise HTTPException(status_code=401, detail="Missing bearer token")
 
     provided = authorization.split(" ", 1)[1].strip()
-    if provided != token:
-        if allow_anonymous:
-            return None
-        raise HTTPException(status_code=401, detail="Invalid token")
+    
+    # 1. Try Legacy Dev Token
+    if token and secrets.compare_digest(provided, token):
+        return Principal(
+            subject=os.getenv("DEV_SUBJECT", "dev"),
+            tenant_key=x_irmmf_key,
+            roles=roles or _default_roles(),
+        )
 
-    # TODO: Replace DEV roles/subject with real JWT claims.
-    return Principal(
-        subject=os.getenv("DEV_SUBJECT", "dev"),
-        tenant_key=x_irmmf_key,
-        roles=roles or _default_roles(),
-    )
+    # 2. Try JWT
+    payload = verify_token(provided)
+    if payload:
+        return Principal(
+            subject=payload.get("sub"),
+            tenant_key=payload.get("tenant_key") or x_irmmf_key, # JWT claim overrides header if present
+            roles=payload.get("roles") or roles or _default_roles(),
+        )
+
+    # 3. Fail
+    if allow_anonymous:
+        return None
+    raise HTTPException(status_code=401, detail="Invalid token")

@@ -21,3 +21,4 @@ accelerate
 pydantic-settings
 psycopg
 email-validator
+pyjwt

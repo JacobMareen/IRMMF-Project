@@ -88,9 +88,18 @@ class Question(Base):
         lazy="selectin",
     )
 
+    input_type: Mapped[str] = mapped_column(String, nullable=False, default="Single")
+    list_ref: Mapped[str] = mapped_column(String, nullable=True)
+    benchmark_weight: Mapped[float] = mapped_column(Float, nullable=True)
+    # section field can reuse pack_section or be new. Let's alias it or use pack_section in ingestion.
+    # But for clarity, let's add specific intake fields if needed, or generic ones.
+    # legacy 'section' from IntakeQuestion:
+    section: Mapped[str] = mapped_column(String, nullable=True)
+
     __table_args__ = (
         Index("ix_dim_questions_domain_tier", "domain", "tier"),
     )
+
 
 class Answer(Base):
     __tablename__ = "dim_answers"
@@ -123,29 +132,17 @@ class Answer(Base):
 
     question: Mapped["Question"] = relationship("Question", back_populates="options")
 
-class IntakeQuestion(Base):
-    __tablename__ = "dim_intake_questions"
+# IntakeQuestion removed (merged into Question)
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    intake_q_id: Mapped[str] = mapped_column(String, nullable=False, unique=True)
-    section: Mapped[str] = mapped_column(String, nullable=True)
-    question_text: Mapped[str] = mapped_column(Text, nullable=False)
-    guidance: Mapped[str] = mapped_column(Text, nullable=True)
-    input_type: Mapped[str] = mapped_column(String, nullable=False, default="Single")
-    list_ref: Mapped[str] = mapped_column(String, nullable=True)
-    used_for: Mapped[str] = mapped_column(String, nullable=True)
-    benchmark_weight: Mapped[float] = mapped_column(Float, nullable=True)
-    depth_logic_ref: Mapped[str] = mapped_column(String, nullable=True)
-
-class IntakeListOption(Base):
-    __tablename__ = "dim_intake_list_options"
+class ListOption(Base):
+    __tablename__ = "dim_list_options"
 
     list_ref: Mapped[str] = mapped_column(String, primary_key=True, index=True)
     value: Mapped[str] = mapped_column(String, primary_key=True)
     display_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     __table_args__ = (
-        UniqueConstraint("list_ref", "value", name="uq_intake_list_ref_value"),
+        UniqueConstraint("list_ref", "value", name="uq_list_ref_value"),
     )
 
 # --- FACT TABLES (Transactional Data) ---
@@ -161,6 +158,7 @@ class Assessment(Base):
     depth: Mapped[str] = mapped_column(String(32), nullable=True)
     override_depth: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     benchmark_tags: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    market_research_opt_in: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False) 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -209,16 +207,17 @@ class IntakeResponse(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     assessment_id: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
-    intake_q_id: Mapped[str] = mapped_column(String, nullable=False)
+    q_id: Mapped[str] = mapped_column(String, ForeignKey("dim_questions.q_id"), nullable=False)
     value: Mapped[str] = mapped_column(Text, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    intake_question_id: Mapped[int] = mapped_column(BigInteger, nullable=True, index=True)
+    # Removed intake_question_id as we use q_id (string FK) or could add question_id (int FK) if needed.
+    # For now, q_id string FK is sufficient as per Response model pattern.
 
     __table_args__ = (
-        UniqueConstraint("assessment_id", "intake_q_id", name="uq_fact_intake_assessment_q"),
+        UniqueConstraint("assessment_id", "q_id", name="uq_fact_intake_assessment_q"),
     )
 
 class ResponseAudit(Base):

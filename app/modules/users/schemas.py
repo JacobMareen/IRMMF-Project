@@ -22,6 +22,9 @@ ALLOWED_ROLES = {
 class UserInviteIn(BaseModel):
     email: EmailStr
     display_name: Optional[str] = None
+    job_title: Optional[str] = None
+    phone_number: Optional[str] = None
+    linkedin_url: Optional[str] = None
     role: str
 
     @field_validator("role")
@@ -38,6 +41,30 @@ class UserLoginIn(BaseModel):
     password: Optional[str] = None
 
 
+class TenantLookupRequest(BaseModel):
+    email: EmailStr
+
+
+class TenantInfo(BaseModel):
+    name: str
+    key: str
+
+
+class TenantLookupResponse(BaseModel):
+    tenants: list[TenantInfo]
+
+
+class TermsStatus(BaseModel):
+    latest_version: str
+    has_accepted: bool
+    accepted_at: datetime | None = None
+    required: bool = True # If false, UI can skip showing modal
+
+
+class TermsAccept(BaseModel):
+    version: str
+
+
 class UserRoleOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     role: str
@@ -48,6 +75,9 @@ class UserOut(BaseModel):
     id: str
     email: str
     display_name: Optional[str] = None
+    job_title: Optional[str] = None
+    phone_number: Optional[str] = None
+    linkedin_url: Optional[str] = None
     status: str
     roles: List[UserRoleOut]
     invited_at: datetime

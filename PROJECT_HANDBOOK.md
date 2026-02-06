@@ -163,7 +163,7 @@ The Assessment Module (v10) focuses on a streamlined intake process and maturity
     *   `app/models.py`: Base class and Insider Risk Program domain (Policy, Controls).
     *   `alembic/env.py`: Migration environment (imports all modules to register metadata).
 *   **Maintenance:**
-    *   `ingest_excel.py`: CLI tool to load Questions/Answers from Excel (v6.1 structure).
+    *   `ingest_excel.py`: CLI tool to load Question Bank from JSON (`app/core/irmmf_bank.json`).
 
 ### Risk Engine (`app/core/risk_engine.py`)
 *   **Scoring Logic:**
@@ -294,13 +294,13 @@ Enhance the user friendliness and professional feel of the application while rob
 ### Ingestion
 The `ingest_excel.py` script loads the static question bank.
 ```bash
-# Full reset of question bank
+# Full reset of question bank from JSON source
 TRUNCATE_BANK=1 python ingest_excel.py
 ```
 
 ### Deployment Checklist
 1.  **Backup:** `pg_dump -h localhost -U postgres -d irmmf_db > backup.sql`
-2.  **Ingest:** Run `ingest_excel.py` with `v10` Consolidated Excel.
+2.  **Ingest:** Run `ingest_excel.py` (loads `app/core/irmmf_bank.json`).
 3.  **Build Frontend:** `cd frontend && npm run build`.
 4.  **Restart Backend:** `python main.py`.
 

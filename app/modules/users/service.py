@@ -6,9 +6,14 @@ import os
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.settings import settings
 from app.modules.tenant import models as tenant_models
 from app.modules.users import models
-from app.modules.users.schemas import LoginResponse, UserInviteIn, UserOut
+from app.core.settings import settings
+from app.modules.tenant import models as tenant_models
+from app.modules.users import models
+from app.modules.users.schemas import LoginResponse, UserInviteIn, UserOut, TermsStatus
+from app.security.jwt import create_access_token
 
 
 class UserService:
@@ -42,6 +47,11 @@ class UserService:
         if existing:
             raise ValueError("User already exists")
 
+        # Enforce Account Limits (DDoS / Abuse Prevention)
+        current_count = self.db.query(models.User).filter(models.User.tenant_id == tenant.id).count()
+        if current_count >= settings.MAX_USERS_PER_TENANT:
+            raise ValueError(f"Tenant has reached the maximum of {settings.MAX_USERS_PER_TENANT} users.")
+
         user = models.User(
             tenant_id=tenant.id,
             email=payload.email,
@@ -73,8 +83,72 @@ class UserService:
         user.last_login_at = datetime.now(timezone.utc)
         self.db.commit()
         self.db.refresh(user)
-        token = os.getenv("DEV_TOKEN", "dev-token")
+        
+        # Generate JWT
+        token_payload = {
+            "sub": str(user.id),
+            "tenant_key": tenant_key,
+            "roles": [r.role for r in user.roles] if self._has_user_roles() else ["ADMIN"] # Fallback for legacy
+        }
+        token = create_access_token(token_payload)
+        
+        # Legacy dev fallback if configured and needed, but we prefer JWT now
+        # token = os.getenv("DEV_TOKEN", "dev-token") 
         return LoginResponse(user=self._serialize_user(user, include_roles=self._has_user_roles()), token=token)
+
+    def lookup_tenants(self, email: str) -> list[dict[str, str]]:
+        if self._uses_legacy_users():
+            return []
+
+        results = (
+            self.db.query(tenant_models.Tenant)
+            .join(models.User, models.User.tenant_id == tenant_models.Tenant.id)
+            .filter(models.User.email == email)
+            .all()
+        )
+
+        return [
+            {"name": t.tenant_name, "key": t.tenant_key}
+            for t in results
+        ]
+
+    def get_terms_status(self, user_id: str, current_version: str = "1.0") -> TermsStatus:
+        acceptance = (
+            self.db.query(models.TermsAcceptance)
+            .filter(
+                models.TermsAcceptance.user_id == user_id,
+                models.TermsAcceptance.terms_version == current_version
+            )
+            .first()
+        )
+        return TermsStatus(
+            latest_version=current_version,
+            has_accepted=bool(acceptance),
+            accepted_at=acceptance.accepted_at if acceptance else None,
+            required=True
+        )
+
+    def accept_terms(self, user_id: str, version: str, ip_address: str | None = None, user_agent: str | None = None) -> None:
+        # Idempotent: check if already accepted
+        existing = (
+            self.db.query(models.TermsAcceptance)
+            .filter(
+                models.TermsAcceptance.user_id == user_id,
+                models.TermsAcceptance.terms_version == version
+            )
+            .first()
+        )
+        if existing:
+            return
+
+        acceptance = models.TermsAcceptance(
+            user_id=user_id,
+            terms_version=version,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+        self.db.add(acceptance)
+        self.db.commit()
 
     def update_roles(self, tenant_key: str, user_id: str, roles: list[str]) -> UserOut:
         if self._uses_legacy_users():

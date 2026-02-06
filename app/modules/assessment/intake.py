@@ -16,26 +16,33 @@ class AssessmentIntakeService:
         )
         if not record:
             raise ValueError(f"Assessment {assessment_id} not found.")
+        
         benchmark_tags = self._build_benchmark_tags(answers)
         record.benchmark_tags = benchmark_tags
+        
         for key, value in answers.items():
             if value is None or value == "":
                 continue
+            # Logic update: 'key' is the QID (e.g. INT-ORG-01). 
+            # In new schema, IntakeResponse uses 'q_id' which maps to 'dim_questions.q_id'
             stmt = insert(models.IntakeResponse).values(
                 assessment_id=assessment_id,
-                intake_q_id=key,
+                q_id=key, 
                 value=str(value),
             ).on_conflict_do_update(
-                index_elements=["assessment_id", "intake_q_id"],
+                index_elements=["assessment_id", "q_id"],
                 set_={"value": str(value)},
             )
             self.db.execute(stmt)
+        
         self.db.commit()
+        
         # Intake answers are stored before kick-start, so depth suggestion can work without responses.
         depth_suggestion = self._suggest_depth(record, None)
         if not record.depth:
             record.depth = self._normalize_depth(depth_suggestion) if hasattr(self, "_normalize_depth") else depth_suggestion
             self.db.commit()
+            
         return {
             "assessment_id": assessment_id,
             "benchmark_tags": benchmark_tags,
@@ -64,9 +71,11 @@ class AssessmentIntakeService:
         size = (tags.get("size_band") or "").lower()
         industry = (tags.get("industry") or "").lower()
         regulated = tags.get("regulated_flags") or []
+        
         readiness = None
         if kickstart and isinstance(kickstart, dict):
             readiness = kickstart.get("readiness")
+            
         if readiness is not None and readiness >= 70:
             return "Deep"
         if any(flag for flag in regulated):
@@ -76,6 +85,10 @@ class AssessmentIntakeService:
         if "enterprise" in size:
             return "Standard"
         return "Core"
+
+    # Helper method that might be missing in older class def but referenced globally
+    def _normalize_depth(self, depth: str) -> str:
+        return depth
 
     def _get_intake_tags(self, assessment_id: str) -> List[str]:
         # Intake tags drive risk scenario impact rules and cohort benchmarking.
@@ -101,31 +114,37 @@ class AssessmentIntakeService:
             .filter_by(assessment_id=assessment_id)
             .all()
         )
-        return [{"intake_q_id": r.intake_q_id, "value": r.value} for r in rows]
+        return [{"intake_q_id": r.q_id, "value": r.value} for r in rows]
 
     def get_intake_questions(self) -> List[Dict[str, Any]]:
+        # Refactor: Query dim_questions where tier='T0'
+        # Also need ListOptions from dim_list_options
+        
         if os.getenv("IRMMF_DEBUG_INTAKE") == "1":
-            count = self.db.execute(text("SELECT COUNT(*) FROM dim_intake_questions")).scalar()
-            print(f"[intake] dim_intake_questions count={count}", flush=True)
+            count = self.db.execute(text("SELECT COUNT(*) FROM dim_questions WHERE tier='T0'")).scalar()
+            print(f"[intake] T0 Question count={count}", flush=True)
+
         rows = (
-            self.db.query(models.IntakeQuestion)
-            .order_by(models.IntakeQuestion.section, models.IntakeQuestion.intake_q_id)
+            self.db.query(models.Question)
+            .filter(models.Question.tier == 'T0')
+            .order_by(models.Question.section, models.Question.q_id)
             .all()
         )
+        
         if not rows:
-            iq_count = self.db.execute(text("SELECT COUNT(*) FROM dim_intake_questions")).scalar()
-            lo_count = self.db.execute(text("SELECT COUNT(*) FROM dim_intake_list_options")).scalar()
+            # Fallback check
+            q_count = self.db.execute(text("SELECT COUNT(*) FROM dim_questions WHERE tier='T0'")).scalar()
             raise ValueError(
-                "Intake tables are empty or not populated. "
-                f"dim_intake_questions={iq_count}, dim_intake_list_options={lo_count}"
+                f"Intake questions (T0) are not present. Count={q_count}"
             )
+
         list_refs = {row.list_ref for row in rows if row.list_ref}
         options: Dict[str, List[Dict[str, Any]]] = {}
         if list_refs:
             opt_rows = (
-                self.db.query(models.IntakeListOption)
-                .filter(models.IntakeListOption.list_ref.in_(list_refs))
-                .order_by(models.IntakeListOption.list_ref, models.IntakeListOption.display_order)
+                self.db.query(models.ListOption)
+                .filter(models.ListOption.list_ref.in_(list_refs))
+                .order_by(models.ListOption.list_ref, models.ListOption.display_order)
                 .all()
             )
             for row in opt_rows:
@@ -133,24 +152,25 @@ class AssessmentIntakeService:
                     "value": row.value,
                     "display_order": row.display_order,
                 })
+        
         payload = []
         for row in rows:
             payload.append({
-                "intake_q_id": row.intake_q_id,
+                "intake_q_id": row.q_id, # Frontend expects intake_q_id
                 "section": row.section,
                 "question_text": row.question_text,
                 "guidance": row.guidance,
                 "input_type": row.input_type,
                 "list_ref": row.list_ref,
-                "options": options.get(row.list_ref, []),
+                "options": options.get(row.list_ref or "", []),
             })
         return payload
 
     def get_intake_options(self) -> Dict[str, Any]:
         """Return intake option lists from the database instead of hardcoding."""
         rows = (
-            self.db.query(models.IntakeListOption)
-            .order_by(models.IntakeListOption.list_ref, models.IntakeListOption.display_order)
+            self.db.query(models.ListOption)
+            .order_by(models.ListOption.list_ref, models.ListOption.display_order)
             .all()
         )
         options_by_ref: Dict[str, List[str]] = {}
