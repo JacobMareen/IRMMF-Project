@@ -18,17 +18,22 @@ const ExternalDropbox = () => {
     }
     setLoading(true)
     setStatus('Submitting...')
-    client.fetch(`/api/external/dropbox`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        subject: subject.trim() || null,
-        message: message.trim(),
-        reporter_name: name.trim() || null,
-        reporter_email: email.trim() || null,
-        source: 'dropbox',
-      }),
-    })
+    client.fetch(
+      `/api/external/dropbox`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: subject.trim() || null,
+          message: message.trim(),
+          reporter_name: name.trim() || null,
+          reporter_email: email.trim() || null,
+          source: 'dropbox',
+        }),
+        authenticated: false,
+      },
+      true
+    )
       .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((data: { ticket_id?: string }) => {
         setTicketId(data.ticket_id || '')

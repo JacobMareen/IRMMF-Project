@@ -223,12 +223,20 @@ def reset_assessment_data(
 
 
 @router.get("/api/v1/intake/options")
-def get_intake_options(service: AssessmentService = Depends(get_service)):
+def get_intake_options(
+    principal: Principal = Depends(get_principal),
+    service: AssessmentService = Depends(get_service),
+):
+    _ensure_tenant_context(principal)
     return service.get_intake_options()
 
 
 @router.get("/api/v1/intake/start")
-def get_intake_start(service: AssessmentService = Depends(get_service)):
+def get_intake_start(
+    principal: Principal = Depends(get_principal),
+    service: AssessmentService = Depends(get_service),
+):
+    _ensure_tenant_context(principal)
     try:
         data = service.get_intake_questions()
         return data
@@ -237,8 +245,12 @@ def get_intake_start(service: AssessmentService = Depends(get_service)):
 
 
 @router.get("/api/v1/intake/debug")
-def get_intake_debug(service: AssessmentService = Depends(get_service)):
+def get_intake_debug(
+    principal: Principal = Depends(get_principal),
+    service: AssessmentService = Depends(get_service),
+):
     """Debug intake tables for local troubleshooting."""
+    _ensure_tenant_context(principal)
     db = service.db
     iq_count = db.execute(text("SELECT COUNT(*) FROM dim_intake_questions")).scalar()
     lo_count = db.execute(text("SELECT COUNT(*) FROM dim_intake_list_options")).scalar()

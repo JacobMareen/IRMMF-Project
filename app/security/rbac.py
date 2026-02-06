@@ -14,6 +14,8 @@ def require_roles(*roles: str):
         if rbac_disabled() or not required:
             return principal
         principal_roles = role_set(principal.roles)
+        if "SUPER_ADMIN" in principal_roles:
+            return principal
         if not principal_roles.intersection(required):
             raise HTTPException(status_code=403, detail="Insufficient role")
         return principal

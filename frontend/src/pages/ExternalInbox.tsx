@@ -31,7 +31,11 @@ const ExternalInbox = () => {
       return
     }
     setLoading(true)
-    client.fetch(`/api/external/inbox?case_id=${encodeURIComponent(caseId)}&token=${encodeURIComponent(token)}`, {}, true)
+    client.fetch(
+      `/api/external/inbox?case_id=${encodeURIComponent(caseId)}&token=${encodeURIComponent(token)}`,
+      { authenticated: false },
+      true
+    )
       .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((payload: ExternalInboxResponse) => {
         setData(payload)
@@ -58,11 +62,16 @@ const ExternalInbox = () => {
       return
     }
     setLoading(true)
-    client.fetch(`/api/external/inbox?case_id=${encodeURIComponent(caseId)}&token=${encodeURIComponent(token)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ body: message.trim() }),
-    })
+    client.fetch(
+      `/api/external/inbox?case_id=${encodeURIComponent(caseId)}&token=${encodeURIComponent(token)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body: message.trim() }),
+        authenticated: false,
+      },
+      true
+    )
       .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then(() => {
         setMessage('')

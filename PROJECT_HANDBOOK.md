@@ -106,6 +106,12 @@ Core infrastructure for multi-tenancy and RBAC.
 *   **Settings:** Manage holidays, jurisdiction rules, and global configurations.
 *   **Holidays:** Custom business-day calendars for deadline logic.
 *   **API:** `/api/v1/tenant/settings`, `/api/v1/tenant/holidays`.
+*   **Registration:** Creates tenant + admin; requires industry sector and employee count for lead context (controlled values). Optional gating to block free email domains for higher-quality leads.
+*   **Registration UI:** Client-side validation blocks common free email domains to preserve lead quality.
+*   **Lead Enrichment:** Registration can capture admin job title, phone, and LinkedIn URL for marketing follow-up.
+*   **Marketing Consent:** Registration includes an opt-in checkbox; stored on the admin user and tenant settings.
+*   **Lead Attribution:** Registration captures `utm_campaign`, `utm_source`, and `utm_medium` for campaign tracking (carried from login URL params when present).
+*   **Registration Audit:** Store registration IP and user-agent on the admin user for compliance/audit tracking.
 
 ### Users Module
 *   **RBAC:** Role-based access control (`ADMIN`, `HR`, `LEGAL`, `INVESTIGATOR`, etc.).
@@ -182,6 +188,7 @@ The Assessment Module (v10) focuses on a streamlined intake process and maturity
     *   `X-IRMMF-KEY` header context.
     *   `ensure_tenant_match`: Gatekeeper to prevent cross-tenant data access.
     *   `DEV_RBAC_DISABLED`: Environment flag to bypass checks in local dev.
+*   **Assessment Access:** Assessment flows require registered users (no anonymous submissions) to preserve lead value.
 
 ### CLI Tools (`scripts/`)
 *   `verify_investigation_module.py`: Comprehensive smoke test for case lifecycle.
@@ -240,44 +247,95 @@ Enhance the user friendliness and professional feel of the application while rob
 **Risk Treatment:** Interactive treatment planning module (current placeholder in Risks view).
 **AI Analysis:** Free-text intake analysis (requires new `app/modules/ai` backend service).
 
-### Phase 8: Content & Depth (Planned)
+### Phase 8: Security Hardening & Review (Planned)
+**Session & Identity:** Enforce strict SUPER_ADMIN vs TENANT_ADMIN RBAC; verify JWT session expiration (`ACCESS_TOKEN_EXPIRE_MINUTES`) and, if cookie auth is introduced, require HttpOnly/SameSite; add email lookup flow to remove tenant_key from the login form.
+**Data Protection:** Ensure assessment_id is never exposed in URL bars or readable text for unauthorized users; review all *Out schemas to prevent internal PII or config leakage.
+**Abuse Prevention:** Add slowapi rate limiting (login 5/min per IP, invite/register 10/min per IP, general API 100/min per IP).
+**Input Validation:** Review `schemas.py` for loose types (dict/Any); enforce string length limits on free-text fields; sanitize RiskHeatmap inputs to prevent stored XSS.
+**Secrets:** Verify Argon2/Bcrypt hashing; scan codebase for hardcoded tokens/keys.
+**Update:** Added max-length validation for core case/user text inputs in `app/modules/cases/schemas.py` and `app/modules/users/schemas.py`.
+**Update:** Added max-length validation for tenant settings and registration inputs in `app/modules/tenant/schemas.py`.
+**Update:** SlowAPI middleware wired with per-route limits for login/invite/register and a default global limit (configurable via `IRMMF_RATE_LIMIT_*` settings).
+**Update:** Startup warning logged if `SECRET_KEY` remains the dev default when `DEBUG` is false.
+**Update:** Added max-length validation for assessment inputs (`app/schemas.py`), insider program payloads (`app/modules/insider_program/schemas.py`), and third-party risk payloads (`app/modules/third_party/schemas.py`).
+**Update:** Added max-length validation for PIA, DWF, SSO, and AI request schemas (`app/modules/pia/schemas.py`, `app/modules/dwf/schemas.py`, `app/modules/sso/schemas.py`, `app/modules/ai/schemas.py`).
+**Update:** Added new rate-limit envs to `.env.example` for login/invite thresholds.
+**Update:** Login now uses email-based tenant lookup to remove tenant_key input (`frontend/src/pages/Login.tsx`).
+**Update:** Tenant-scoped routes now enforce tenant-key match for non-super admins; Settings UI uses stored tenant key for API calls.
+**Update:** Added TENANT_ADMIN role support and UI selection (legacy ADMIN remains accepted).
+**Update:** Hid assessment_id from Third-Party Risk UI surfaces.
+**Update:** Added AI risk-heatmap input length limits and trimming in `app/modules/ai/schemas.py`.
+**Update:** Added size limits for assessment evidence and sidebar context payloads in `app/schemas.py`.
+**Update:** Added `ACCESS_TOKEN_EXPIRE_MINUTES` to `.env.example` for session TTL configuration.
+**Update:** Frontend now clears auth and redirects to `/login` on 401 responses to enforce session timeouts.
+**Secrets Audit (initial):** No hardcoded secrets found beyond dev defaults (e.g., `DEV_TOKEN`, `SECRET_KEY`). Ensure production overrides via env.
+
+### Phase 9: SSO Prep & Modular Auth (Planned)
+**Goal:** Enable pluggable identity providers (Auth0, Azure AD, SAML) without rewriting core auth logic.
+**Architecture:** `app/modules/sso` with `protocols.py` identity provider interface, registry in `service.py`, and standardized routes in `routes.py` (`/auth/sso/login/{provider}`, `/auth/sso/callback/{provider}`).
+**Integration:** SSO callback exchanges code for profile, upserts the user, and issues an internal JWT using `app/security/jwt.py`.
+
+### Phase 10: Content & Depth (Planned)
 **Methodology Guide:** Expand `frontend/src/components/FrameworkGuide.tsx` into a comprehensive, readable manual.
 **Capabilities Integration:** Integrate domain capability tags into Assessment Results and scoring views to provide granular context.
 
-### Phase 9: Strategic Enhancements (Based on Industry Analysis)
+### Phase 11: Strategic Enhancements (Based on Industry Analysis)
 **Third-Party Risk Module:** Add assessment criteria for Trusted Partners and Supply Chain (Ref: DTEX, Leidos).
 **Maturity Mapper:** Map IRMMF Archetypes to industry-standard 1-5 Maturity Levels (Ad-hoc -> Optimized) for CISO reporting (Ref: CMMI, Cyberhaven).
 **Socio-Technical Profiling:** Distinguish between Malicious vs Negligent risk indicators in the dashboard (Ref: Orange Cyberdefense STS Theory).
 **Global Benchmarking:** Create a Scenario Benchmark view to compare scores against simulated Industry/Sector averages (Ref: Gurucul, Ponemon).
 **Board-Ready Reporting:** Generate PDF Executive Summaries focusing on Business Value and ROI rather than just technical scores.
 
-### Phase 10: Case Management Maturity (Refining Evidence & Workflow)
+### Phase 12: Case Management Maturity (Refining Evidence & Workflow)
 **Privacy-First Workflow:** Implement Anonymized by Default views for analysts, revealing PII only with Break Glass justification (Ref: DTEX, Proofpoint).
 **Update:** Break-glass endpoint + UI added in Case Flow and Case list overlays; PII masking applied to subjects, evidence labels, reporter messages, legal holds, expert access, case titles/summaries, and notes. PII entry fields (subjects, evidence, legal holds, experts, notes, reporter replies) now require break-glass unlock. Audit event logged for break-glass actions.
 **Investigator Audit Trail:** Log every action taken by the investigator (viewing evidence, unmasking users) to ensure watching-the-watcher compliance.
 **Integrated Feedback Loop:** Right-sized response workflow (send micro-learning or nudge emails for low-risk negligence) (Ref: Code42 Instructor).
 **Legal-Ready Packaging:** One-click Case Export that bundles timeline, evidence, and audit logs into a tamper-evident ZIP for HR/Legal handoff.
 
-### Phase 11: Adaptive Methodology (The Triage Pivot)
+### Phase 13: Adaptive Methodology (The Triage Pivot)
 **Rapid Benchmark (Tier 1):** Promote the 25-question Intake module to be the default starting experience.
-**Unified Schema (Refactor):** Merge `IntakeQuestion` and `Question` tables. Treat Intake as Tier 0 questions to simplify DB and remove redundant tables.
+**Unified Schema (Refactor):** [x] Merge `IntakeQuestion` and `Question` tables. Treat Intake as Tier 0 questions to simplify DB and remove redundant tables.
+**Streamline:** [x] Remove Auto-fill / Scraper feature to reduce friction and complexity.
+**Expansion (Procurement, Corruption & Defense):** [partial] Question bank added; branching insertion pending.
 **Smart Extension:** Use Gatekeeper Logic to dynamically unlock Deep Dive tiers based on Tier 0 answers.
 **Score Integrity:** Tag assessment results as `CONFIDENCE_LEVEL: LOW` (Rapid) vs `CONFIDENCE_LEVEL: HIGH` (Full) to prevent apples-to-oranges benchmarking.
 **Gatekeeper Logic:** Ensure Rapid answers automatically close/open downstream Deep Dive sections.
 **Engagement Mechanics:** Ghost Bars (show potential score on Radar chart), incentive teasers (Unlock Domain Analysis), and extension workflow UI to invite users to unlock domains after Rapid Benchmark.
 
-### Phase 12: UX Polish & Content Enrichment
+### Phase 14: UX Polish & Content Enrichment
 **Info Overlays:** Standardized clickable info icons that trigger a click-outside-to-close overlay for definitions (replacing simple browser tooltips).
 **Rich Archetypes:** Expand archetype definitions from bullet points to full prose with peer comparison context.
 **Registration Portal:** Self-service registration flow that creates a dedicated tenant/user (removing manual SQL provisioning).
+**Licensing & T&C:** Versioned Terms of Service content (markdown/HTML), acceptance tracking (`dim_terms_acceptance`), and enforcement middleware to redirect users who have not accepted the latest version.
 
-### Phase 13: Strategic Enablers (Based on Global/Belgian Analysis)
+### Phase 15: Strategic Enablers (Based on Global/Belgian Analysis)
 **Structural Integrity Floor:** Implement a multiplicative penalty in scoring for organizations that have policies (BaseScore) but fail execution (Axis E), preventing paper maturity.
 **Evidence-Aware Assessment:** Add confidence adjusters based on micro-questions (e.g., specific MFA type, RMM tool usage) to refine scores.
 **Shadow Worker Detection:** Add risk scenarios for Remote Management Tools (AnyDesk/RustDesk) and Timezone Anomalies to detect proxy workers (Ref: North Korean checks).
 **Belgian Compliance Module:** CBA No. 81 alignment with tiered visibility (PII hidden by default until Break Glass procedure is logged).
 **Works Council Logic:** `EvidencePolicyID: LEG_STRICT` requires DPIA/Works Council approval for high maturity scores in Domain 4.
 **Signal Fusion:** Backend logic to correlate disparate signals (Auth Event + Geolocation + HID presence) into a single high-fidelity risk score.
+
+### Phase 16: Market Research & Lead Generation Engine
+**Goal:** Pivot the platform to serve as a high-volume lead generation and market research tool.
+**Lead Capture:** Expand User model with optional job_title, phone_number, and linkedin_url; enhance TenantSettings to capture industry_sector and employee_count.
+**Campaign Logic:** Support `?campaign=...` URL params for cohorting; add recurring pulse assessments for year-over-year comparison.
+**Dual-Use Data Strategy:** Tag ~50 core research questions (T0 + key T1s); add question bank version locking; enforce Research Mode to validate only the core subset.
+**Consent & Legal:** Add `market_research_opt_in` to Assessment; add UI opt-in checkbox on Registration/Intake.
+**State of the Industry Report:** Aggregation service for opt-in data, trend engine for campaign comparisons, export API for anonymized CSV.
+**Sales Enablement:** Lead dashboard for new registrations and assessment status.
+
+### Phase 17: Remediation Toolkit (Building the Program)
+**Content Library:** One-click policy generation (Acceptable Use, Insider Threat) and template hub (playbooks, training decks).
+**Action Management:** Roadmap Kanban with assignees and task tracking.
+
+### Phase 18: Expert Connect (Service Marketplace)
+**Features:** Request assessment review and partner matching based on region/industry.
+
+### Phase 19: Ecosystem Integrations (Closing the Loop)
+**Education (LMS):** Training prescription for low awareness scores and SCORM export/link tracking.
+**Financial (Insurance):** Underwriter report PDF and maturity-based premium negotiation support.
 
 ### Verification Plan
 **Rapid Mode:** Start new assessment and verify only 25 questions load.

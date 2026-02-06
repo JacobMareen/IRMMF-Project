@@ -13,6 +13,9 @@ type TenantSettings = {
   company_name?: string | null
   default_jurisdiction: string
   investigation_mode: string
+  utm_campaign?: string | null
+  utm_source?: string | null
+  utm_medium?: string | null
   retention_days: number
   keyword_flagging_enabled: boolean
   keyword_list: string[]
@@ -21,6 +24,7 @@ type TenantSettings = {
   deadline_cutoff_hour: number
   notifications_enabled: boolean
   serious_cause_notifications_enabled: boolean
+  marketing_consent: boolean
   jurisdiction_rules: Record<string, unknown>
   updated_at: string
 }
@@ -38,6 +42,7 @@ type UserEntry = {
 
 const Settings = () => {
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
+  const tenantKey = useMemo(() => localStorage.getItem('irmmf_tenant') || DEFAULT_TENANT_KEY, [])
   const [logo, setLogo] = useState<string | null>(null)
   const [resetId, setResetId] = useState('')
   const [status, setStatus] = useState('')
@@ -61,7 +66,7 @@ const Settings = () => {
   }, [currentUser])
 
   useEffect(() => {
-    apiJson<TenantSettings>(`/tenant/settings?tenant_key=${DEFAULT_TENANT_KEY}`)
+    apiJson<TenantSettings>(`/tenant/settings?tenant_key=${tenantKey}`)
       .then((data) => {
         setTenantSettings({
           ...data,
@@ -70,6 +75,10 @@ const Settings = () => {
           deadline_cutoff_hour: data.deadline_cutoff_hour ?? 17,
           notifications_enabled: data.notifications_enabled ?? true,
           serious_cause_notifications_enabled: data.serious_cause_notifications_enabled ?? true,
+          marketing_consent: data.marketing_consent ?? false,
+          utm_campaign: data.utm_campaign ?? null,
+          utm_source: data.utm_source ?? null,
+          utm_medium: data.utm_medium ?? null,
           jurisdiction_rules: data.jurisdiction_rules || {},
         })
         setKeywordText((data.keyword_list || []).join(', '))
@@ -81,7 +90,7 @@ const Settings = () => {
   }, [])
 
   useEffect(() => {
-    apiJson<UserEntry[]>(`/users?tenant_key=${DEFAULT_TENANT_KEY}`)
+    apiJson<UserEntry[]>(`/users?tenant_key=${tenantKey}`)
       .then((data) => setUsers(data || []))
       .catch(() => {
         setInviteStatus('Unable to load users.')
@@ -89,7 +98,7 @@ const Settings = () => {
   }, [])
 
   useEffect(() => {
-    apiJson(`/tenant/holidays?tenant_key=${DEFAULT_TENANT_KEY}`)
+    apiJson(`/tenant/holidays?tenant_key=${tenantKey}`)
       .then((data) => setHolidays(data || []))
       .catch(() => {
         setTenantStatus('Unable to load holidays.')
@@ -177,10 +186,11 @@ const Settings = () => {
       deadline_cutoff_hour: tenantSettings.deadline_cutoff_hour,
       notifications_enabled: tenantSettings.notifications_enabled,
       serious_cause_notifications_enabled: tenantSettings.serious_cause_notifications_enabled,
+      marketing_consent: tenantSettings.marketing_consent,
       jurisdiction_rules: rulesPayload,
     }
     try {
-      const resp = await apiFetch(`/tenant/settings?tenant_key=${DEFAULT_TENANT_KEY}`, {
+      const resp = await apiFetch(`/tenant/settings?tenant_key=${tenantKey}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -198,7 +208,7 @@ const Settings = () => {
 
   const refreshUsers = async () => {
     try {
-      const resp = await apiFetch(`/users?tenant_key=${DEFAULT_TENANT_KEY}`)
+      const resp = await apiFetch(`/users?tenant_key=${tenantKey}`)
       if (!resp.ok) throw new Error('Fetch failed')
       const data = (await resp.json()) as UserEntry[]
       setUsers(data || [])
@@ -215,7 +225,7 @@ const Settings = () => {
     }
     setInviteStatus('Updating role...')
     try {
-      const resp = await apiFetch(`/users/${userId}/roles?tenant_key=${DEFAULT_TENANT_KEY}`, {
+      const resp = await apiFetch(`/users/${userId}/roles?tenant_key=${tenantKey}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ roles: [role] }),
@@ -235,7 +245,7 @@ const Settings = () => {
     }
     setInviteStatus('Inviting user...')
     try {
-      const resp = await apiFetch(`/users/invite?tenant_key=${DEFAULT_TENANT_KEY}`, {
+      const resp = await apiFetch(`/users/invite?tenant_key=${tenantKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -260,7 +270,7 @@ const Settings = () => {
       return
     }
     try {
-      const resp = await apiFetch(`/tenant/holidays?tenant_key=${DEFAULT_TENANT_KEY}`, {
+      const resp = await apiFetch(`/tenant/holidays?tenant_key=${tenantKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ holiday_date: holidayDate, label: holidayLabel || null }),
@@ -278,7 +288,7 @@ const Settings = () => {
 
   const deleteHoliday = async (holidayId: number) => {
     try {
-      const resp = await apiFetch(`/tenant/holidays/${holidayId}?tenant_key=${DEFAULT_TENANT_KEY}`, {
+      const resp = await apiFetch(`/tenant/holidays/${holidayId}?tenant_key=${tenantKey}`, {
         method: 'DELETE',
       })
       if (!resp.ok) throw new Error('Delete failed')
@@ -474,6 +484,35 @@ const Settings = () => {
                   />
                 </div>
               </label>
+              <label>
+                Marketing communications consent
+                <div className="toggle-row">
+                  <span>{tenantSettings.marketing_consent ? 'Opted in' : 'Opted out'}</span>
+                  <input
+                    type="checkbox"
+                    checked={tenantSettings.marketing_consent}
+                    onChange={(event) =>
+                      setTenantSettings((prev) =>
+                        prev ? { ...prev, marketing_consent: event.target.checked } : prev
+                      )
+                    }
+                  />
+                </div>
+              </label>
+              <div className="settings-divider" />
+              <h5>Lead attribution</h5>
+              <div className="settings-inline">
+                <span className="mini-note">UTM Campaign</span>
+                <span>{tenantSettings.utm_campaign || '—'}</span>
+              </div>
+              <div className="settings-inline">
+                <span className="mini-note">UTM Source</span>
+                <span>{tenantSettings.utm_source || '—'}</span>
+              </div>
+              <div className="settings-inline">
+                <span className="mini-note">UTM Medium</span>
+                <span>{tenantSettings.utm_medium || '—'}</span>
+              </div>
               <div className="settings-divider" />
               <h5>Business-day rules (Belgium)</h5>
               <label>
@@ -591,7 +630,7 @@ const Settings = () => {
               </div>
               {tenantStatus ? <div className="status-note">{tenantStatus}</div> : null}
               <div className="mini-note">
-                Tenant context is derived from login (placeholder: {DEFAULT_TENANT_KEY}).
+                Tenant context is derived from login (current: {tenantKey}).
               </div>
             </>
           ) : (
@@ -622,7 +661,8 @@ const Settings = () => {
           <label>
             Assign role
             <select value={inviteRole} onChange={(event) => setInviteRole(event.target.value)}>
-              <option value="ADMIN">Admin</option>
+              <option value="TENANT_ADMIN">Tenant Admin</option>
+              <option value="ADMIN">Admin (legacy)</option>
               <option value="INVESTIGATOR">Investigator</option>
               <option value="LEGAL">Legal</option>
               <option value="LEGAL_COUNSEL">Legal Counsel</option>
@@ -643,7 +683,7 @@ const Settings = () => {
             </button>
           </div>
           {inviteStatus ? <div className="status-note">{inviteStatus}</div> : null}
-          <div className="mini-note">Tenant scope: {DEFAULT_TENANT_KEY}</div>
+          <div className="mini-note">Tenant scope: {tenantKey}</div>
           <div className="mini-note">Users</div>
           <div className="settings-list">
             {users.length === 0 ? (
@@ -665,7 +705,8 @@ const Settings = () => {
                         setRoleEdits((prev) => ({ ...prev, [user.id]: event.target.value }))
                       }
                     >
-                      <option value="ADMIN">Admin</option>
+                      <option value="TENANT_ADMIN">Tenant Admin</option>
+                      <option value="ADMIN">Admin (legacy)</option>
                       <option value="INVESTIGATOR">Investigator</option>
                       <option value="LEGAL">Legal</option>
                       <option value="LEGAL_COUNSEL">Legal Counsel</option>

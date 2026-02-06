@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.modules.tenant import models
+from app.core.settings import settings
 from app.modules.tenant.schemas import (
     TenantHolidayCreate,
     TenantHolidayOut,
@@ -91,8 +92,13 @@ class TenantService:
             tenant_name=tenant.tenant_name,
             environment_type=tenant.environment_type,
             company_name=settings.company_name,
+            industry_sector=settings.industry_sector,
+            employee_count=settings.employee_count,
             default_jurisdiction=settings.default_jurisdiction,
             investigation_mode=settings.investigation_mode,
+            utm_campaign=settings.utm_campaign,
+            utm_source=settings.utm_source,
+            utm_medium=settings.utm_medium,
             retention_days=settings.retention_days,
             keyword_flagging_enabled=settings.keyword_flagging_enabled,
             keyword_list=settings.keyword_list or [],
@@ -102,6 +108,7 @@ class TenantService:
             notifications_enabled=settings.notifications_enabled,
             serious_cause_notifications_enabled=settings.serious_cause_notifications_enabled,
             jurisdiction_rules=settings.jurisdiction_rules or {},
+            marketing_consent=settings.marketing_consent,
             updated_at=settings.updated_at,
         )
 
@@ -148,7 +155,23 @@ class TenantService:
             models.TenantHoliday.id == holiday_id,
         ).delete()
         self.db.commit()
-    def register_tenant(self, payload: RegistrationRequest) -> RegistrationResponse:
+
+    def register_tenant(
+        self,
+        payload: RegistrationRequest,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+    ) -> RegistrationResponse:
+        if settings.REGISTRATION_BLOCK_FREE_EMAILS:
+            email = (payload.admin_email or "").strip().lower()
+            domain = email.split("@")[-1] if "@" in email else ""
+            blocked = {
+                d.strip().lower()
+                for d in (settings.REGISTRATION_BLOCKED_DOMAINS or "").split(",")
+                if d.strip()
+            }
+            if domain and domain in blocked:
+                raise ValueError("Please use a company email address.")
         # 1. Generate unique tenant_key
         base_key = payload.company_name.lower().replace(" ", "-").replace("'", "").replace(".", "")
         # Remove non-alphanumeric chars
@@ -183,6 +206,12 @@ class TenantService:
             settings = models.TenantSettings(
                 tenant_id=tenant.id,
                 company_name=payload.company_name,
+                industry_sector=payload.industry_sector,
+                employee_count=payload.employee_count,
+                utm_campaign=payload.utm_campaign,
+                utm_source=payload.utm_source,
+                utm_medium=payload.utm_medium,
+                marketing_consent=bool(payload.marketing_consent),
                 notifications_enabled=True
             )
             self.db.add(settings)
@@ -192,6 +221,13 @@ class TenantService:
                 tenant_id=tenant.id,
                 email=payload.admin_email,
                 display_name=payload.admin_name,
+                job_title=payload.admin_job_title,
+                phone_number=payload.admin_phone_number,
+                linkedin_url=payload.admin_linkedin_url,
+                marketing_consent=bool(payload.marketing_consent),
+                marketing_consent_at=datetime.now(timezone.utc) if payload.marketing_consent else None,
+                registered_ip=self._normalize_ip(ip_address),
+                registered_user_agent=self._normalize_user_agent(user_agent),
                 status="active", # Auto-activate for now
                 invited_at=datetime.now(),
                 last_login_at=None
@@ -216,3 +252,21 @@ class TenantService:
         except Exception as e:
             self.db.rollback()
             raise e
+
+    @staticmethod
+    def _normalize_ip(ip_address: str | None) -> str | None:
+        if not ip_address:
+            return None
+        ip_address = ip_address.strip()
+        if not ip_address:
+            return None
+        return ip_address[:45]
+
+    @staticmethod
+    def _normalize_user_agent(user_agent: str | None) -> str | None:
+        if not user_agent:
+            return None
+        user_agent = user_agent.strip()
+        if not user_agent:
+            return None
+        return user_agent[:512]

@@ -21,7 +21,7 @@ const TermsOfServiceModal = () => {
 
     const fetchStatus = async () => {
         try {
-            const { data } = await apiClient.get<TermsStatus>('/auth/terms/status')
+            const data = await apiClient.get<TermsStatus>('/auth/terms/status')
             setStatus(data)
             if (data.required && !data.has_accepted) {
                 setShow(true)

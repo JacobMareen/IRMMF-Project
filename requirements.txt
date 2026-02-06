@@ -4,6 +4,7 @@ beautifulsoup4
 requests
 openai
 python-dotenv
+slowapi
 pandas
 openpyxl
 litellm

@@ -2,7 +2,21 @@ from __future__ import annotations
 
 from typing import Any, Optional, List
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+MAX_ID_LEN = 128
+MAX_AUDIENCE_LEN = 64
+MAX_RISK_NAME_LEN = 200
+MAX_RISK_SCENARIO_LEN = 200
+MAX_RISK_LEVEL_LEN = 64
+MAX_REC_TITLE_LEN = 200
+MAX_REC_PRIORITY_LEN = 64
+MAX_REC_TIMELINE_LEN = 120
+MAX_REC_RATIONALE_LEN = 2000
+MAX_SUMMARY_TITLE_LEN = 200
+MAX_SUMMARY_BODY_LEN = 4000
+MAX_BULLET_LEN = 400
+MAX_EXPLANATION_LEN = 4000
 
 
 class AxisScore(BaseModel):
@@ -13,20 +27,36 @@ class AxisScore(BaseModel):
 
 class RiskItem(BaseModel):
     model_config = ConfigDict(extra="allow")
-    id: Optional[str] = None
-    scenario: Optional[str] = None
-    name: Optional[str] = None
+    id: Optional[str] = Field(default=None, max_length=MAX_ID_LEN)
+    scenario: Optional[str] = Field(default=None, max_length=MAX_RISK_SCENARIO_LEN)
+    name: Optional[str] = Field(default=None, max_length=MAX_RISK_NAME_LEN)
     likelihood: Optional[float] = None
     impact: Optional[float] = None
-    risk_level: Optional[str] = None
+    risk_level: Optional[str] = Field(default=None, max_length=MAX_RISK_LEVEL_LEN)
+
+    @field_validator("id", "scenario", "name", "risk_level")
+    @classmethod
+    def normalize_text(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        cleaned = value.strip()
+        return cleaned or None
 
 
 class Recommendation(BaseModel):
     model_config = ConfigDict(extra="allow")
-    title: Optional[str] = None
-    priority: Optional[str] = None
-    timeline: Optional[str] = None
-    rationale: Optional[str] = None
+    title: Optional[str] = Field(default=None, max_length=MAX_REC_TITLE_LEN)
+    priority: Optional[str] = Field(default=None, max_length=MAX_REC_PRIORITY_LEN)
+    timeline: Optional[str] = Field(default=None, max_length=MAX_REC_TIMELINE_LEN)
+    rationale: Optional[str] = Field(default=None, max_length=MAX_REC_RATIONALE_LEN)
+
+    @field_validator("title", "priority", "timeline", "rationale")
+    @classmethod
+    def normalize_text(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        cleaned = value.strip()
+        return cleaned or None
 
 
 class SummaryMetrics(BaseModel):
@@ -48,24 +78,41 @@ class ResultsPayload(BaseModel):
     gap_vector: Optional[List[AxisScore]] = None
     recommendations: Optional[List[Recommendation]] = None
     maturity_scores: Optional[dict[str, Any]] = None
-    maturity_explanation: Optional[str] = None
+    maturity_explanation: Optional[str] = Field(default=None, max_length=MAX_EXPLANATION_LEN)
     caps_applied: Optional[List[dict[str, Any]]] = None
     risk_heatmap: Optional[List[RiskItem]] = None
     top_risks: Optional[List[RiskItem]] = None
 
 
 class ExecutiveSummaryRequest(BaseModel):
-    assessment_id: Optional[str] = None
+    assessment_id: Optional[str] = Field(default=None, max_length=MAX_ID_LEN)
     results: ResultsPayload
-    audience: Optional[str] = "C-LEVEL"
+    audience: Optional[str] = Field(default="C-LEVEL", max_length=MAX_AUDIENCE_LEN)
     include_html: bool = False
     force_refresh: bool = False
 
 
 class SummarySection(BaseModel):
-    title: str
-    body: Optional[str] = None
+    title: str = Field(max_length=MAX_SUMMARY_TITLE_LEN)
+    body: Optional[str] = Field(default=None, max_length=MAX_SUMMARY_BODY_LEN)
     bullets: List[str] = Field(default_factory=list)
+
+    @field_validator("bullets")
+    @classmethod
+    def validate_bullets(cls, value: List[str]) -> List[str]:
+        if not value:
+            return value
+        cleaned = []
+        for item in value:
+            if item is None:
+                continue
+            text = item.strip()
+            if not text:
+                continue
+            if len(text) > MAX_BULLET_LEN:
+                raise ValueError(f"Bullet length must be <= {MAX_BULLET_LEN}")
+            cleaned.append(text)
+        return cleaned
 
 
 class ExecutiveSummaryResponse(BaseModel):
@@ -106,4 +153,4 @@ class ExecutiveSummaryHistoryOut(BaseModel):
 
 
 class ExecutiveSummaryPinIn(BaseModel):
-    history_id: str
+    history_id: str = Field(max_length=MAX_ID_LEN)

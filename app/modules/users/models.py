@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,6 +24,10 @@ class User(Base):
     job_title: Mapped[str] = mapped_column(String(255), nullable=True)
     phone_number: Mapped[str] = mapped_column(String(32), nullable=True)
     linkedin_url: Mapped[str] = mapped_column(String(512), nullable=True)
+    marketing_consent: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    marketing_consent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    registered_ip: Mapped[str] = mapped_column(String(45), nullable=True)  # IPv6 support
+    registered_user_agent: Mapped[str] = mapped_column(String(512), nullable=True)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="invited")
 
     invited_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)

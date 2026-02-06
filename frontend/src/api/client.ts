@@ -19,6 +19,18 @@ type RequestOptions = RequestInit & {
 }
 
 class ApiClient {
+  private clearAuth(): void {
+    const currentUser = localStorage.getItem('irmmf_user') || ''
+    localStorage.removeItem('irmmf_user')
+    localStorage.removeItem('irmmf_token')
+    localStorage.removeItem('irmmf_roles')
+    localStorage.removeItem('irmmf_tenant')
+    localStorage.removeItem('assessment_id')
+    if (currentUser) {
+      localStorage.removeItem(`assessment_id_${currentUser}`)
+    }
+  }
+
   private getAuthHeaders(): Headers {
     const headers = new Headers()
     const token = localStorage.getItem('irmmf_token')
@@ -74,7 +86,14 @@ class ApiClient {
       headers.set('Expires', '0')
     }
 
-    return fetch(url, config)
+    const res = await fetch(url, config)
+    if (res.status === 401 && options.authenticated !== false) {
+      this.clearAuth()
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.assign('/login')
+      }
+    }
+    return res
   }
 
   async get<T>(path: string, options: RequestOptions = {}): Promise<T> {

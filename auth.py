@@ -68,7 +68,7 @@ def _default_roles() -> List[str]:
     env_roles = os.getenv("DEV_ROLES")
     if env_roles:
         return [role.strip().upper() for role in env_roles.split(",") if role.strip()]
-    return ["SUPER_ADMIN", "ADMIN"]
+    return ["SUPER_ADMIN", "TENANT_ADMIN"]
 
 
 def _resolve_roles(raw_roles: Optional[str]) -> List[str]:

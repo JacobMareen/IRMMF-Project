@@ -4,25 +4,25 @@ from typing import Optional, List, Dict, Any
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ThirdPartyAssessmentIn(BaseModel):
-    partner_name: str
-    partner_type: Optional[str] = "Supplier"
-    risk_tier: Optional[str] = "Tier-2"
-    status: Optional[str] = "draft"
-    summary: Optional[str] = None
+    partner_name: str = Field(max_length=200)
+    partner_type: Optional[str] = Field(default="Supplier", max_length=64)
+    risk_tier: Optional[str] = Field(default="Tier-2", max_length=32)
+    status: Optional[str] = Field(default="draft", max_length=32)
+    summary: Optional[str] = Field(default=None, max_length=2000)
     responses: Optional[dict] = None
     score: Optional[float] = None
 
 
 class ThirdPartyAssessmentUpdate(BaseModel):
-    partner_name: Optional[str] = None
-    partner_type: Optional[str] = None
-    risk_tier: Optional[str] = None
-    status: Optional[str] = None
-    summary: Optional[str] = None
+    partner_name: Optional[str] = Field(default=None, max_length=200)
+    partner_type: Optional[str] = Field(default=None, max_length=64)
+    risk_tier: Optional[str] = Field(default=None, max_length=32)
+    status: Optional[str] = Field(default=None, max_length=32)
+    summary: Optional[str] = Field(default=None, max_length=2000)
     responses: Optional[dict] = None
     score: Optional[float] = None
 
@@ -45,22 +45,22 @@ class ThirdPartyAssessmentOut(BaseModel):
 
 
 class ThirdPartyAnswerOptionOut(BaseModel):
-    a_id: str
-    label: str
+    a_id: str = Field(max_length=128)
+    label: str = Field(max_length=300)
     score: float
 
 
 class ThirdPartyQuestionOut(BaseModel):
-    q_id: str
-    category: Optional[str] = None
-    question_text: str
+    q_id: str = Field(max_length=128)
+    category: Optional[str] = Field(default=None, max_length=120)
+    question_text: str = Field(max_length=2000)
     weight: Optional[float] = None
     options: List[ThirdPartyAnswerOptionOut]
 
 
 class ThirdPartyAnswerIn(BaseModel):
-    q_id: str
-    a_id: str
+    q_id: str = Field(max_length=128)
+    a_id: str = Field(max_length=128)
 
 
 class ThirdPartyResponseIn(BaseModel):

@@ -64,6 +64,9 @@ class TenantSettings(Base):
     employee_count: Mapped[str] = mapped_column(String(64), nullable=True)
     default_jurisdiction: Mapped[str] = mapped_column(String(64), nullable=False, default="Belgium")
     investigation_mode: Mapped[str] = mapped_column(String(32), nullable=False, default="standard")
+    utm_campaign: Mapped[str] = mapped_column(String(120), nullable=True)
+    utm_source: Mapped[str] = mapped_column(String(120), nullable=True)
+    utm_medium: Mapped[str] = mapped_column(String(120), nullable=True)
     retention_days: Mapped[int] = mapped_column(Integer, nullable=False, default=365)
     keyword_flagging_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     keyword_list: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
@@ -73,6 +76,7 @@ class TenantSettings(Base):
     notifications_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     serious_cause_notifications_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     jurisdiction_rules: Mapped[dict] = mapped_column(JSONB, nullable=False, default=_default_jurisdiction_rules)
+    marketing_consent: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)

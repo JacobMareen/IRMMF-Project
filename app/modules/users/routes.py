@@ -17,6 +17,9 @@ from app.modules.users.schemas import (
     TermsAccept,
 )
 from app.modules.users.service import UserService
+from app.core.settings import settings
+from app.security.access import ensure_tenant_match
+from app.security.slowapi import limit
 from app.security.rbac import require_roles
 from auth import get_principal, Principal, Request
 
@@ -30,31 +33,39 @@ def get_user_service(db: Session = Depends(get_db)) -> UserService:
 
 @router.get("/api/v1/users", response_model=list[UserOut])
 def list_users(
-    tenant_key: str = Query(default="default"),
+    tenant_key: str | None = Query(default=None),
     principal=Depends(require_roles("ADMIN", "HR", "LEGAL", "DPO_AUDITOR")),
     service: UserService = Depends(get_user_service),
 ):
     try:
-        return service.list_users(tenant_key)
+        resolved_tenant = tenant_key or principal.tenant_key or "default"
+        ensure_tenant_match(principal, resolved_tenant, not_found_detail="Tenant not found.")
+        return service.list_users(resolved_tenant)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.post("/api/v1/users/invite", response_model=UserOut)
+@limit(f"{settings.IRMMF_RATE_LIMIT_INVITE_PER_MINUTE}/minute")
 def invite_user(
+    request: Request,
     payload: UserInviteIn,
-    tenant_key: str = Query(default="default"),
+    tenant_key: str | None = Query(default=None),
     principal=Depends(require_roles("ADMIN")),
     service: UserService = Depends(get_user_service),
 ):
     try:
-        return service.invite_user(tenant_key, payload)
+        resolved_tenant = tenant_key or principal.tenant_key or "default"
+        ensure_tenant_match(principal, resolved_tenant, not_found_detail="Tenant not found.")
+        return service.invite_user(resolved_tenant, payload)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.post("/api/v1/auth/login", response_model=LoginResponse)
+@limit(f"{settings.IRMMF_RATE_LIMIT_LOGIN_PER_MINUTE}/minute")
 def login_user(
+    request: Request,
     payload: UserLoginIn,
     tenant_key: str = Query(default="default"),
     service: UserService = Depends(get_user_service),
@@ -105,11 +116,13 @@ def accept_terms(
 def update_user_roles(
     user_id: str,
     payload: UserRolesUpdate,
-    tenant_key: str = Query(default="default"),
+    tenant_key: str | None = Query(default=None),
     principal=Depends(require_roles("ADMIN")),
     service: UserService = Depends(get_user_service),
 ):
     try:
-        return service.update_roles(tenant_key, user_id, payload.roles)
+        resolved_tenant = tenant_key or principal.tenant_key or "default"
+        ensure_tenant_match(principal, resolved_tenant, not_found_detail="Tenant not found.")
+        return service.update_roles(resolved_tenant, user_id, payload.roles)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))

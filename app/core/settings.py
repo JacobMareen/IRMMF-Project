@@ -25,7 +25,14 @@ class Settings(BaseSettings):
     IRMMF_RATE_LIMIT_ENABLED: bool = True
     IRMMF_RATE_LIMIT_PER_MINUTE: int = 100
     IRMMF_RATE_LIMIT_WINDOW_SECONDS: int = 60
+    IRMMF_RATE_LIMIT_LOGIN_PER_MINUTE: int = 5
+    IRMMF_RATE_LIMIT_INVITE_PER_MINUTE: int = 10
     IRMMF_MAX_BODY_MB: int = 10
+
+    # Registration gating
+    REGISTRATION_BLOCK_FREE_EMAILS: bool = False
+    REGISTRATION_BLOCKED_DOMAINS: str = "gmail.com,yahoo.com,hotmail.com,outlook.com,icloud.com,proton.me,protonmail.com"
+
     
     # Ingestion
     IRMMF_EXCEL_FILE: str = "IRMMF_QuestionBank_v10_StreamlinedIntake_20260117.xlsx"

@@ -27,17 +27,18 @@ JURISDICTION_RULES_DEFAULT = (
 
 
 def upgrade() -> None:
-    op.execute(
-        """
+    conn = op.get_bind()
+    rules_sql = JURISDICTION_RULES_DEFAULT.replace("'", "''")
+    conn.exec_driver_sql(
+        f"""
         ALTER TABLE IF EXISTS tenant_settings
             ADD COLUMN IF NOT EXISTS weekend_days jsonb NOT NULL DEFAULT '[5,6]'::jsonb,
             ADD COLUMN IF NOT EXISTS saturday_is_business_day boolean NOT NULL DEFAULT false,
             ADD COLUMN IF NOT EXISTS deadline_cutoff_hour integer NOT NULL DEFAULT 17,
             ADD COLUMN IF NOT EXISTS notifications_enabled boolean NOT NULL DEFAULT true,
             ADD COLUMN IF NOT EXISTS serious_cause_notifications_enabled boolean NOT NULL DEFAULT true,
-            ADD COLUMN IF NOT EXISTS jurisdiction_rules jsonb NOT NULL DEFAULT '%s'::jsonb;
+            ADD COLUMN IF NOT EXISTS jurisdiction_rules jsonb NOT NULL DEFAULT '{rules_sql}'::jsonb;
         """
-        % JURISDICTION_RULES_DEFAULT
     )
     op.execute(
         """

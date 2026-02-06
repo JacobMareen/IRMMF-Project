@@ -88,7 +88,7 @@ class UserService:
         token_payload = {
             "sub": str(user.id),
             "tenant_key": tenant_key,
-            "roles": [r.role for r in user.roles] if self._has_user_roles() else ["ADMIN"] # Fallback for legacy
+            "roles": [r.role for r in user.roles] if self._has_user_roles() else ["TENANT_ADMIN"] # Fallback for legacy
         }
         token = create_access_token(token_payload)
         
@@ -197,6 +197,8 @@ class UserService:
             email=user.email,
             display_name=user.display_name,
             status=user.status,
+            marketing_consent=bool(getattr(user, "marketing_consent", False)),
+            marketing_consent_at=getattr(user, "marketing_consent_at", None),
             roles=[{"role": role.role} for role in roles],
             invited_at=user.invited_at,
             last_login_at=user.last_login_at,
@@ -262,7 +264,7 @@ class UserService:
         ).mappings().all()
         results: list[UserOut] = []
         for row in rows:
-            roles = [{"role": "ADMIN"}] if row.get("is_admin") else [{"role": "VIEWER"}]
+            roles = [{"role": "TENANT_ADMIN"}] if row.get("is_admin") else [{"role": "VIEWER"}]
             created_at = row.get("created_at")
             results.append(
                 UserOut(
@@ -303,7 +305,7 @@ class UserService:
         ).scalar()
         if existing:
             raise ValueError("User already exists")
-        is_admin = payload.role.upper() == "ADMIN"
+        is_admin = payload.role.upper() in {"ADMIN", "TENANT_ADMIN"}
         row = self.db.execute(
             text(
                 """
@@ -320,7 +322,7 @@ class UserService:
             },
         ).mappings().first()
         self.db.commit()
-        roles = [{"role": "ADMIN"}] if is_admin else [{"role": "VIEWER"}]
+        roles = [{"role": "TENANT_ADMIN"}] if is_admin else [{"role": "VIEWER"}]
         return UserOut(
             id=str(row.get("user_id")),
             email=payload.email,
@@ -352,7 +354,7 @@ class UserService:
         ).mappings().first()
         if not row:
             raise ValueError("User not found")
-        roles = [{"role": "ADMIN"}] if row.get("is_admin") else [{"role": "VIEWER"}]
+        roles = [{"role": "TENANT_ADMIN"}] if row.get("is_admin") else [{"role": "VIEWER"}]
         user = UserOut(
             id=str(row.get("user_id")),
             email=row.get("email"),
@@ -367,7 +369,7 @@ class UserService:
         return LoginResponse(user=user, token=token)
 
     def _update_roles_legacy(self, tenant_key: str, user_id: str, roles: list[str]) -> UserOut:
-        is_admin = any(role.upper() == "ADMIN" for role in roles)
+        is_admin = any(role.upper() in {"ADMIN", "TENANT_ADMIN"} for role in roles)
         row = self.db.execute(
             text(
                 """
@@ -382,7 +384,7 @@ class UserService:
         if not row:
             raise ValueError("User not found")
         self.db.commit()
-        role_payload = [{"role": "ADMIN"}] if row.get("is_admin") else [{"role": "VIEWER"}]
+        role_payload = [{"role": "TENANT_ADMIN"}] if row.get("is_admin") else [{"role": "VIEWER"}]
         return UserOut(
             id=str(row.get("user_id")),
             email=row.get("email"),

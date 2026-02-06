@@ -576,7 +576,7 @@ const ThirdPartyRisk = () => {
                   <div>
                     <div className="tpr-item-title">{item.partner_name}</div>
                     <div className="tpr-item-sub">
-                      {item.partner_type} • {item.risk_tier} • Assessment {item.assessment_id}
+                      {item.partner_type} • {item.risk_tier} • Assessment Linked
                     </div>
                   </div>
                   <div className="tpr-item-actions">
@@ -613,7 +613,7 @@ const ThirdPartyRisk = () => {
             <div>
               <h3 className="overlay-title">Partner Detail</h3>
               <div className="overlay-subtitle">
-                {detailAssessment ? `${detailAssessment.partner_name} · ${detailAssessment.assessment_id}` : 'Loading'}
+                {detailAssessment ? `${detailAssessment.partner_name}` : 'Loading'}
               </div>
             </div>
             <button className="overlay-close" onClick={() => setDetailOpen(false)} aria-label="Close">

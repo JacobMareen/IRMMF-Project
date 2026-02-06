@@ -3,10 +3,12 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 ALLOWED_ROLES = {
+    "SUPER_ADMIN",
+    "TENANT_ADMIN",
     "ADMIN",
     "INVESTIGATOR",
     "LEGAL",
@@ -18,13 +20,19 @@ ALLOWED_ROLES = {
     "VIEWER",
 }
 
+MAX_DISPLAY_NAME_LEN = 120
+MAX_JOB_TITLE_LEN = 120
+MAX_PHONE_LEN = 32
+MAX_URL_LEN = 2048
+MAX_PASSWORD_LEN = 256
+
 
 class UserInviteIn(BaseModel):
     email: EmailStr
-    display_name: Optional[str] = None
-    job_title: Optional[str] = None
-    phone_number: Optional[str] = None
-    linkedin_url: Optional[str] = None
+    display_name: Optional[str] = Field(default=None, max_length=MAX_DISPLAY_NAME_LEN)
+    job_title: Optional[str] = Field(default=None, max_length=MAX_JOB_TITLE_LEN)
+    phone_number: Optional[str] = Field(default=None, max_length=MAX_PHONE_LEN)
+    linkedin_url: Optional[str] = Field(default=None, max_length=MAX_URL_LEN)
     role: str
 
     @field_validator("role")
@@ -38,7 +46,7 @@ class UserInviteIn(BaseModel):
 
 class UserLoginIn(BaseModel):
     email: EmailStr
-    password: Optional[str] = None
+    password: Optional[str] = Field(default=None, max_length=MAX_PASSWORD_LEN)
 
 
 class TenantLookupRequest(BaseModel):
@@ -78,6 +86,8 @@ class UserOut(BaseModel):
     job_title: Optional[str] = None
     phone_number: Optional[str] = None
     linkedin_url: Optional[str] = None
+    marketing_consent: bool = False
+    marketing_consent_at: Optional[datetime] = None
     status: str
     roles: List[UserRoleOut]
     invited_at: datetime

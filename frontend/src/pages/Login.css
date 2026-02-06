@@ -59,6 +59,14 @@
   color: var(--text-main);
 }
 
+.login-form select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
 .login-btn {
   border: none;
   border-radius: 10px;
@@ -69,7 +77,27 @@
   cursor: pointer;
 }
 
+.login-btn.secondary {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+.login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .login-status {
   color: var(--text-sub);
   font-size: 0.9rem;
+}
+
+.workspace-chip {
+  border: 1px dashed var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-sub);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
 }

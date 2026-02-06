@@ -1,5 +1,6 @@
 """FastAPI entrypoint: routing + startup wiring for IRMMF services."""
 from __future__ import annotations
+import logging
 from fastapi import FastAPI, Depends, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -24,14 +25,21 @@ from app.modules.insider_program.routes import router as insider_program_router
 from app.modules.third_party.routes import router as third_party_router
 from app.security.audit import AuditContext, reset_audit_context, set_audit_context
 from app.security.rate_limit import RateLimiter, load_rate_limit_config, resolve_client_ip
+from app.security import slowapi
 
 from contextlib import asynccontextmanager
 from app.core.settings import settings
+
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     init_database()
+    if not settings.DEBUG and settings.SECRET_KEY == "dev-secret-key-change-in-prod":
+        logger.warning(
+            "SECRET_KEY is set to the default dev value. Set a secure SECRET_KEY in production."
+        )
     yield
     # Shutdown (if needed)
 
@@ -68,6 +76,15 @@ rate_limiter = RateLimiter(
     limit=rate_limit_config.limit_per_minute,
     window_seconds=rate_limit_config.window_seconds,
 )
+USE_SLOWAPI = slowapi.slowapi_enabled()
+
+if USE_SLOWAPI and slowapi.limiter:
+    app.state.limiter = slowapi.limiter
+    app.add_exception_handler(
+        slowapi.RateLimitExceeded,
+        slowapi._rate_limit_exceeded_handler,
+    )
+    app.add_middleware(slowapi.SlowAPIMiddleware)
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
@@ -86,6 +103,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                     )
             except ValueError:
                 pass
+        if USE_SLOWAPI:
+            return await call_next(request)
         client_ip = resolve_client_ip(request)
         allowed, retry_after = rate_limiter.allow(client_ip)
         if not allowed:

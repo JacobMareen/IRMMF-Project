@@ -17,6 +17,10 @@ def rbac_disabled() -> bool:
 
 def role_set(roles: Iterable[str] | None) -> set[str]:
     normalized = {role.upper() for role in (roles or []) if role}
+    if "ADMIN" in normalized:
+        normalized.add("TENANT_ADMIN")
+    if "TENANT_ADMIN" in normalized:
+        normalized.add("ADMIN")
     if "LEGAL_COUNSEL" in normalized:
         normalized.add("LEGAL")
     if "AUDITOR" in normalized:
@@ -26,6 +30,10 @@ def role_set(roles: Iterable[str] | None) -> set[str]:
 
 def is_admin(principal: Principal) -> bool:
     return "SUPER_ADMIN" in role_set(principal.roles)
+
+
+def is_tenant_admin(principal: Principal) -> bool:
+    return "TENANT_ADMIN" in role_set(principal.roles)
 
 
 def require_tenant(principal: Principal) -> str:

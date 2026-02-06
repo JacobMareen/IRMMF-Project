@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 CASE_STATUSES = {"OPEN", "ON_HOLD", "CLOSED", "ERASURE_PENDING", "ERASED"}
@@ -18,34 +18,44 @@ CASE_STAGES = {
 }
 CASE_LINK_RELATIONS = {"RELATED", "DUPLICATE", "PARENT", "CHILD"}
 
+MAX_TINY_LEN = 64
+MAX_SHORT_LEN = 200
+MAX_SUMMARY_LEN = 2000
+MAX_MEDIUM_LEN = 1000
+MAX_LONG_LEN = 4000
+MAX_URL_LEN = 2048
+MAX_EMAIL_LEN = 320
+MAX_ID_LEN = 128
+MAX_DATE_LEN = 32
+
 
 class CaseCreate(BaseModel):
-    title: str
-    summary: Optional[str] = None
-    jurisdiction: Optional[str] = None
+    title: str = Field(max_length=MAX_SHORT_LEN)
+    summary: Optional[str] = Field(default=None, max_length=MAX_SUMMARY_LEN)
+    jurisdiction: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
     vip_flag: Optional[bool] = None
-    external_report_id: Optional[str] = None
-    reporter_channel_id: Optional[str] = None
-    reporter_key: Optional[str] = None
+    external_report_id: Optional[str] = Field(default=None, max_length=MAX_ID_LEN)
+    reporter_channel_id: Optional[str] = Field(default=None, max_length=MAX_ID_LEN)
+    reporter_key: Optional[str] = Field(default=None, max_length=MAX_ID_LEN)
     urgent_dismissal: Optional[bool] = None
     subject_suspended: Optional[bool] = None
 
 
 class CaseUpdate(BaseModel):
-    title: Optional[str] = None
-    summary: Optional[str] = None
-    jurisdiction: Optional[str] = None
+    title: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    summary: Optional[str] = Field(default=None, max_length=MAX_SUMMARY_LEN)
+    jurisdiction: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
     vip_flag: Optional[bool] = None
-    external_report_id: Optional[str] = None
-    reporter_channel_id: Optional[str] = None
-    reporter_key: Optional[str] = None
+    external_report_id: Optional[str] = Field(default=None, max_length=MAX_ID_LEN)
+    reporter_channel_id: Optional[str] = Field(default=None, max_length=MAX_ID_LEN)
+    reporter_key: Optional[str] = Field(default=None, max_length=MAX_ID_LEN)
     urgent_dismissal: Optional[bool] = None
     subject_suspended: Optional[bool] = None
 
 
 class CaseStatusUpdate(BaseModel):
     status: str
-    reason: Optional[str] = None
+    reason: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
     @field_validator("status")
     @classmethod
@@ -69,10 +79,10 @@ class CaseStageUpdate(BaseModel):
 
 
 class CaseSubjectCreate(BaseModel):
-    subject_type: str
-    display_name: str
-    reference: Optional[str] = None
-    manager_name: Optional[str] = None
+    subject_type: str = Field(max_length=MAX_TINY_LEN)
+    display_name: str = Field(max_length=MAX_SHORT_LEN)
+    reference: Optional[str] = Field(default=None, max_length=MAX_ID_LEN)
+    manager_name: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
 
 
 class CaseLinkCreate(BaseModel):
@@ -89,20 +99,20 @@ class CaseLinkCreate(BaseModel):
 
 
 class CaseLegalHoldCreate(BaseModel):
-    contact_name: str
-    contact_email: Optional[str] = None
-    contact_role: Optional[str] = None
-    preservation_scope: Optional[str] = None
-    delivery_channel: Optional[str] = None
-    access_code: Optional[str] = None
-    conflict_override_reason: Optional[str] = None
+    contact_name: str = Field(max_length=MAX_SHORT_LEN)
+    contact_email: Optional[str] = Field(default=None, max_length=MAX_EMAIL_LEN)
+    contact_role: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    preservation_scope: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
+    delivery_channel: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    access_code: Optional[str] = Field(default=None, max_length=MAX_ID_LEN)
+    conflict_override_reason: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
 
 class CaseExpertAccessCreate(BaseModel):
-    expert_email: str
-    expert_name: Optional[str] = None
-    organization: Optional[str] = None
-    reason: Optional[str] = None
+    expert_email: str = Field(max_length=MAX_EMAIL_LEN)
+    expert_name: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    organization: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    reason: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
     @field_validator("expert_email")
     @classmethod
@@ -114,11 +124,11 @@ class CaseExpertAccessCreate(BaseModel):
 
 
 class CaseTriageTicketCreate(BaseModel):
-    subject: Optional[str] = None
-    message: str
-    reporter_name: Optional[str] = None
-    reporter_email: Optional[str] = None
-    source: Optional[str] = None
+    subject: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    message: str = Field(max_length=MAX_LONG_LEN)
+    reporter_name: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    reporter_email: Optional[str] = Field(default=None, max_length=MAX_EMAIL_LEN)
+    source: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
 
     @field_validator("message")
     @classmethod
@@ -131,7 +141,7 @@ class CaseTriageTicketCreate(BaseModel):
 
 class CaseTriageTicketUpdate(BaseModel):
     status: Optional[str] = None
-    triage_notes: Optional[str] = None
+    triage_notes: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
     @field_validator("status")
     @classmethod
@@ -145,27 +155,27 @@ class CaseTriageTicketUpdate(BaseModel):
 
 
 class CaseTriageTicketConvert(BaseModel):
-    case_title: Optional[str] = None
-    case_summary: Optional[str] = None
-    jurisdiction: Optional[str] = None
+    case_title: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    case_summary: Optional[str] = Field(default=None, max_length=MAX_SUMMARY_LEN)
+    jurisdiction: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
     vip_flag: Optional[bool] = None
 
 
 class CaseEvidenceCreate(BaseModel):
-    label: str
-    source: str
-    link: Optional[str] = None
-    notes: Optional[str] = None
-    evidence_hash: Optional[str] = None
+    label: str = Field(max_length=MAX_SHORT_LEN)
+    source: str = Field(max_length=MAX_SHORT_LEN)
+    link: Optional[str] = Field(default=None, max_length=MAX_URL_LEN)
+    notes: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
+    evidence_hash: Optional[str] = Field(default=None, max_length=MAX_ID_LEN)
 
 
 class CaseTaskCreate(BaseModel):
-    title: str
-    description: Optional[str] = None
-    task_type: Optional[str] = None
-    status: Optional[str] = None
+    title: str = Field(max_length=MAX_SHORT_LEN)
+    description: Optional[str] = Field(default=None, max_length=MAX_SUMMARY_LEN)
+    task_type: Optional[str] = Field(default=None, max_length=MAX_TINY_LEN)
+    status: Optional[str] = Field(default=None, max_length=MAX_TINY_LEN)
     due_at: Optional[datetime] = None
-    assignee: Optional[str] = None
+    assignee: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
 
 
 class CaseTaskUpdate(BaseModel):
@@ -185,63 +195,63 @@ class CaseTaskUpdate(BaseModel):
 
 
 class CaseNoteCreate(BaseModel):
-    note_type: Optional[str] = None
-    body: str
+    note_type: Optional[str] = Field(default=None, max_length=MAX_TINY_LEN)
+    body: str = Field(max_length=MAX_LONG_LEN)
 
 
 class CaseLegitimacyForm(BaseModel):
-    legal_basis: str
-    trigger_summary: str
+    legal_basis: str = Field(max_length=MAX_SHORT_LEN)
+    trigger_summary: str = Field(max_length=MAX_LONG_LEN)
     proportionality_confirmed: bool
-    less_intrusive_steps: Optional[str] = None
-    mandate_owner: Optional[str] = None
-    mandate_date: Optional[str] = None
+    less_intrusive_steps: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
+    mandate_owner: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    mandate_date: Optional[str] = Field(default=None, max_length=MAX_DATE_LEN)
 
 
 class CaseCredentialingForm(BaseModel):
-    investigator_name: str
-    investigator_role: str
+    investigator_name: str = Field(max_length=MAX_SHORT_LEN)
+    investigator_role: str = Field(max_length=MAX_SHORT_LEN)
     licensed: bool
-    license_id: Optional[str] = None
+    license_id: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
     conflict_check_passed: bool
-    conflict_override_reason: Optional[str] = None
-    authorizer: Optional[str] = None
-    authorization_date: Optional[str] = None
+    conflict_override_reason: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
+    authorizer: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    authorization_date: Optional[str] = Field(default=None, max_length=MAX_DATE_LEN)
 
 
 class CaseAdversarialForm(BaseModel):
     invitation_sent: bool
-    invitation_date: Optional[str] = None
+    invitation_date: Optional[str] = Field(default=None, max_length=MAX_DATE_LEN)
     rights_acknowledged: bool
-    representative_present: Optional[str] = None
-    interview_summary: Optional[str] = None
+    representative_present: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    interview_summary: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
 
 class CaseLegalApprovalForm(BaseModel):
-    approved_at: Optional[str] = None
-    approval_note: Optional[str] = None
+    approved_at: Optional[str] = Field(default=None, max_length=MAX_DATE_LEN)
+    approval_note: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
 
 class CaseWorksCouncilForm(BaseModel):
     monitoring: bool
-    approval_document_uri: Optional[str] = None
-    approval_received_at: Optional[str] = None
-    approval_notes: Optional[str] = None
+    approval_document_uri: Optional[str] = Field(default=None, max_length=MAX_URL_LEN)
+    approval_received_at: Optional[str] = Field(default=None, max_length=MAX_DATE_LEN)
+    approval_notes: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
 
 class CaseTriageForm(BaseModel):
     impact: int
     probability: int
     risk_score: int
-    outcome: str
-    notes: Optional[str] = None
-    trigger_source: Optional[str] = None
-    business_impact: Optional[str] = None
-    exposure_summary: Optional[str] = None
-    data_sensitivity: Optional[str] = None
-    stakeholders: Optional[str] = None
-    confidence_level: Optional[str] = None
-    recommended_actions: Optional[str] = None
+    outcome: str = Field(max_length=MAX_TINY_LEN)
+    notes: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
+    trigger_source: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    business_impact: Optional[str] = Field(default=None, max_length=MAX_MEDIUM_LEN)
+    exposure_summary: Optional[str] = Field(default=None, max_length=MAX_MEDIUM_LEN)
+    data_sensitivity: Optional[str] = Field(default=None, max_length=MAX_MEDIUM_LEN)
+    stakeholders: Optional[str] = Field(default=None, max_length=MAX_MEDIUM_LEN)
+    confidence_level: Optional[str] = Field(default=None, max_length=MAX_TINY_LEN)
+    recommended_actions: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
     @field_validator("impact", "probability", "risk_score")
     @classmethod
@@ -262,11 +272,11 @@ class CaseTriageForm(BaseModel):
 
 class CaseImpactAnalysisForm(BaseModel):
     estimated_loss: Optional[float] = None
-    regulation_breached: Optional[str] = None
-    operational_impact: Optional[str] = None
-    reputational_impact: Optional[str] = None
-    people_impact: Optional[str] = None
-    financial_impact: Optional[str] = None
+    regulation_breached: Optional[str] = Field(default=None, max_length=MAX_MEDIUM_LEN)
+    operational_impact: Optional[str] = Field(default=None, max_length=MAX_MEDIUM_LEN)
+    reputational_impact: Optional[str] = Field(default=None, max_length=MAX_MEDIUM_LEN)
+    people_impact: Optional[str] = Field(default=None, max_length=MAX_MEDIUM_LEN)
+    financial_impact: Optional[str] = Field(default=None, max_length=MAX_MEDIUM_LEN)
 
 
 class CaseSeriousCauseUpsert(BaseModel):
@@ -274,43 +284,43 @@ class CaseSeriousCauseUpsert(BaseModel):
     facts_confirmed_at: Optional[datetime] = None
     decision_due_at: Optional[datetime] = None
     dismissal_due_at: Optional[datetime] = None
-    override_reason: Optional[str] = None
+    override_reason: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
 
 class CaseSeriousCauseToggle(BaseModel):
     enabled: bool = True
     date_incident_occurred: Optional[datetime] = None
     date_investigation_started: Optional[datetime] = None
-    decision_maker: Optional[str] = None
+    decision_maker: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
 
 
 class CaseSubmitFindings(BaseModel):
     confirmed_at: Optional[datetime] = None
-    decision_maker: Optional[str] = None
+    decision_maker: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
 
 
 class CaseRecordDismissal(BaseModel):
     dismissal_recorded_at: Optional[datetime] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
 
 class CaseRecordReasonsSent(BaseModel):
     sent_at: Optional[datetime] = None
-    delivery_method: Optional[str] = None
-    proof_uri: Optional[str] = None
+    delivery_method: Optional[str] = Field(default=None, max_length=MAX_SHORT_LEN)
+    proof_uri: Optional[str] = Field(default=None, max_length=MAX_URL_LEN)
 
 
 class CaseAcknowledgeMissed(BaseModel):
-    reason: Optional[str] = None
+    reason: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
 
 class CaseAnonymizeRequest(BaseModel):
-    reason: Optional[str] = None
+    reason: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
 
 class CaseBreakGlassRequest(BaseModel):
-    reason: str
-    scope: Optional[str] = None
+    reason: str = Field(max_length=MAX_LONG_LEN)
+    scope: Optional[str] = Field(default=None, max_length=MAX_MEDIUM_LEN)
     duration_minutes: Optional[int] = 60
 
     @field_validator("reason")
@@ -336,7 +346,7 @@ class CaseBreakGlassOut(BaseModel):
 
 
 class CaseApplyPlaybook(BaseModel):
-    playbook_key: str
+    playbook_key: str = Field(max_length=MAX_ID_LEN)
 
 
 class CaseEvidenceSuggestionOut(BaseModel):
@@ -370,7 +380,7 @@ class CasePlaybookOut(BaseModel):
 
 
 class CaseDocumentCreate(BaseModel):
-    format: Optional[str] = None
+    format: Optional[str] = Field(default=None, max_length=MAX_TINY_LEN)
 
     @field_validator("format")
     @classmethod
@@ -399,20 +409,20 @@ class CaseDocumentOut(BaseModel):
 
 class CaseExportRedactionCreate(BaseModel):
     redactions: list[dict] = []
-    note: Optional[str] = None
+    note: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
 
 class CaseRemediationExportCreate(BaseModel):
-    remediation_statement: Optional[str] = None
-    format: Optional[str] = "json"
+    remediation_statement: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
+    format: Optional[str] = Field(default="json", max_length=MAX_TINY_LEN)
 
 
 class CaseDecisionCreate(BaseModel):
-    outcome: str
-    decision: Optional[str] = None
-    summary: Optional[str] = None
+    outcome: str = Field(max_length=MAX_SHORT_LEN)
+    decision: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
+    summary: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
     decided_at: Optional[datetime] = None
-    role_separation_override_reason: Optional[str] = None
+    role_separation_override_reason: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
 
 class CaseOutcomeOut(BaseModel):
@@ -432,7 +442,7 @@ class CaseErasureApprove(BaseModel):
 
 
 class CaseErasureExecute(BaseModel):
-    reason: Optional[str] = None
+    reason: Optional[str] = Field(default=None, max_length=MAX_LONG_LEN)
 
 
 class CaseErasureJobOut(BaseModel):
@@ -593,7 +603,7 @@ class CaseConsistencyOut(BaseModel):
 
 
 class CaseReporterMessageCreate(BaseModel):
-    body: str
+    body: str = Field(max_length=MAX_LONG_LEN)
 
 
 class CaseReporterMessageOut(BaseModel):

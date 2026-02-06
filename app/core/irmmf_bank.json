@@ -3932,9 +3932,9 @@
       "tier": "T2",
       "branch_type": "Gatekeeper",
       "gate_threshold": 2.0,
-      "next_if_low": "ADD-WB-Q02",
-      "next_if_high": "ADD-WB-Q02",
-      "next_default": "ADD-WB-Q02",
+      "next_if_low": "CORR-CUL-01",
+      "next_if_high": "CORR-CUL-01",
+      "next_default": "CORR-CUL-01",
       "axis1": "H",
       "cw": 1.3,
       "pts_g": 0.15,
@@ -4188,9 +4188,9 @@
       "guidance": "Examples: time-to-contain, high-risk clusters, repeated bypass patterns, trust indicators, losses avoided.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T2",
       "branch_type": "Drilldown",
-      "next_if_low": "AUD-D3-Q06",
-      "next_if_high": "AUD-D3-Q06",
-      "next_default": "AUD-D3-Q06",
+      "next_if_low": "CORR-DEF-01",
+      "next_if_high": "CORR-DEF-01",
+      "next_default": "CORR-DEF-01",
       "axis1": "G",
       "cw": 1.0,
       "pts_g": 0.45,
@@ -8067,7 +8067,6 @@
       "guidance": "Near-miss reviews show learning without waiting for a breach.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T2",
       "branch_type": "End",
-      "end_flag": "Y",
       "axis1": "E",
       "cw": 1.0,
       "pts_g": 0.15,
@@ -8078,7 +8077,8 @@
       "pts_v": 0.1,
       "pts_r": 0.05,
       "pts_f": 0.0,
-      "pts_w": 0.0
+      "pts_w": 0.0,
+      "next_default": "CORR-SUB-01"
     },
     {
       "q_id": "SEC-D9-Q27",
@@ -9872,7 +9872,8 @@
       "pts_v": 0.3,
       "pts_r": 0.0,
       "pts_f": 0.1,
-      "pts_w": 0.0
+      "pts_w": 0.0,
+      "next_default": "CORR-DEF-02"
     },
     {
       "q_id": "CORR-DEF-02",
@@ -9891,7 +9892,8 @@
       "pts_v": 0.3,
       "pts_r": 0.0,
       "pts_f": 0.1,
-      "pts_w": 0.0
+      "pts_w": 0.0,
+      "next_default": "AUD-D3-Q06"
     },
     {
       "q_id": "CORR-PROC-01",
@@ -9910,7 +9912,8 @@
       "pts_v": 0.0,
       "pts_r": 0.0,
       "pts_f": 0.0,
-      "pts_w": 0.0
+      "pts_w": 0.0,
+      "next_default": "CORR-PROC-02"
     },
     {
       "q_id": "CORR-PROC-02",
@@ -9948,7 +9951,8 @@
       "pts_v": 0.1,
       "pts_r": 0.0,
       "pts_f": 0.0,
-      "pts_w": 0.0
+      "pts_w": 0.0,
+      "next_default": "CORR-EXP-01"
     },
     {
       "q_id": "CORR-EXP-01",
@@ -9967,7 +9971,9 @@
       "pts_v": 0.1,
       "pts_r": 0.0,
       "pts_f": 0.0,
-      "pts_w": 0.0
+      "pts_w": 0.0,
+      "end_flag": "Y",
+      "branch_type": "End"
     },
     {
       "q_id": "CORR-CUL-01",
@@ -9986,7 +9992,8 @@
       "pts_v": 0.0,
       "pts_r": 0.0,
       "pts_f": 0.0,
-      "pts_w": 0.0
+      "pts_w": 0.0,
+      "next_default": "ADD-WB-Q02"
     }
   ],
   "answers": [
