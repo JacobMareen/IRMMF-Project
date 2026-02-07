@@ -327,6 +327,17 @@ class AssessmentStateService:
         self.db.commit()
         return {"assessment_id": assessment_id, "override_depth": record.override_depth}
 
+    def set_market_research_opt_in(self, assessment_id: str, opt_in: bool) -> Dict[str, Any]:
+        record = self.db.query(models.Assessment).filter_by(assessment_id=assessment_id).first()
+        if not record:
+            raise ValueError(f"Assessment {assessment_id} not found.")
+        record.market_research_opt_in = bool(opt_in)
+        self.db.commit()
+        return {
+            "assessment_id": assessment_id,
+            "market_research_opt_in": bool(record.market_research_opt_in),
+        }
+
     def list_assessments_for_user(self, user_id: str, tenant_key: str | None = None) -> List[Dict[str, Any]]:
         query = self.db.query(models.Assessment).filter_by(user_id=user_id)
         if tenant_key:

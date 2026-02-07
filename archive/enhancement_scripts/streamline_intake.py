@@ -16,7 +16,7 @@ def create_streamlined_intake_questions():
     questions = [
         # === Organization Basics (5 questions) ===
         {
-            "Q-ID": "INT-ORG-01",
+            "Q-ID": "INT-ORG-Q01",
             "Section": "Organization Profile",
             "Question Text": "Primary industry sector",
             "Guidance": "Select the industry that best represents your organization's primary business activity.",
@@ -38,7 +38,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-ORG-03",
+            "Q-ID": "INT-ORG-Q02",
             "Section": "Organization Profile",
             "Question Text": "Total employee count",
             "Guidance": "Select the range that includes all employees globally (FTE + contractors).",
@@ -49,7 +49,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": "DEPTH_TRIGGER",
         },
         {
-            "Q-ID": "INT-ORG-04",
+            "Q-ID": "INT-ORG-Q03",
             "Section": "Organization Profile",
             "Question Text": "Annual revenue or budget",
             "Guidance": "Select the revenue band for commercial organizations, or annual budget for government/non-profit.",
@@ -60,7 +60,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": "DEPTH_TRIGGER",
         },
         {
-            "Q-ID": "INT-ORG-05",
+            "Q-ID": "INT-ORG-Q04",
             "Section": "Organization Profile",
             "Question Text": "Geographic footprint",
             "Guidance": "Select all regions where your organization operates (select all that apply).",
@@ -73,7 +73,7 @@ def create_streamlined_intake_questions():
 
         # === Regulatory Context (4 questions) ===
         {
-            "Q-ID": "INT-REG-01",
+            "Q-ID": "INT-REG-Q01",
             "Section": "Regulatory & Compliance",
             "Question Text": "Regulatory environment",
             "Guidance": "Select all major regulatory frameworks your organization must comply with.",
@@ -84,7 +84,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-REG-02",
+            "Q-ID": "INT-REG-Q02",
             "Section": "Regulatory & Compliance",
             "Question Text": "EU NIS2 Directive status",
             "Guidance": "Indicate your entity classification under the Network and Information Security Directive (NIS2).",
@@ -95,7 +95,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-REG-03",
+            "Q-ID": "INT-REG-Q03",
             "Section": "Regulatory & Compliance",
             "Question Text": "EU DORA applicability",
             "Guidance": "Indicate whether your organization is in scope for the Digital Operational Resilience Act.",
@@ -106,7 +106,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-REG-04",
+            "Q-ID": "INT-REG-Q04",
             "Section": "Regulatory & Compliance",
             "Question Text": "Critical infrastructure designation",
             "Guidance": "Indicate if your organization is designated as critical infrastructure in any jurisdiction.",
@@ -119,7 +119,7 @@ def create_streamlined_intake_questions():
 
         # === Workforce Characteristics (4 questions) ===
         {
-            "Q-ID": "INT-WORK-01",
+            "Q-ID": "INT-WORK-Q01",
             "Section": "Workforce Characteristics",
             "Question Text": "Remote and hybrid workforce",
             "Guidance": "Percentage of employees who work remotely or hybrid (not office-based 100% of time).",
@@ -130,7 +130,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-WORK-02",
+            "Q-ID": "INT-WORK-Q03",
             "Section": "Workforce Characteristics",
             "Question Text": "Contingent workforce usage",
             "Guidance": "Percentage of workforce that are contractors, temps, or third-party personnel.",
@@ -141,7 +141,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-WORK-03",
+            "Q-ID": "INT-WORK-Q05",
             "Section": "Workforce Characteristics",
             "Question Text": "Employee turnover rate",
             "Guidance": "Annual voluntary and involuntary turnover as a percentage of total workforce.",
@@ -152,7 +152,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-WORK-04",
+            "Q-ID": "INT-WORK-Q06",
             "Section": "Workforce Characteristics",
             "Question Text": "Privileged access scope",
             "Guidance": "Approximate number of users with elevated system access (admins, DBAs, developers, etc.).",
@@ -165,7 +165,7 @@ def create_streamlined_intake_questions():
 
         # === Technology Environment (3 questions) ===
         {
-            "Q-ID": "INT-TECH-01",
+            "Q-ID": "INT-TECH-Q01",
             "Section": "Technology Environment",
             "Question Text": "Cloud adoption level",
             "Guidance": "Percentage of IT workloads/applications running in public or hybrid cloud.",
@@ -176,7 +176,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-TECH-02",
+            "Q-ID": "INT-TECH-Q03",
             "Section": "Technology Environment",
             "Question Text": "IT environment complexity",
             "Guidance": "Approximate number of distinct IT applications and systems in your environment.",
@@ -187,7 +187,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": "DEPTH_TRIGGER",
         },
         {
-            "Q-ID": "INT-TECH-03",
+            "Q-ID": "INT-TECH-Q04",
             "Section": "Technology Environment",
             "Question Text": "Data sensitivity profile",
             "Guidance": "Types of sensitive data your organization processes (select all that apply).",
@@ -200,7 +200,7 @@ def create_streamlined_intake_questions():
 
         # === Current Insider Risk Program (5 questions) ===
         {
-            "Q-ID": "INT-PROG-01",
+            "Q-ID": "INT-PROG-Q01",
             "Section": "Current Program State",
             "Question Text": "Insider risk program maturity",
             "Guidance": "Self-assessment of your organization's current insider risk program maturity.",
@@ -211,7 +211,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-PROG-02",
+            "Q-ID": "INT-PROG-Q03",
             "Section": "Current Program State",
             "Question Text": "Dedicated insider risk resources",
             "Guidance": "Full-time equivalent (FTE) headcount dedicated to insider risk/threat program.",
@@ -222,7 +222,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-PROG-03",
+            "Q-ID": "INT-PROG-Q04",
             "Section": "Current Program State",
             "Question Text": "Technical controls deployed",
             "Guidance": "Insider risk detection and prevention technologies currently deployed (select all that apply).",
@@ -233,7 +233,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-PROG-04",
+            "Q-ID": "INT-PROG-Q06",
             "Section": "Current Program State",
             "Question Text": "Recent insider incidents",
             "Guidance": "Has your organization experienced a material insider incident in the past 24 months?",
@@ -244,7 +244,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-PROG-05",
+            "Q-ID": "INT-PROG-Q07",
             "Section": "Current Program State",
             "Question Text": "Active threat concerns",
             "Guidance": "Are you currently aware of specific insider threat concerns or investigations?",
@@ -290,7 +290,7 @@ def create_streamlined_intake_questions():
             "DepthLogicRef": None,
         },
         {
-            "Q-ID": "INT-ASSESS-04",
+            "Q-ID": "INT-ASSESS-Q01",
             "Section": "Assessment Context",
             "Question Text": "Upcoming risk events",
             "Guidance": "Are there upcoming organizational changes that increase insider risk (M&A, layoffs, restructuring)?",

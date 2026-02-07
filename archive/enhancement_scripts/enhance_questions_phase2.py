@@ -128,7 +128,7 @@ def create_new_fraud_questions():
             "Pts_G": 0, "Pts_E": 0, "Pts_T": 0, "Pts_L": 0, "Pts_H": 0, "Pts_V": 0, "Pts_R": 0.2, "Pts_F": 0.5, "Pts_W": 0.3,
         },
         {
-            "Q-ID": "FRAUD-02",
+            "Q-ID": "FRAUD-Q01",
             "IRMMF Domain": "8. Investigation & Response",
             "Question Title": "Chain of Custody Procedures",
             "Question Text": "To what extent does your organization maintain documented chain of custody procedures for digital and physical evidence in insider investigations?",
@@ -179,7 +179,7 @@ def create_new_fraud_questions():
             "Pts_G": 0.3, "Pts_E": 0, "Pts_T": 0, "Pts_L": 0.3, "Pts_H": 0, "Pts_V": 0, "Pts_R": 0.2, "Pts_F": 0.2, "Pts_W": 0,
         },
         {
-            "Q-ID": "FRAUD-05",
+            "Q-ID": "FRAUD-Q02",
             "IRMMF Domain": "4. Legal & Compliance",
             "Question Title": "SOX Internal Controls Testing",
             "Question Text": "To what extent does your organization test insider risk controls over financial reporting as part of SOX Section 404 compliance?",
@@ -196,7 +196,7 @@ def create_new_fraud_questions():
             "Pts_G": 0.2, "Pts_E": 0.2, "Pts_T": 0.2, "Pts_L": 0.3, "Pts_H": 0, "Pts_V": 0, "Pts_R": 0, "Pts_F": 0.1, "Pts_W": 0,
         },
         {
-            "Q-ID": "FRAUD-06",
+            "Q-ID": "FRAUD-Q03",
             "IRMMF Domain": "3. Risk Management",
             "Question Title": "FCPA Anti-Bribery Controls",
             "Question Text": "To what extent does your organization monitor employees for FCPA violations including gifts to foreign officials, improper payments, and falsified records?",
@@ -234,7 +234,7 @@ def create_new_fraud_questions():
             "Pts_G": 0.5, "Pts_E": 0.1, "Pts_T": 0, "Pts_L": 0.2, "Pts_H": 0.1, "Pts_V": 0.1, "Pts_R": 0, "Pts_F": 0, "Pts_W": 0,
         },
         {
-            "Q-ID": "EXEC-02",
+            "Q-ID": "EXEC-Q01",
             "IRMMF Domain": "2. Threat Model & Operations",
             "Question Title": "Executive Threat Assessment",
             "Question Text": "To what extent does your organization maintain specific threat assessments for executives and board members considering elevated access, external targeting, and reputational impact?",
@@ -268,7 +268,7 @@ def create_new_fraud_questions():
             "Pts_G": 0, "Pts_E": 0.1, "Pts_T": 0.5, "Pts_L": 0.1, "Pts_H": 0, "Pts_V": 0.2, "Pts_R": 0, "Pts_F": 0.1, "Pts_W": 0,
         },
         {
-            "Q-ID": "EXEC-04",
+            "Q-ID": "EXEC-Q02",
             "IRMMF Domain": "8. Investigation & Response",
             "Question Title": "Executive Investigation Protocols",
             "Question Text": "To what extent does your organization maintain pre-defined protocols for investigating allegations involving executives, including independence requirements and legal privilege considerations?",

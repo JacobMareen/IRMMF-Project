@@ -23,7 +23,7 @@ class AssessmentIntakeService:
         for key, value in answers.items():
             if value is None or value == "":
                 continue
-            # Logic update: 'key' is the QID (e.g. INT-ORG-01). 
+            # Logic update: 'key' is the QID (e.g. INT-ORG-Q01). 
             # In new schema, IntakeResponse uses 'q_id' which maps to 'dim_questions.q_id'
             stmt = insert(models.IntakeResponse).values(
                 assessment_id=assessment_id,

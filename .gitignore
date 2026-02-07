@@ -20,6 +20,6 @@ venv/
 .env.*
 
 # Local logs
+*.log
 uvicorn.log
 nohup.out
-.log

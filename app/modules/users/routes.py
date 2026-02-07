@@ -1,5 +1,4 @@
 """User management API routes."""
-from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -92,7 +91,7 @@ def get_terms_status(
     service: UserService = Depends(get_user_service),
 ):
     """Check if the current user has accepted the latest T&C."""
-    return service.get_terms_status(principal.user_id)
+    return service.get_terms_status(principal.subject)
 
 
 @router.post("/api/v1/auth/terms/accept")
@@ -104,7 +103,7 @@ def accept_terms(
 ):
     """Accept the T&C."""
     service.accept_terms(
-        user_id=principal.user_id,
+        user_id=principal.subject,
         version=payload.version,
         ip_address=request.client.host if request.client else None,
         user_agent=request.headers.get("user-agent")

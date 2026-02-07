@@ -91,6 +91,32 @@
   gap: 12px;
 }
 
+.ai-consent {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-consent-label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.ai-consent-label input {
+  margin-top: 4px;
+}
+
+.ai-consent-note {
+  color: var(--text-sub);
+  font-size: 0.9rem;
+}
+
 .ai-btn {
   border: 1px solid var(--border-color);
   border-radius: 8px;

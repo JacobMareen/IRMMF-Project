@@ -76,14 +76,13 @@ const Login = () => {
         body: JSON.stringify({ email: user })
       })
       if (!resp.ok) {
-        setStatus('Unable to find workspace. Check your email.')
+        setStatus('Unable to find workspace. You can enter one manually.')
         return
       }
       const data = (await resp.json()) as { tenants?: TenantInfo[] }
       const tenants = data?.tenants || []
       if (!tenants.length) {
-        setTenantKey('')
-        setStatus('No workspace found for this email.')
+        setStatus('No workspace found for this email. You can enter one manually.')
         return
       }
       setTenantOptions(tenants)
@@ -212,9 +211,9 @@ const Login = () => {
           >
             {isLookupBusy ? 'Finding Workspace...' : 'Find Workspace'}
           </button>
-          {tenantOptions.length > 1 && (
-            <label>
-              Workspace
+          <label>
+            Workspace
+            {tenantOptions.length > 1 ? (
               <select
                 value={tenantKey}
                 onChange={(event) => setTenantKey(event.target.value)}
@@ -226,8 +225,15 @@ const Login = () => {
                   </option>
                 ))}
               </select>
-            </label>
-          )}
+            ) : (
+              <input
+                type="text"
+                placeholder="demo_corp"
+                value={tenantKey}
+                onChange={(event) => setTenantKey(event.target.value)}
+              />
+            )}
+          </label>
           {tenantKey && (
             <div className="workspace-chip">
               Workspace: {tenantOptions.find((tenant) => tenant.key === tenantKey)?.name || tenantKey}

@@ -1,6 +1,8 @@
 """FastAPI entrypoint: routing + startup wiring for IRMMF services."""
 from __future__ import annotations
 import logging
+import time
+from datetime import datetime, timezone
 from fastapi import FastAPI, Depends, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -24,7 +26,6 @@ from app.modules.cases.routes import router as cases_router
 from app.modules.insider_program.routes import router as insider_program_router
 from app.modules.insider_program.routes import router as insider_program_router
 from app.modules.third_party.routes import router as third_party_router
-from app.api.v1.endpoints import templates as templates_router
 from app.security.audit import AuditContext, reset_audit_context, set_audit_context
 from app.security.rate_limit import RateLimiter, load_rate_limit_config, resolve_client_ip
 from app.security import slowapi
@@ -33,6 +34,7 @@ from contextlib import asynccontextmanager
 from app.core.settings import settings
 
 logger = logging.getLogger(__name__)
+START_TIME = time.time()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -178,20 +180,88 @@ def health_check():
 def list_modules():
     return {k: vars(v) for k, v in module_registry.list_modules().items()}
 
+@app.get("/api/v1/status")
+def system_status(db: Session = Depends(get_db)):
+    timestamp = datetime.now(timezone.utc).isoformat()
+    uptime_s = int(time.time() - START_TIME)
+
+    db_status = {"ok": True, "error": None, "latency_ms": None}
+    qbank_status: dict = {}
+    migration_status: dict = {}
+
+    try:
+        start = time.perf_counter()
+        db.execute(text("SELECT 1")).scalar()
+        db_status["latency_ms"] = int((time.perf_counter() - start) * 1000)
+    except Exception as exc:
+        db_status["ok"] = False
+        db_status["error"] = str(exc)
+
+    if db_status["ok"]:
+        try:
+            qbank_status = {
+                "questions": db.execute(text("SELECT COUNT(*) FROM dim_questions")).scalar(),
+                "answers": db.execute(text("SELECT COUNT(*) FROM dim_answers")).scalar(),
+                "intake_responses": db.execute(text("SELECT COUNT(*) FROM fact_intake_responses")).scalar(),
+            }
+        except Exception as exc:
+            qbank_status = {"error": str(exc)}
+
+        try:
+            latest_bank = db.execute(
+                text(
+                    """
+                    SELECT version, source_file, source_sha256, created_at
+                    FROM question_banks
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                    """
+                )
+            ).mappings().first()
+            if latest_bank:
+                qbank_status["latest"] = dict(latest_bank)
+        except Exception as exc:
+            qbank_status.setdefault("error", str(exc))
+
+        try:
+            migration_version = db.execute(text("SELECT version_num FROM alembic_version")).scalar()
+            migration_status = {"alembic_version": migration_version}
+        except Exception as exc:
+            migration_status = {"error": str(exc)}
+
+    overall = "ok" if db_status["ok"] else "degraded"
+
+    return {
+        "status": overall,
+        "timestamp": timestamp,
+        "uptime_s": uptime_s,
+        "app": {
+            "title": settings.APP_TITLE,
+            "version": settings.APP_VERSION,
+            "debug": settings.DEBUG,
+            "rbac_disabled": settings.DEV_RBAC_DISABLED,
+            "rate_limit_enabled": settings.IRMMF_RATE_LIMIT_ENABLED,
+        },
+        "database": db_status,
+        "question_bank": qbank_status,
+        "migrations": migration_status,
+    }
+
 
 if settings.DEBUG:
     @app.get("/api/v1/debug/intake_counts")
     def debug_intake_counts(db: Session = Depends(get_db)):
         counts = {
-            "dim_intake_questions": db.execute(text("SELECT COUNT(*) FROM dim_intake_questions")).scalar(),
-            "dim_intake_list_options": db.execute(text("SELECT COUNT(*) FROM dim_intake_list_options")).scalar(),
+            "dim_questions": db.execute(text("SELECT COUNT(*) FROM dim_questions")).scalar(),
+            "dim_answers": db.execute(text("SELECT COUNT(*) FROM dim_answers")).scalar(),
+            "fact_intake_responses": db.execute(text("SELECT COUNT(*) FROM fact_intake_responses")).scalar(),
         }
         sample = db.execute(
             text(
                 """
-                SELECT intake_q_id, section, question_text
-                FROM dim_intake_questions
-                ORDER BY intake_q_id
+                SELECT q_id, domain, question_text
+                FROM dim_questions
+                ORDER BY q_id
                 LIMIT 1
                 """
             )

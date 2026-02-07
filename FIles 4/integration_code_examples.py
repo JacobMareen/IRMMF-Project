@@ -443,7 +443,7 @@ def main():
     # Example user responses (you already capture this)
     responses = {
         'ADD-AI-Q01': 3,
-        'SEC-D2-Q04': 2,
+        'SEC-D2-Q01': 2,
         'ITIAM-D1-Q01': 4,
         # ... all 410 questions
     }

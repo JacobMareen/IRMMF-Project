@@ -8,6 +8,7 @@ export type ResumptionState = {
     responses?: Record<string, string>
     deferred_ids?: string[]
     flagged_ids?: string[]
+    market_research_opt_in?: boolean
 }
 
 export type RiskPoint = {

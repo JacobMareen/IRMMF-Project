@@ -13,7 +13,7 @@ def validate_json():
             print(f"   ℹ️ Last Question ID: {data['questions'][-1].get('q_id')}")
 
         # Check for new questions
-        new_ids = ["CORR-DEF-01", "CORR-PROC-01", "CORR-SUB-01"]
+        new_ids = ["CORR-DEF-Q01", "CORR-PROC-Q01", "CORR-SUB-Q01"]
         
         # Debug: Print all CORR- IDs found
         corr_found = [q.get('q_id') for q in data['questions'] if str(q.get('q_id')).startswith("CORR")]

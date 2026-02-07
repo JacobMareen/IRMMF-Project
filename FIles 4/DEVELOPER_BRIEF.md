@@ -47,7 +47,7 @@ User completes assessment
 ```
 Q-ID          | Pts_G | Pts_E | Pts_T | Pts_L | Pts_H | Pts_V | Pts_R | Pts_F | Pts_W
 ADD-AI-Q01    | 0.10  | 0.00  | 0.30  | 0.15  | 0.00  | 0.40  | 0.00  | 0.05  | 0.00
-SEC-D2-Q04    | 0.15  | 0.25  | 0.30  | 0.00  | 0.00  | 0.30  | 0.00  | 0.00  | 0.00
+SEC-D2-Q01    | 0.15  | 0.25  | 0.30  | 0.00  | 0.00  | 0.30  | 0.00  | 0.00  | 0.00
 ...
 ```
 These 9-axis weights already exist. You just read them.
@@ -74,7 +74,7 @@ Generated from intake module. Already exists.
 ```json
 {
   "ADD-AI-Q01": 3,
-  "SEC-D2-Q04": 2,
+  "SEC-D2-Q01": 2,
   "ITIAM-D1-Q01": 4,
   ...
 }

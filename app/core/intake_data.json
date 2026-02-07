@@ -1,532 +1,532 @@
 {
-    "questions": [
-        {
-            "intake_q_id": "INT-ORG-01",
-            "section": "Organization Profile",
-            "question_text": "Primary industry sector",
-            "guidance": "Select the industry that best represents your organization’s primary business activity.",
-            "input_type": "Single",
-            "list_ref": "IndustrySector",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-ORG-03",
-            "section": "Organization Profile",
-            "question_text": "Total workforce size",
-            "guidance": "Select the band that includes all workers globally (employees + long-term contractors/temps).",
-            "input_type": "Single",
-            "list_ref": "WorkforceSize",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-ORG-04",
-            "section": "Organization Profile",
-            "question_text": "Annual revenue or operating budget",
-            "guidance": "Select your most recent completed fiscal year revenue (commercial) or operating budget (public/non-profit).",
-            "input_type": "Single",
-            "list_ref": "RevenueBand",
-            "benchmark_weight": 0.5
-        },
-        {
-            "intake_q_id": "INT-ORG-05",
-            "section": "Organization Profile",
-            "question_text": "Geographic footprint",
-            "guidance": "Select all regions where you operate (employees, sites, or contracted operations).",
-            "input_type": "Multi",
-            "list_ref": "GeoRegions",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-REG-01",
-            "section": "Regulatory & Compliance",
-            "question_text": "Regulatory obligations and frameworks",
-            "guidance": "Select all that apply.",
-            "input_type": "Multi",
-            "list_ref": "Regulations",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-REG-02",
-            "section": "Regulatory & Compliance",
-            "question_text": "EU NIS2 status",
-            "guidance": "Your organization’s current NIS2 classification.",
-            "input_type": "Single",
-            "list_ref": "NIS2Status",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-REG-03",
-            "section": "Regulatory & Compliance",
-            "question_text": "EU DORA applicability",
-            "guidance": "",
-            "input_type": "Single",
-            "list_ref": "DORAStatus",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-REG-04",
-            "section": "Regulatory & Compliance",
-            "question_text": "Critical infrastructure designation",
-            "guidance": "In any jurisdiction, are you formally designated as critical infrastructure / essential service provider?",
-            "input_type": "Single",
-            "list_ref": "YesNoReview",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-WORK-01",
-            "section": "Workforce & Access",
-            "question_text": "Remote/hybrid workforce share",
-            "guidance": "Approx. % of workforce that works remotely/hybrid at least 1 day/week.",
-            "input_type": "Single",
-            "list_ref": "PercentageBands",
-            "benchmark_weight": 0.5
-        },
-        {
-            "intake_q_id": "INT-WORK-01a",
-            "section": "Workforce & Access",
-            "question_text": "Remote endpoint management coverage",
-            "guidance": "Are remote endpoints centrally managed (MDM + EDR or equivalent)?",
-            "input_type": "Single",
-            "list_ref": "CoverageLevel",
-            "benchmark_weight": 1.0,
-            "depth_logic_ref": "INT-WORK-01 > 0"
-        },
-        {
-            "intake_q_id": "INT-WORK-02",
-            "section": "Workforce & Access",
-            "question_text": "Contingent workforce share",
-            "guidance": "Approx. % of total workforce that are contractors/temps/third-party personnel.",
-            "input_type": "Single",
-            "list_ref": "ContingentShare",
-            "benchmark_weight": 0.5
-        },
-        {
-            "intake_q_id": "INT-WORK-02a",
-            "section": "Workforce & Access",
-            "question_text": "Third parties with privileged or sensitive access",
-            "guidance": "Do contractors/vendors have privileged access to production systems or access to sensitive data?",
-            "input_type": "Single",
-            "list_ref": "ThirdPartyAccess",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-WORK-03",
-            "section": "Workforce & Access",
-            "question_text": "Annual turnover rate",
-            "guidance": "Voluntary + involuntary turnover as % of total workforce (last 12 months).",
-            "input_type": "Single",
-            "list_ref": "TurnoverRate",
-            "benchmark_weight": 0.5
-        },
-        {
-            "intake_q_id": "INT-WORK-04",
-            "section": "Workforce & Access",
-            "question_text": "Privileged human users",
-            "guidance": "Approx. number of human users with admin-level access to production systems.",
-            "input_type": "Single",
-            "list_ref": "PrivilegedCount",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-WORK-04a",
-            "section": "Workforce & Access",
-            "question_text": "Privileged service accounts prevalence",
-            "guidance": "Compared to privileged human users, privileged service accounts are:",
-            "input_type": "Single",
-            "list_ref": "ServiceAcctPrevalence",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-TECH-01",
-            "section": "Technology & Data Exposure",
-            "question_text": "Hosting model",
-            "guidance": "",
-            "input_type": "Single",
-            "list_ref": "HostingModel",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-TECH-01a",
-            "section": "Technology & Data Exposure",
-            "question_text": "Primary cloud/SaaS providers",
-            "guidance": "",
-            "input_type": "Multi",
-            "list_ref": "CloudProviders",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-TECH-02",
-            "section": "Technology & Data Exposure",
-            "question_text": "Identity complexity",
-            "guidance": "How many identity providers/directories are used?",
-            "input_type": "Single",
-            "list_ref": "IdentityCount",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-TECH-03",
-            "section": "Technology & Data Exposure",
-            "question_text": "Data sensitivity profile",
-            "guidance": "Select all types of sensitive data you process or store.",
-            "input_type": "Multi",
-            "list_ref": "DataTypes",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-TECH-03a",
-            "section": "Technology & Data Exposure",
-            "question_text": "Primary data locations",
-            "guidance": "Where is most sensitive data stored?",
-            "input_type": "Multi",
-            "list_ref": "DataLocations",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-TECH-04",
-            "section": "Technology & Data Exposure",
-            "question_text": "Data egress channels allowed",
-            "guidance": "Which channels are permitted for transferring data externally?",
-            "input_type": "Multi",
-            "list_ref": "EgressChannels",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-TECH-05",
-            "section": "Technology & Data Exposure",
-            "question_text": "OT/ICS presence",
-            "guidance": "Do you operate OT/ICS environments?",
-            "input_type": "Single",
-            "list_ref": "YesNoUnsure",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-PROG-01",
-            "section": "Current Program State",
-            "question_text": "Insider risk program maturity",
-            "guidance": "Choose the statement that best fits today.",
-            "input_type": "Single",
-            "list_ref": "MaturityLevels",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-PROG-01a",
-            "section": "Current Program State",
-            "question_text": "Governance in place",
-            "guidance": "Do you have formal insider risk governance?",
-            "input_type": "Single",
-            "list_ref": "YesPartialNo",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-PROG-02",
-            "section": "Current Program State",
-            "question_text": "Dedicated resources",
-            "guidance": "Total FTE equivalent primarily dedicated to insider risk.",
-            "input_type": "Single",
-            "list_ref": "FTECount",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-PROG-03",
-            "section": "Current Program State",
-            "question_text": "Technical controls deployed",
-            "guidance": "Select all currently deployed.",
-            "input_type": "Multi",
-            "list_ref": "TechControls",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-PROG-03a",
-            "section": "Current Program State",
-            "question_text": "Monitoring effectiveness",
-            "guidance": "For the controls above, monitoring is:",
-            "input_type": "Single",
-            "list_ref": "MonitoringEff",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-PROG-04",
-            "section": "Current Program State",
-            "question_text": "Insider incidents in last 24 months",
-            "guidance": "Confirmed insider-related incident resulting in impact?",
-            "input_type": "Single",
-            "list_ref": "IncidentHistory",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-PROG-05",
-            "section": "Current Program State",
-            "question_text": "Active concerns",
-            "guidance": "Are there active, credible insider-risk concerns?",
-            "input_type": "Single",
-            "list_ref": "Concerns",
-            "benchmark_weight": 1.0
-        },
-        {
-            "intake_q_id": "INT-ASSESS-04",
-            "section": "Assessment Context",
-            "question_text": "Upcoming risk events",
-            "guidance": "Select any planned or likely changes in the next 6–12 months.",
-            "input_type": "Multi",
-            "list_ref": "RiskEvents",
-            "benchmark_weight": 1.0
-        }
-    ],
-    "lists": {
-        "IndustrySector": [
-            "Energy & Utilities",
-            "Financial Services (Banking/Insurance/Payments)",
-            "Healthcare & Life Sciences",
-            "Government / Public Sector",
-            "Manufacturing / Industrial",
-            "Technology / Software / IT Services",
-            "Telecoms",
-            "Retail / eCommerce / Consumer",
-            "Transportation & Logistics",
-            "Education & Research",
-            "Professional Services",
-            "Other (specify)",
-            "Unsure"
-        ],
-        "WorkforceSize": [
-            "1–49",
-            "50–249",
-            "250–999",
-            "1,000–4,999",
-            "5,000–19,999",
-            "20,000+",
-            "Unsure"
-        ],
-        "RevenueBand": [
-            "< €10M",
-            "€10M–€49M",
-            "€50M–€249M",
-            "€250M–€999M",
-            "€1B–€9.9B",
-            "€10B+",
-            "Prefer not to answer",
-            "Unsure"
-        ],
-        "GeoRegions": [
-            "EU/EEA",
-            "UK",
-            "North America",
-            "Latin America",
-            "APAC",
-            "Middle East",
-            "Africa",
-            "Unsure"
-        ],
-        "Regulations": [
-            "GDPR / EU privacy law obligations",
-            "Sector financial regulation (e.g., EBA/ECB)",
-            "HIPAA / health privacy",
-            "SOX / financial reporting",
-            "PCI DSS",
-            "Export controls / sanctions",
-            "ISO/IEC 27001 (certified or aligned)",
-            "NIST CSF / NIST 800-53",
-            "SOC 2 / ISAE 3402",
-            "CIS Controls",
-            "Other (specify)",
-            "None",
-            "Unsure"
-        ],
-        "NIS2Status": [
-            "Essential entity",
-            "Important entity",
-            "Not in scope",
-            "In scope but classification not confirmed",
-            "Unsure / under assessment"
-        ],
-        "DORAStatus": [
-            "Directly in scope as a financial entity",
-            "Not a financial entity, but provides critical ICT services",
-            "Not in scope",
-            "Unsure / under assessment"
-        ],
-        "YesNoReview": [
-            "Yes",
-            "No",
-            "Under review / expected soon",
-            "Unsure"
-        ],
-        "PercentageBands": [
-            "0%",
-            "1–10%",
-            "11–25%",
-            "26–50%",
-            "51–75%",
-            "76–100%",
-            "Unsure"
-        ],
-        "CoverageLevel": [
-            "Mostly (≥80% managed)",
-            "Some (30–79% managed)",
-            "Minimal (<30% managed)",
-            "No / not applicable",
-            "Unsure"
-        ],
-        "ContingentShare": [
-            "0–5%",
-            "6–15%",
-            "16–30%",
-            "31–50%",
-            ">50%",
-            "Unsure"
-        ],
-        "ThirdPartyAccess": [
-            "Yes, privileged access",
-            "Yes, sensitive data access only",
-            "No",
-            "Unsure"
-        ],
-        "TurnoverRate": [
-            "<5%",
-            "5–10%",
-            "11–20%",
-            "21–30%",
-            ">30%",
-            "Unknown"
-        ],
-        "PrivilegedCount": [
-            "0–9",
-            "10–49",
-            "50–199",
-            "200–999",
-            "1,000+",
-            "Unsure"
-        ],
-        "ServiceAcctPrevalence": [
-            "Fewer than humans",
-            "About the same",
-            "More than humans",
-            "Unsure / not tracked"
-        ],
-        "HostingModel": [
-            "Mostly on-prem",
-            "Mixed (on-prem + cloud)",
-            "Mostly cloud",
-            "Cloud-native (minimal on-prem)",
-            "Unsure"
-        ],
-        "CloudProviders": [
-            "Microsoft (Entra/M365/Azure)",
-            "Google (Workspace/GCP)",
-            "AWS",
-            "Salesforce",
-            "Other major SaaS (specify)",
-            "None / Unsure"
-        ],
-        "IdentityCount": [
-            "1",
-            "2",
-            "3+",
-            "Unsure"
-        ],
-        "DataTypes": [
-            "Personal data (general)",
-            "Sensitive/special category personal data",
-            "Payment card data",
-            "Financial account data",
-            "Health data",
-            "Children’s data",
-            "Government/classified/regulated data",
-            "Trade secrets / IP / source code",
-            "Customer confidential",
-            "None of the above",
-            "Unsure"
-        ],
-        "DataLocations": [
-            "Email (M365/Google)",
-            "Endpoints/laptops",
-            "File shares (on-prem)",
-            "Cloud storage (OneDrive/Drive/S3)",
-            "Core business apps (ERP/CRM)",
-            "Data warehouse/lake",
-            "Source code repositories",
-            "Unsure"
-        ],
-        "EgressChannels": [
-            "Corporate email",
-            "Personal webmail",
-            "USB/removable media",
-            "Approved cloud file sharing",
-            "Unapproved/consumer file sharing",
-            "Messaging apps (Teams/Slack/etc)",
-            "Managed SFTP/secure transfer",
-            "Code repos",
-            "Other (specify)",
-            "Unsure"
-        ],
-        "YesNoUnsure": [
-            "Yes",
-            "No",
-            "Unsure"
-        ],
-        "MaturityLevels": [
-            "0: No formal insider risk program",
-            "1: Basic policy awareness and ad hoc",
-            "2: Defined processes and some tooling",
-            "3: Proactive monitoring + governance",
-            "4: Measured, automated, continuously improved",
-            "Unsure"
-        ],
-        "YesPartialNo": [
-            "Yes",
-            "Partial (some elements)",
-            "No",
-            "Unsure"
-        ],
-        "FTECount": [
-            "0 (no dedicated FTE)",
-            "0.1–0.9",
-            "1–2",
-            "3–5",
-            "6–10",
-            "10+",
-            "Unsure"
-        ],
-        "TechControls": [
-            "SIEM with insider-relevant detections",
-            "UEBA / behavior analytics",
-            "DLP (endpoint/network/cloud)",
-            "CASB / SSE",
-            "EDR/XDR for insider-related investigations",
-            "PAM (privileged access management)",
-            "Email security + data classification",
-            "Central cloud audit logging",
-            "Data access governance",
-            "None",
-            "Unsure"
-        ],
-        "MonitoringEff": [
-            "Consistent and staffed",
-            "Partial (some sources monitored; gaps)",
-            "Minimal (logs exist but rarely reviewed)",
-            "None / unsure"
-        ],
-        "IncidentHistory": [
-            "Yes",
-            "No",
-            "Suspected but unconfirmed",
-            "Prefer not to answer"
-        ],
-        "Concerns": [
-            "Yes",
-            "No",
-            "Prefer not to answer"
-        ],
-        "RiskEvents": [
-            "M&A / divestiture / carve-out",
-            "Layoffs / restructuring",
-            "Rapid hiring / onboarding surge",
-            "Major outsourcing / vendor transition",
-            "Major system migration",
-            "Labor disputes / employee relations",
-            "Geopolitical/sanctions exposure change",
-            "None of the above",
-            "Prefer not to answer"
-        ]
+  "questions": [
+    {
+      "intake_q_id": "INT-ORG-Q01",
+      "section": "Organization Profile",
+      "question_text": "Primary industry sector",
+      "guidance": "Select the industry that best represents your organization\u2019s primary business activity.",
+      "input_type": "Single",
+      "list_ref": "IndustrySector",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-ORG-Q02",
+      "section": "Organization Profile",
+      "question_text": "Total workforce size",
+      "guidance": "Select the band that includes all workers globally (employees + long-term contractors/temps).",
+      "input_type": "Single",
+      "list_ref": "WorkforceSize",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-ORG-Q03",
+      "section": "Organization Profile",
+      "question_text": "Annual revenue or operating budget",
+      "guidance": "Select your most recent completed fiscal year revenue (commercial) or operating budget (public/non-profit).",
+      "input_type": "Single",
+      "list_ref": "RevenueBand",
+      "benchmark_weight": 0.5
+    },
+    {
+      "intake_q_id": "INT-ORG-Q04",
+      "section": "Organization Profile",
+      "question_text": "Geographic footprint",
+      "guidance": "Select all regions where you operate (employees, sites, or contracted operations).",
+      "input_type": "Multi",
+      "list_ref": "GeoRegions",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-REG-Q01",
+      "section": "Regulatory & Compliance",
+      "question_text": "Regulatory obligations and frameworks",
+      "guidance": "Select all that apply.",
+      "input_type": "Multi",
+      "list_ref": "Regulations",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-REG-Q02",
+      "section": "Regulatory & Compliance",
+      "question_text": "EU NIS2 status",
+      "guidance": "Your organization\u2019s current NIS2 classification.",
+      "input_type": "Single",
+      "list_ref": "NIS2Status",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-REG-Q03",
+      "section": "Regulatory & Compliance",
+      "question_text": "EU DORA applicability",
+      "guidance": "",
+      "input_type": "Single",
+      "list_ref": "DORAStatus",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-REG-Q04",
+      "section": "Regulatory & Compliance",
+      "question_text": "Critical infrastructure designation",
+      "guidance": "In any jurisdiction, are you formally designated as critical infrastructure / essential service provider?",
+      "input_type": "Single",
+      "list_ref": "YesNoReview",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-WORK-Q01",
+      "section": "Workforce & Access",
+      "question_text": "Remote/hybrid workforce share",
+      "guidance": "Approx. % of workforce that works remotely/hybrid at least 1 day/week.",
+      "input_type": "Single",
+      "list_ref": "PercentageBands",
+      "benchmark_weight": 0.5
+    },
+    {
+      "intake_q_id": "INT-WORK-Q02",
+      "section": "Workforce & Access",
+      "question_text": "Remote endpoint management coverage",
+      "guidance": "Are remote endpoints centrally managed (MDM + EDR or equivalent)?",
+      "input_type": "Single",
+      "list_ref": "CoverageLevel",
+      "benchmark_weight": 1.0,
+      "depth_logic_ref": "INT-WORK-01 > 0"
+    },
+    {
+      "intake_q_id": "INT-WORK-Q03",
+      "section": "Workforce & Access",
+      "question_text": "Contingent workforce share",
+      "guidance": "Approx. % of total workforce that are contractors/temps/third-party personnel.",
+      "input_type": "Single",
+      "list_ref": "ContingentShare",
+      "benchmark_weight": 0.5
+    },
+    {
+      "intake_q_id": "INT-WORK-Q04",
+      "section": "Workforce & Access",
+      "question_text": "Third parties with privileged or sensitive access",
+      "guidance": "Do contractors/vendors have privileged access to production systems or access to sensitive data?",
+      "input_type": "Single",
+      "list_ref": "ThirdPartyAccess",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-WORK-Q05",
+      "section": "Workforce & Access",
+      "question_text": "Annual turnover rate",
+      "guidance": "Voluntary + involuntary turnover as % of total workforce (last 12 months).",
+      "input_type": "Single",
+      "list_ref": "TurnoverRate",
+      "benchmark_weight": 0.5
+    },
+    {
+      "intake_q_id": "INT-WORK-Q06",
+      "section": "Workforce & Access",
+      "question_text": "Privileged human users",
+      "guidance": "Approx. number of human users with admin-level access to production systems.",
+      "input_type": "Single",
+      "list_ref": "PrivilegedCount",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-WORK-Q07",
+      "section": "Workforce & Access",
+      "question_text": "Privileged service accounts prevalence",
+      "guidance": "Compared to privileged human users, privileged service accounts are:",
+      "input_type": "Single",
+      "list_ref": "ServiceAcctPrevalence",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-TECH-Q01",
+      "section": "Technology & Data Exposure",
+      "question_text": "Hosting model",
+      "guidance": "",
+      "input_type": "Single",
+      "list_ref": "HostingModel",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-TECH-Q02",
+      "section": "Technology & Data Exposure",
+      "question_text": "Primary cloud/SaaS providers",
+      "guidance": "",
+      "input_type": "Multi",
+      "list_ref": "CloudProviders",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-TECH-Q03",
+      "section": "Technology & Data Exposure",
+      "question_text": "Identity complexity",
+      "guidance": "How many identity providers/directories are used?",
+      "input_type": "Single",
+      "list_ref": "IdentityCount",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-TECH-Q04",
+      "section": "Technology & Data Exposure",
+      "question_text": "Data sensitivity profile",
+      "guidance": "Select all types of sensitive data you process or store.",
+      "input_type": "Multi",
+      "list_ref": "DataTypes",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-TECH-Q05",
+      "section": "Technology & Data Exposure",
+      "question_text": "Primary data locations",
+      "guidance": "Where is most sensitive data stored?",
+      "input_type": "Multi",
+      "list_ref": "DataLocations",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-TECH-Q06",
+      "section": "Technology & Data Exposure",
+      "question_text": "Data egress channels allowed",
+      "guidance": "Which channels are permitted for transferring data externally?",
+      "input_type": "Multi",
+      "list_ref": "EgressChannels",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-TECH-Q07",
+      "section": "Technology & Data Exposure",
+      "question_text": "OT/ICS presence",
+      "guidance": "Do you operate OT/ICS environments?",
+      "input_type": "Single",
+      "list_ref": "YesNoUnsure",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-PROG-Q01",
+      "section": "Current Program State",
+      "question_text": "Insider risk program maturity",
+      "guidance": "Choose the statement that best fits today.",
+      "input_type": "Single",
+      "list_ref": "MaturityLevels",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-PROG-Q02",
+      "section": "Current Program State",
+      "question_text": "Governance in place",
+      "guidance": "Do you have formal insider risk governance?",
+      "input_type": "Single",
+      "list_ref": "YesPartialNo",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-PROG-Q03",
+      "section": "Current Program State",
+      "question_text": "Dedicated resources",
+      "guidance": "Total FTE equivalent primarily dedicated to insider risk.",
+      "input_type": "Single",
+      "list_ref": "FTECount",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-PROG-Q04",
+      "section": "Current Program State",
+      "question_text": "Technical controls deployed",
+      "guidance": "Select all currently deployed.",
+      "input_type": "Multi",
+      "list_ref": "TechControls",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-PROG-Q05",
+      "section": "Current Program State",
+      "question_text": "Monitoring effectiveness",
+      "guidance": "For the controls above, monitoring is:",
+      "input_type": "Single",
+      "list_ref": "MonitoringEff",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-PROG-Q06",
+      "section": "Current Program State",
+      "question_text": "Insider incidents in last 24 months",
+      "guidance": "Confirmed insider-related incident resulting in impact?",
+      "input_type": "Single",
+      "list_ref": "IncidentHistory",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-PROG-Q07",
+      "section": "Current Program State",
+      "question_text": "Active concerns",
+      "guidance": "Are there active, credible insider-risk concerns?",
+      "input_type": "Single",
+      "list_ref": "Concerns",
+      "benchmark_weight": 1.0
+    },
+    {
+      "intake_q_id": "INT-ASSESS-Q01",
+      "section": "Assessment Context",
+      "question_text": "Upcoming risk events",
+      "guidance": "Select any planned or likely changes in the next 6\u201312 months.",
+      "input_type": "Multi",
+      "list_ref": "RiskEvents",
+      "benchmark_weight": 1.0
     }
+  ],
+  "lists": {
+    "IndustrySector": [
+      "Energy & Utilities",
+      "Financial Services (Banking/Insurance/Payments)",
+      "Healthcare & Life Sciences",
+      "Government / Public Sector",
+      "Manufacturing / Industrial",
+      "Technology / Software / IT Services",
+      "Telecoms",
+      "Retail / eCommerce / Consumer",
+      "Transportation & Logistics",
+      "Education & Research",
+      "Professional Services",
+      "Other (specify)",
+      "Unsure"
+    ],
+    "WorkforceSize": [
+      "1\u201349",
+      "50\u2013249",
+      "250\u2013999",
+      "1,000\u20134,999",
+      "5,000\u201319,999",
+      "20,000+",
+      "Unsure"
+    ],
+    "RevenueBand": [
+      "< \u20ac10M",
+      "\u20ac10M\u2013\u20ac49M",
+      "\u20ac50M\u2013\u20ac249M",
+      "\u20ac250M\u2013\u20ac999M",
+      "\u20ac1B\u2013\u20ac9.9B",
+      "\u20ac10B+",
+      "Prefer not to answer",
+      "Unsure"
+    ],
+    "GeoRegions": [
+      "EU/EEA",
+      "UK",
+      "North America",
+      "Latin America",
+      "APAC",
+      "Middle East",
+      "Africa",
+      "Unsure"
+    ],
+    "Regulations": [
+      "GDPR / EU privacy law obligations",
+      "Sector financial regulation (e.g., EBA/ECB)",
+      "HIPAA / health privacy",
+      "SOX / financial reporting",
+      "PCI DSS",
+      "Export controls / sanctions",
+      "ISO/IEC 27001 (certified or aligned)",
+      "NIST CSF / NIST 800-53",
+      "SOC 2 / ISAE 3402",
+      "CIS Controls",
+      "Other (specify)",
+      "None",
+      "Unsure"
+    ],
+    "NIS2Status": [
+      "Essential entity",
+      "Important entity",
+      "Not in scope",
+      "In scope but classification not confirmed",
+      "Unsure / under assessment"
+    ],
+    "DORAStatus": [
+      "Directly in scope as a financial entity",
+      "Not a financial entity, but provides critical ICT services",
+      "Not in scope",
+      "Unsure / under assessment"
+    ],
+    "YesNoReview": [
+      "Yes",
+      "No",
+      "Under review / expected soon",
+      "Unsure"
+    ],
+    "PercentageBands": [
+      "0%",
+      "1\u201310%",
+      "11\u201325%",
+      "26\u201350%",
+      "51\u201375%",
+      "76\u2013100%",
+      "Unsure"
+    ],
+    "CoverageLevel": [
+      "Mostly (\u226580% managed)",
+      "Some (30\u201379% managed)",
+      "Minimal (<30% managed)",
+      "No / not applicable",
+      "Unsure"
+    ],
+    "ContingentShare": [
+      "0\u20135%",
+      "6\u201315%",
+      "16\u201330%",
+      "31\u201350%",
+      ">50%",
+      "Unsure"
+    ],
+    "ThirdPartyAccess": [
+      "Yes, privileged access",
+      "Yes, sensitive data access only",
+      "No",
+      "Unsure"
+    ],
+    "TurnoverRate": [
+      "<5%",
+      "5\u201310%",
+      "11\u201320%",
+      "21\u201330%",
+      ">30%",
+      "Unknown"
+    ],
+    "PrivilegedCount": [
+      "0\u20139",
+      "10\u201349",
+      "50\u2013199",
+      "200\u2013999",
+      "1,000+",
+      "Unsure"
+    ],
+    "ServiceAcctPrevalence": [
+      "Fewer than humans",
+      "About the same",
+      "More than humans",
+      "Unsure / not tracked"
+    ],
+    "HostingModel": [
+      "Mostly on-prem",
+      "Mixed (on-prem + cloud)",
+      "Mostly cloud",
+      "Cloud-native (minimal on-prem)",
+      "Unsure"
+    ],
+    "CloudProviders": [
+      "Microsoft (Entra/M365/Azure)",
+      "Google (Workspace/GCP)",
+      "AWS",
+      "Salesforce",
+      "Other major SaaS (specify)",
+      "None / Unsure"
+    ],
+    "IdentityCount": [
+      "1",
+      "2",
+      "3+",
+      "Unsure"
+    ],
+    "DataTypes": [
+      "Personal data (general)",
+      "Sensitive/special category personal data",
+      "Payment card data",
+      "Financial account data",
+      "Health data",
+      "Children\u2019s data",
+      "Government/classified/regulated data",
+      "Trade secrets / IP / source code",
+      "Customer confidential",
+      "None of the above",
+      "Unsure"
+    ],
+    "DataLocations": [
+      "Email (M365/Google)",
+      "Endpoints/laptops",
+      "File shares (on-prem)",
+      "Cloud storage (OneDrive/Drive/S3)",
+      "Core business apps (ERP/CRM)",
+      "Data warehouse/lake",
+      "Source code repositories",
+      "Unsure"
+    ],
+    "EgressChannels": [
+      "Corporate email",
+      "Personal webmail",
+      "USB/removable media",
+      "Approved cloud file sharing",
+      "Unapproved/consumer file sharing",
+      "Messaging apps (Teams/Slack/etc)",
+      "Managed SFTP/secure transfer",
+      "Code repos",
+      "Other (specify)",
+      "Unsure"
+    ],
+    "YesNoUnsure": [
+      "Yes",
+      "No",
+      "Unsure"
+    ],
+    "MaturityLevels": [
+      "0: No formal insider risk program",
+      "1: Basic policy awareness and ad hoc",
+      "2: Defined processes and some tooling",
+      "3: Proactive monitoring + governance",
+      "4: Measured, automated, continuously improved",
+      "Unsure"
+    ],
+    "YesPartialNo": [
+      "Yes",
+      "Partial (some elements)",
+      "No",
+      "Unsure"
+    ],
+    "FTECount": [
+      "0 (no dedicated FTE)",
+      "0.1\u20130.9",
+      "1\u20132",
+      "3\u20135",
+      "6\u201310",
+      "10+",
+      "Unsure"
+    ],
+    "TechControls": [
+      "SIEM with insider-relevant detections",
+      "UEBA / behavior analytics",
+      "DLP (endpoint/network/cloud)",
+      "CASB / SSE",
+      "EDR/XDR for insider-related investigations",
+      "PAM (privileged access management)",
+      "Email security + data classification",
+      "Central cloud audit logging",
+      "Data access governance",
+      "None",
+      "Unsure"
+    ],
+    "MonitoringEff": [
+      "Consistent and staffed",
+      "Partial (some sources monitored; gaps)",
+      "Minimal (logs exist but rarely reviewed)",
+      "None / unsure"
+    ],
+    "IncidentHistory": [
+      "Yes",
+      "No",
+      "Suspected but unconfirmed",
+      "Prefer not to answer"
+    ],
+    "Concerns": [
+      "Yes",
+      "No",
+      "Prefer not to answer"
+    ],
+    "RiskEvents": [
+      "M&A / divestiture / carve-out",
+      "Layoffs / restructuring",
+      "Rapid hiring / onboarding surge",
+      "Major outsourcing / vendor transition",
+      "Major system migration",
+      "Labor disputes / employee relations",
+      "Geopolitical/sanctions exposure change",
+      "None of the above",
+      "Prefer not to answer"
+    ]
+  }
 }

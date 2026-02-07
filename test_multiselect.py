@@ -57,18 +57,18 @@ def _run_multiselect_detection() -> bool:
         # Expected multi-select questions (v9 Phase 3)
         expected = [
             # Original 6 from v8
-            "FRAUD-DETECT-01",
-            "WHISTLEBLOW-01",
-            "EXEC-MONITOR-01",
-            "REGULATORY-01",
-            "PRIVILEGED-01",
-            "INVESTIGATE-01",
+            "FRAUD-DETECT-Q01",
+            "WHISTLEBLOW-Q01",
+            "EXEC-MONITOR-Q01",
+            "REGULATORY-Q01",
+            "PRIVILEGED-Q01",
+            "INVESTIGATE-Q01",
             # New 5 from Phase 3
-            "INCIDENT-RESPONSE-01",
-            "DATA-PROTECTION-01",
-            "HR-LIFECYCLE-01",
-            "ACCESS-CONTROLS-01",
-            "FORENSICS-01",
+            "INCIDENT-RESPONSE-Q01",
+            "DATA-PROTECTION-Q01",
+            "HR-LIFECYCLE-Q01",
+            "ACCESS-CONTROLS-Q01",
+            "FORENSICS-Q01",
         ]
 
         found_ids = [q.q_id for q in multiselect_questions]
@@ -111,7 +111,7 @@ def _run_multiselect_answer_structure() -> bool:
     db = SessionLocal()
     try:
         # Get a sample multi-select question
-        sample_qid = "FRAUD-DETECT-01"
+        sample_qid = "FRAUD-DETECT-Q01"
         question = db.query(Question).filter_by(q_id=sample_qid).first()
 
         if not question:
@@ -164,8 +164,8 @@ def _run_comma_separated_storage() -> bool:
 
     # Simulate backend storage
     test_cases = [
-        ("FRAUD-DETECT-01-A1", ["FRAUD-DETECT-01-A1"]),  # Single selection
-        ("FRAUD-DETECT-01-A1,FRAUD-DETECT-01-A2", ["FRAUD-DETECT-01-A1", "FRAUD-DETECT-01-A2"]),  # Two selections
+        ("FRAUD-DETECT-Q01-A1", ["FRAUD-DETECT-Q01-A1"]),  # Single selection
+        ("FRAUD-DETECT-Q01-A1,FRAUD-DETECT-Q01-A2", ["FRAUD-DETECT-Q01-A1", "FRAUD-DETECT-Q01-A2"]),  # Two selections
         ("A1,A2,A3,A4,A5", ["A1", "A2", "A3", "A4", "A5"]),  # Five selections
     ]
 

@@ -27,7 +27,7 @@ LANGUAGE_ENHANCEMENTS = {
 def create_multiselect_incident_response():
     """Consolidate incident response capability questions."""
     return {
-        "Q-ID": "INCIDENT-RESPONSE-01",
+        "Q-ID": "INCIDENT-RESPONSE-Q01",
         "IRMMF Domain": "8. Investigation & Response",
         "Question Title": "Incident Response Capabilities",
         "Question Text": "Which incident response capabilities does your organization maintain for insider incidents? (Select all that apply)",
@@ -42,7 +42,7 @@ def create_multiselect_incident_response():
 def create_multiselect_data_protection():
     """Consolidate data protection control questions."""
     return {
-        "Q-ID": "DATA-PROTECTION-01",
+        "Q-ID": "DATA-PROTECTION-Q01",
         "IRMMF Domain": "6. Technical Controls",
         "Question Title": "Data Protection Controls",
         "Question Text": "Which data protection controls are applied to sensitive data in your environment? (Select all that apply)",
@@ -57,7 +57,7 @@ def create_multiselect_data_protection():
 def create_multiselect_hr_lifecycle():
     """Consolidate HR lifecycle insider risk questions."""
     return {
-        "Q-ID": "HR-LIFECYCLE-01",
+        "Q-ID": "HR-LIFECYCLE-Q01",
         "IRMMF Domain": "5. Human-Centric Culture",
         "Question Title": "HR Lifecycle Insider Risk Controls",
         "Question Text": "At which stages of the employee lifecycle does your organization apply insider risk controls? (Select all that apply)",
@@ -72,7 +72,7 @@ def create_multiselect_hr_lifecycle():
 def create_multiselect_access_controls():
     """Consolidate access control and identity management questions."""
     return {
-        "Q-ID": "ACCESS-CONTROLS-01",
+        "Q-ID": "ACCESS-CONTROLS-Q01",
         "IRMMF Domain": "6. Technical Controls",
         "Question Title": "Access Control and Identity Management",
         "Question Text": "Which access control and identity management capabilities are implemented in your environment? (Select all that apply)",
@@ -87,7 +87,7 @@ def create_multiselect_access_controls():
 def create_multiselect_forensics():
     """Consolidate forensic investigation capability questions."""
     return {
-        "Q-ID": "FORENSICS-01",
+        "Q-ID": "FORENSICS-Q01",
         "IRMMF Domain": "8. Investigation & Response",
         "Question Title": "Digital Forensics Capabilities",
         "Question Text": "Which digital forensics capabilities does your organization maintain for insider investigations? (Select all that apply)",
@@ -216,7 +216,7 @@ def main():
 
     # Generate answers for new multi-select questions
     multiselect_options = {
-        "INCIDENT-RESPONSE-01": [
+        "INCIDENT-RESPONSE-Q01": [
             "Stop-the-bleed procedures",
             "Executive escalation protocols",
             "Device isolation/imaging",
@@ -225,7 +225,7 @@ def main():
             "Documented playbooks",
             "Regular tabletop exercises"
         ],
-        "DATA-PROTECTION-01": [
+        "DATA-PROTECTION-Q01": [
             "Data Loss Prevention (DLP)",
             "Database Activity Monitoring (DAM)",
             "Email monitoring/scanning",
@@ -234,7 +234,7 @@ def main():
             "CASB for SaaS applications",
             "API monitoring for data access"
         ],
-        "HR-LIFECYCLE-01": [
+        "HR-LIFECYCLE-Q01": [
             "Pre-hire background checks",
             "Onboarding security training",
             "Periodic access reviews",
@@ -244,7 +244,7 @@ def main():
             "Enhanced monitoring during notice period",
             "Layoff/redundancy protocols"
         ],
-        "ACCESS-CONTROLS-01": [
+        "ACCESS-CONTROLS-Q01": [
             "Periodic access certification",
             "Orphaned account detection",
             "Just-in-time privileged access",
@@ -253,7 +253,7 @@ def main():
             "Risk-based adaptive authentication",
             "Lateral movement detection"
         ],
-        "FORENSICS-01": [
+        "FORENSICS-Q01": [
             "Device imaging (forensically sound)",
             "Volatile memory capture",
             "Messaging platform search",
@@ -341,11 +341,11 @@ def main():
     print("=" * 80)
     print()
     print("New Multi-Select Questions Added:")
-    print("  1. INCIDENT-RESPONSE-01: Incident Response Capabilities")
-    print("  2. DATA-PROTECTION-01: Data Protection Controls")
-    print("  3. HR-LIFECYCLE-01: HR Lifecycle Insider Risk Controls")
-    print("  4. ACCESS-CONTROLS-01: Access Control and Identity Management")
-    print("  5. FORENSICS-01: Digital Forensics Capabilities")
+    print("  1. INCIDENT-RESPONSE-Q01: Incident Response Capabilities")
+    print("  2. DATA-PROTECTION-Q01: Data Protection Controls")
+    print("  3. HR-LIFECYCLE-Q01: HR Lifecycle Insider Risk Controls")
+    print("  4. ACCESS-CONTROLS-Q01: Access Control and Identity Management")
+    print("  5. FORENSICS-Q01: Digital Forensics Capabilities")
     print()
     print(f"Total multi-select questions: 11 (covers major capability areas)")
     print(f"Professional language coverage: {enhanced_count}/{len(q_df)} questions ({enhanced_count/len(q_df)*100:.1f}%)")

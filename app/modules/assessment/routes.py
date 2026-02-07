@@ -119,6 +119,24 @@ def set_override_depth(
         raise HTTPException(status_code=500, detail="Internal Server Error during override update")
 
 
+@router.put("/api/v1/assessment/{assessment_id}/market-research")
+def set_market_research_opt_in(
+    assessment_id: str,
+    payload: dict,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    service: AssessmentService = Depends(get_service),
+):
+    _ensure_assessment_access(assessment_id, principal, db)
+    try:
+        opt_in = bool(payload.get("market_research_opt_in"))
+        return service.set_market_research_opt_in(assessment_id, opt_in)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal Server Error during consent update")
+
+
 @router.get("/responses/analysis/{assessment_id}")
 def get_analysis(
     assessment_id: str,

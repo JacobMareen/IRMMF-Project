@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import './Settings.css'
 import { getStoredAssessmentId } from '../utils/assessment'
 import { apiFetch, apiJson } from '../lib/api'
@@ -41,12 +41,43 @@ type UserEntry = {
   last_login_at?: string | null
 }
 
+type SystemStatus = {
+  status?: string
+  timestamp?: string
+  uptime_s?: number
+  app?: {
+    title?: string
+    version?: string
+    debug?: boolean
+    rbac_disabled?: boolean
+    rate_limit_enabled?: boolean
+  }
+  database?: { ok?: boolean; error?: string | null; latency_ms?: number | null }
+  question_bank?: {
+    questions?: number
+    answers?: number
+    intake_responses?: number
+    error?: string
+    latest?: {
+      version?: string
+      source_file?: string
+      source_sha256?: string
+      created_at?: string
+    }
+  }
+  migrations?: { alembic_version?: string | null; error?: string }
+}
+
 const Settings = () => {
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
   const tenantKey = useMemo(() => localStorage.getItem('irmmf_tenant') || DEFAULT_TENANT_KEY, [])
   const [logo, setLogo] = useState<string | null>(null)
   const [resetId, setResetId] = useState('')
   const [status, setStatus] = useState('')
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null)
+  const [systemStatusNote, setSystemStatusNote] = useState('')
+  const [systemStatusLoading, setSystemStatusLoading] = useState(false)
+  const [systemStatusCheckedAt, setSystemStatusCheckedAt] = useState<Date | null>(null)
   const [tenantSettings, setTenantSettings] = useState<TenantSettings | null>(null)
   const [tenantStatus, setTenantStatus] = useState('')
   const [keywordText, setKeywordText] = useState('')
@@ -65,6 +96,29 @@ const Settings = () => {
     setLogo(localStorage.getItem(BRAND_LOGO_KEY))
     setResetId(getStoredAssessmentId(currentUser))
   }, [currentUser])
+
+  const loadSystemStatus = useCallback(async () => {
+    setSystemStatusLoading(true)
+    setSystemStatusNote('')
+    try {
+      const data = await apiJson<SystemStatus>('/status')
+      setSystemStatus(data)
+      setSystemStatusCheckedAt(new Date())
+    } catch {
+      setSystemStatus(null)
+      setSystemStatusNote('Unable to reach backend. Verify the API is running.')
+    } finally {
+      setSystemStatusLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadSystemStatus()
+    const timer = window.setInterval(() => {
+      loadSystemStatus()
+    }, 30000)
+    return () => window.clearInterval(timer)
+  }, [loadSystemStatus])
 
   useEffect(() => {
     apiJson<TenantSettings>(`/tenant/settings?tenant_key=${tenantKey}`)
@@ -304,6 +358,101 @@ const Settings = () => {
     <section className="settings-page">
       <div className="settings-title">Platform Settings</div>
       <div className="settings-grid">
+        <div className="settings-card">
+          <h4>System Status</h4>
+          <div className="status-grid">
+            <div className="status-item">
+              <div className="status-label">Frontend</div>
+              <span className="status-pill ok">Online</span>
+            </div>
+            <div className="status-item">
+              <div className="status-label">Backend API</div>
+              <span className={`status-pill ${systemStatus ? 'ok' : 'error'}`}>
+                {systemStatus ? 'Online' : 'Offline'}
+              </span>
+            </div>
+            <div className="status-item">
+              <div className="status-label">Database</div>
+              <span className={`status-pill ${systemStatus?.database?.ok ? 'ok' : 'error'}`}>
+                {systemStatus?.database?.ok ? 'Connected' : 'Unavailable'}
+              </span>
+            </div>
+            <div className="status-item">
+              <div className="status-label">Question Bank</div>
+              <span
+                className={`status-pill ${
+                  systemStatus?.question_bank?.questions ? 'ok' : 'warn'
+                }`}
+              >
+                {systemStatus?.question_bank?.questions
+                  ? `${systemStatus.question_bank.questions} questions`
+                  : 'Empty'}
+              </span>
+            </div>
+          </div>
+          <div className="status-details">
+            <div>
+              <div className="mini-note">Answers</div>
+              <div>{systemStatus?.question_bank?.answers ?? '—'}</div>
+            </div>
+            <div>
+              <div className="mini-note">Intake Responses</div>
+              <div>{systemStatus?.question_bank?.intake_responses ?? '—'}</div>
+            </div>
+            <div>
+              <div className="mini-note">Version</div>
+              <div>{systemStatus?.app?.version ?? '—'}</div>
+            </div>
+          </div>
+          <div className="status-details">
+            <div>
+              <div className="mini-note">DB Latency</div>
+              <div>
+                {systemStatus?.database?.latency_ms != null
+                  ? `${systemStatus.database.latency_ms} ms`
+                  : '—'}
+              </div>
+            </div>
+            <div>
+              <div className="mini-note">Latest Bank</div>
+              <div>{systemStatus?.question_bank?.latest?.version ?? '—'}</div>
+            </div>
+            <div>
+              <div className="mini-note">Alembic</div>
+              <div>{systemStatus?.migrations?.alembic_version ?? '—'}</div>
+            </div>
+          </div>
+          <div className="status-details">
+            <div>
+              <div className="mini-note">RBAC</div>
+              <div>{systemStatus?.app?.rbac_disabled ? 'Disabled' : 'Enabled'}</div>
+            </div>
+            <div>
+              <div className="mini-note">Rate Limiting</div>
+              <div>{systemStatus?.app?.rate_limit_enabled ? 'Enabled' : 'Disabled'}</div>
+            </div>
+            <div>
+              <div className="mini-note">Last Checked</div>
+              <div>{systemStatusCheckedAt ? systemStatusCheckedAt.toLocaleString() : '—'}</div>
+            </div>
+          </div>
+          {systemStatus?.database?.error ? (
+            <div className="status-note error">{systemStatus.database.error}</div>
+          ) : null}
+          {systemStatus?.question_bank && 'error' in systemStatus.question_bank ? (
+            <div className="status-note error">{systemStatus.question_bank.error}</div>
+          ) : null}
+          {systemStatus?.migrations && 'error' in systemStatus.migrations ? (
+            <div className="status-note error">{systemStatus.migrations.error}</div>
+          ) : null}
+          {systemStatusNote ? <div className="status-note error">{systemStatusNote}</div> : null}
+          <div className="btn-row">
+            <button className="btn secondary" onClick={loadSystemStatus} disabled={systemStatusLoading}>
+              {systemStatusLoading ? 'Refreshing...' : 'Refresh Status'}
+            </button>
+          </div>
+        </div>
+
         <div className="settings-card">
           <h4>Branding</h4>
           <p className="mini-note">Upload a logo that appears across the entire environment.</p>

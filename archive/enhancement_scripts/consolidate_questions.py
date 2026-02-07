@@ -13,7 +13,7 @@ def create_consolidated_questions():
 
     # Consolidate fraud detection methods into one multi-select question
     consolidated.append({
-        "Q-ID": "FRAUD-DETECT-01",
+        "Q-ID": "FRAUD-DETECT-Q01",
         "IRMMF Domain": "7. Behavioral Analytics & Detection",
         "Question Title": "Fraud Detection Capabilities",
         "Question Text": "Which fraud detection capabilities does your organization currently employ? (Select all that apply)",
@@ -26,7 +26,7 @@ def create_consolidated_questions():
 
     # Consolidate whistleblower channel options
     consolidated.append({
-        "Q-ID": "WHISTLEBLOW-01",
+        "Q-ID": "WHISTLEBLOW-Q01",
         "IRMMF Domain": "4. Legal & Compliance",
         "Question Title": "Whistleblower Reporting Channels",
         "Question Text": "Which whistleblower reporting channels does your organization provide? (Select all that apply)",
@@ -39,7 +39,7 @@ def create_consolidated_questions():
 
     # Consolidate executive monitoring controls
     consolidated.append({
-        "Q-ID": "EXEC-MONITOR-01",
+        "Q-ID": "EXEC-MONITOR-Q01",
         "IRMMF Domain": "6. Technical Controls",
         "Question Title": "Executive Monitoring Controls",
         "Question Text": "Which monitoring controls are applied to executive and board member activities? (Select all that apply)",
@@ -52,7 +52,7 @@ def create_consolidated_questions():
 
     # Consolidate regulatory compliance frameworks
     consolidated.append({
-        "Q-ID": "REGULATORY-01",
+        "Q-ID": "REGULATORY-Q01",
         "IRMMF Domain": "4. Legal & Compliance",
         "Question Title": "Regulatory Compliance Frameworks",
         "Question Text": "Which regulatory frameworks does your organization address in its insider risk program? (Select all that apply)",
@@ -65,7 +65,7 @@ def create_consolidated_questions():
 
     # Consolidate privileged user types
     consolidated.append({
-        "Q-ID": "PRIVILEGED-01",
+        "Q-ID": "PRIVILEGED-Q01",
         "IRMMF Domain": "2. Threat Model & Operations",
         "Question Title": "Privileged User Coverage",
         "Question Text": "Which privileged user populations are included in your insider risk monitoring program? (Select all that apply)",
@@ -78,7 +78,7 @@ def create_consolidated_questions():
 
     # Consolidate investigation capabilities
     consolidated.append({
-        "Q-ID": "INVESTIGATE-01",
+        "Q-ID": "INVESTIGATE-Q01",
         "IRMMF Domain": "8. Investigation & Response",
         "Question Title": "Investigation Capabilities",
         "Question Text": "Which investigation capabilities does your organization maintain for insider incidents? (Select all that apply)",
@@ -139,14 +139,14 @@ def main():
 
     # Questions to remove (will be replaced by consolidated multi-select)
     questions_to_remove = [
-        "FRAUD-01",  # Replaced by FRAUD-DETECT-01
-        "FRAUD-03",  # Replaced by WHISTLEBLOW-01
-        "FRAUD-04",  # Replaced by WHISTLEBLOW-01
-        "EXEC-01",   # Replaced by EXEC-MONITOR-01
-        "EXEC-03",   # Replaced by EXEC-MONITOR-01
-        "REG-NIS2-01",  # Replaced by REGULATORY-01
-        "REG-DORA-01",  # Replaced by REGULATORY-01
-        "REG-GDPR-01",  # Replaced by REGULATORY-01
+        "FRAUD-01",  # Replaced by FRAUD-DETECT-Q01
+        "FRAUD-03",  # Replaced by WHISTLEBLOW-Q01
+        "FRAUD-04",  # Replaced by WHISTLEBLOW-Q01
+        "EXEC-01",   # Replaced by EXEC-MONITOR-Q01
+        "EXEC-03",   # Replaced by EXEC-MONITOR-Q01
+        "REG-NIS2-01",  # Replaced by REGULATORY-Q01
+        "REG-DORA-01",  # Replaced by REGULATORY-Q01
+        "REG-GDPR-01",  # Replaced by REGULATORY-Q01
     ]
 
     print("Removing redundant questions:")
@@ -170,12 +170,12 @@ def main():
 
     # Generate answers for consolidated questions
     multiselect_options = {
-        "FRAUD-DETECT-01": ["Behavioral analytics", "Transaction monitoring", "Data analytics", "Periodic audits", "Anonymous tips", "Manager escalations", "Automated alerts"],
-        "WHISTLEBLOW-01": ["Anonymous hotline", "Web portal", "Email", "In-person reporting", "Third-party service", "Mobile app"],
-        "EXEC-MONITOR-01": ["Email monitoring", "Travel tracking", "Expense reviews", "Gift registry", "Trading windows", "Third-party relationships"],
-        "REGULATORY-01": ["SOX", "GDPR", "NIS2", "DORA", "HIPAA", "PCI-DSS", "FCPA", "Whistleblowing Directive"],
-        "PRIVILEGED-01": ["Executives", "Board members", "Sys admins", "DBAs", "Cloud admins", "Developers", "Security team", "M&A team"],
-        "INVESTIGATE-01": ["Digital forensics", "Interview skills", "Chain of custody", "Data analytics", "Legal coordination", "Evidence preservation", "Timeline reconstruction"],
+        "FRAUD-DETECT-Q01": ["Behavioral analytics", "Transaction monitoring", "Data analytics", "Periodic audits", "Anonymous tips", "Manager escalations", "Automated alerts"],
+        "WHISTLEBLOW-Q01": ["Anonymous hotline", "Web portal", "Email", "In-person reporting", "Third-party service", "Mobile app"],
+        "EXEC-MONITOR-Q01": ["Email monitoring", "Travel tracking", "Expense reviews", "Gift registry", "Trading windows", "Third-party relationships"],
+        "REGULATORY-Q01": ["SOX", "GDPR", "NIS2", "DORA", "HIPAA", "PCI-DSS", "FCPA", "Whistleblowing Directive"],
+        "PRIVILEGED-Q01": ["Executives", "Board members", "Sys admins", "DBAs", "Cloud admins", "Developers", "Security team", "M&A team"],
+        "INVESTIGATE-Q01": ["Digital forensics", "Interview skills", "Chain of custody", "Data analytics", "Legal coordination", "Evidence preservation", "Timeline reconstruction"],
     }
 
     new_answers = []

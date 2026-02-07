@@ -1,0 +1,26 @@
+fastapi
+uvicorn
+beautifulsoup4
+requests
+openai
+python-dotenv
+slowapi
+pandas
+openpyxl
+litellm
+groq
+alembic
+reportlab
+python-docx
+python-frontmatter
+
+# Added for local LLM support
+transformers
+torch
+torchvision
+torchaudio
+accelerate
+pydantic-settings
+psycopg
+email-validator
+pyjwt

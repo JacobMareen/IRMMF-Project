@@ -29,6 +29,9 @@ const AssessmentIntake = () => {
   const [index, setIndex] = useState(0)
   const [status, setStatus] = useState<string>('')
   const [loading, setLoading] = useState(true)
+  const [marketOptIn, setMarketOptIn] = useState(false)
+  const [consentStatus, setConsentStatus] = useState('')
+  const [consentSaving, setConsentSaving] = useState(false)
 
   useEffect(() => {
     setAssessmentId(getStoredAssessmentId(currentUser))
@@ -45,8 +48,9 @@ const AssessmentIntake = () => {
     Promise.all([
       apiFetch(`/intake/start`, { signal: controller.signal }),
       apiFetch(`/intake/${assessmentId}`, { signal: controller.signal }),
+      apiFetch(`/assessment/${assessmentId}/resume`, { signal: controller.signal }),
     ])
-      .then(async ([questionsResp, intakeResp]) => {
+      .then(async ([questionsResp, intakeResp, resumeResp]) => {
         if (!questionsResp.ok) {
           const detail = await readApiError(questionsResp)
           throw new Error(describeAssessmentError(detail, 'Unable to load intake questions.'))
@@ -57,6 +61,10 @@ const AssessmentIntake = () => {
         if (!intakeResp.ok) {
           const detail = await readApiError(intakeResp)
           setStatus(describeAssessmentError(detail, 'Intake answers unavailable. You can still complete intake.'))
+        }
+        if (resumeResp.ok) {
+          const resume = (await resumeResp.json()) as { market_research_opt_in?: boolean }
+          setMarketOptIn(Boolean(resume.market_research_opt_in))
         }
         const nextDraft: Record<string, string> = {}
         answers.forEach((row) => {
@@ -142,6 +150,32 @@ const AssessmentIntake = () => {
       }
     } catch {
       setStatus('Failed to save intake.')
+    }
+  }
+
+  const handleConsentToggle = async (nextValue: boolean) => {
+    if (!assessmentId) return
+    const previous = marketOptIn
+    setMarketOptIn(nextValue)
+    setConsentSaving(true)
+    setConsentStatus('Saving preference...')
+    try {
+      const resp = await apiFetch(`/assessment/${assessmentId}/market-research`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ market_research_opt_in: nextValue }),
+      })
+      if (!resp.ok) {
+        const detail = await readApiError(resp)
+        throw new Error(detail || 'Unable to save consent.')
+      }
+      setConsentStatus(nextValue ? 'Thank you for opting in.' : 'You have opted out.')
+    } catch (err) {
+      setMarketOptIn(previous)
+      setConsentStatus(err instanceof Error ? err.message : 'Failed to save preference.')
+      showToast('Unable to save research consent.', 'error')
+    } finally {
+      setConsentSaving(false)
     }
   }
 
@@ -235,6 +269,23 @@ const AssessmentIntake = () => {
           <button className="ai-btn primary" onClick={handleNext}>
             {index >= questions.length - 1 ? 'Finish Intake' : 'Save & Continue'}
           </button>
+        </div>
+        <div className="ai-consent">
+          <label className="ai-consent-label">
+            <input
+              type="checkbox"
+              checked={marketOptIn}
+              disabled={consentSaving}
+              onChange={(event) => handleConsentToggle(event.target.checked)}
+            />
+            <span>
+              Allow anonymized use of this assessment for research and benchmarking insights.
+            </span>
+          </label>
+          <div className="ai-consent-note">
+            No personal or company identifiers are included. You can change this anytime.
+          </div>
+          {consentStatus ? <div className="ai-status">{consentStatus}</div> : null}
         </div>
         {status ? <div className="ai-status">{status}</div> : null}
       </div>

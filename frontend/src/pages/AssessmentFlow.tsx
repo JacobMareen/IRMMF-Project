@@ -35,6 +35,7 @@ type ResumptionState = {
   sidebar_context?: SidebarItem[]
   next_best_qid?: string | null
   next_reason?: string | null
+  market_research_opt_in?: boolean
 }
 
 type EvidenceCheck = { id: string; label: string }
