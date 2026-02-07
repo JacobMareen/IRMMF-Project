@@ -55,6 +55,11 @@ const FrameworkRadar = ({ domains, onDomainClick }: FrameworkRadarProps) => {
 
             // Calculate fill radius based on completion
             const pct = d.total > 0 ? (d.answered / d.total) : 0
+
+            // Ghost Bar: If answered is low, show a faint "potential" bar?
+            // Actually, the background slice already represents the "Total Capacity".
+            // Let's just rely on the background slice being visible.
+
             // Min radius for visibility, Max radius slightly less than full
             const fillRadius = (RADIUS * 0.2) + (RADIUS * 0.8 * pct)
 

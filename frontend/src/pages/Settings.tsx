@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import './Settings.css'
 import { getStoredAssessmentId } from '../utils/assessment'
 import { apiFetch, apiJson } from '../lib/api'
+import { RegionMap } from '../components/RegionMap'
 
 const BRAND_LOGO_KEY = 'irmmf_logo_data'
 const DEFAULT_TENANT_KEY = 'default'
@@ -384,22 +385,15 @@ const Settings = () => {
               </label>
               <label>
                 Default jurisdiction
-                <select
-                  value={tenantSettings.default_jurisdiction}
-                  onChange={(event) =>
+                <div className="mini-note">Select your primary operating region for regulatory benchmarks.</div>
+                <RegionMap
+                  selectedRegion={tenantSettings.default_jurisdiction}
+                  onSelect={(region) =>
                     setTenantSettings((prev) =>
-                      prev ? { ...prev, default_jurisdiction: event.target.value } : prev
+                      prev ? { ...prev, default_jurisdiction: region } : prev
                     )
                   }
-                >
-                  <option>Belgium</option>
-                  <option>Netherlands</option>
-                  <option>Luxembourg</option>
-                  <option>Ireland</option>
-                  <option>EU (non-Belgium)</option>
-                  <option>UK</option>
-                  <option>US</option>
-                </select>
+                />
               </label>
               <label>
                 Investigation mode

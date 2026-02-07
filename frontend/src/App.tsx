@@ -15,6 +15,7 @@ import CaseFlow from './pages/CaseFlow'
 import InsiderRiskProgram from './pages/InsiderRiskProgram'
 import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
 import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+import Resources from './pages/insider-risk/components/Resources'
 import Settings from './pages/Settings'
 import Notifications from './pages/Notifications'
 import Login from './pages/Login'
@@ -57,8 +58,10 @@ function App() {
                 <Route path="policy" element={<InsiderRiskProgram view="policy" />} />
                 <Route path="controls" element={<InsiderRiskProgram view="controls" />} />
                 <Route path="risks" element={<AssessmentRisks />} />
+                <Route path="risks" element={<AssessmentRisks />} />
                 <Route path="roadmap" element={<InsiderRiskRoadmap />} />
                 <Route path="actions" element={<InsiderRiskProgram view="actions" />} />
+                <Route path="resources" element={<Resources />} />
               </Route>
               <Route path="workforce" element={<DynamicWorkforce />} />
               <Route path="third-party" element={<ThirdPartyRisk />} />

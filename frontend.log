@@ -76,3 +76,991 @@
       at run.next (<anonymous>)
       at transform (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transform.js:22:33)
 9:28:04 AM [vite] (client) hmr update /src/pages/AssessmentIntake.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/ExternalDropbox.tsx, /src/pages/AssessmentRisks.tsx, /src/pages/AssessmentReview.tsx, /src/pages/AssessmentResults.tsx, /src/pages/AssessmentIntake.tsx, /src/pages/AssessmentHub.tsx, /src/pages/ThirdPartyRisk.tsx, /src/pages/CommandCenter.tsx, /src/pages/Cases.tsx, /src/pages/AssessmentFlow.tsx, /src/pages/PiaCompliance.tsx, /src/pages/DynamicWorkforce.tsx, /src/pages/Notifications.tsx, /src/pages/TriageInbox.tsx, /src/pages/Login.tsx, /src/pages/Settings.tsx, /src/pages/InsiderRiskRoadmap.tsx, /src/pages/InsiderRiskProgram.tsx, /src/pages/CaseFlow.tsx, /src/pages/Register.tsx, /src/pages/ExternalInbox.tsx, /src/components/TermsOfServiceModal.tsx
+2:19:51 PM [vite] (client) hmr update /src/components/TermsOfServiceModal.tsx
+2:19:51 PM [vite] (client) hmr update /src/layout/AppLayout.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/ExternalDropbox.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/ExternalInbox.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/Login.css
+2:19:51 PM [vite] (client) hmr update /src/pages/Login.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/Register.css
+2:19:51 PM [vite] (client) hmr update /src/pages/Register.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/Settings.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/ThirdPartyRisk.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/ExternalDropbox.tsx, /src/pages/AssessmentRisks.tsx, /src/pages/AssessmentReview.tsx, /src/pages/AssessmentResults.tsx, /src/pages/AssessmentIntake.tsx, /src/pages/AssessmentHub.tsx, /src/pages/ThirdPartyRisk.tsx, /src/pages/CommandCenter.tsx, /src/pages/Cases.tsx, /src/pages/AssessmentFlow.tsx, /src/pages/PiaCompliance.tsx, /src/pages/DynamicWorkforce.tsx, /src/pages/Notifications.tsx, /src/pages/TriageInbox.tsx, /src/pages/Login.tsx, /src/pages/Settings.tsx, /src/pages/InsiderRiskRoadmap.tsx, /src/pages/InsiderRiskProgram.tsx, /src/pages/CaseFlow.tsx, /src/pages/Register.tsx, /src/pages/ExternalInbox.tsx, /src/components/TermsOfServiceModal.tsx
+2:19:51 PM [vite] (client) hmr update /src/components/TermsOfServiceModal.tsx
+2:19:51 PM [vite] (client) hmr update /src/layout/AppLayout.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/ExternalDropbox.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/ExternalInbox.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/Login.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/Login.css
+2:19:51 PM [vite] (client) hmr update /src/pages/Register.css
+2:19:51 PM [vite] (client) hmr update /src/pages/Register.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/Settings.tsx
+2:19:51 PM [vite] (client) hmr update /src/pages/ThirdPartyRisk.tsx
+2:36:55 PM [vite] (client) hmr update /src/pages/AssessmentIntake.tsx
+2:36:56 PM [vite] (client) hmr update /src/pages/AssessmentIntake.tsx
+2:36:58 PM [vite] (client) hmr update /src/pages/AssessmentHub.tsx
+2:37:01 PM [vite] (client) hmr update /src/index.css
+2:37:03 PM [vite] (client) hmr update /src/pages/AssessmentIntake.tsx
+2:37:05 PM [vite] (client) hmr update /src/pages/AssessmentIntake.tsx
+2:55:07 PM [vite] (client) hmr update /src/pages/Settings.tsx
+2:55:14 PM [vite] (client) hmr update /src/pages/Settings.tsx
+2:55:38 PM [vite] (client) hmr update /src/pages/AssessmentHub.tsx
+2:56:18 PM [vite] (client) hmr update /src/pages/AssessmentHub.tsx
+2:56:55 PM [vite] (client) hmr update /src/pages/AssessmentHub.tsx
+2:56:57 PM [vite] (client) hmr update /src/pages/AssessmentHub.tsx
+2:57:31 PM [vite] (client) hmr update /src/pages/AssessmentHub.tsx
+2:57:32 PM [vite] (client) hmr update /src/pages/AssessmentHub.tsx
+2:57:32 PM [vite] (client) hmr update /src/pages/AssessmentHub.tsx
+2:57:46 PM [vite] (client) hmr update /src/pages/AssessmentHub.tsx
+2:57:49 PM [vite] (client) hmr update /src/pages/AssessmentHub.tsx
+2:57:51 PM [vite] (client) hmr update /src/pages/AssessmentHub.tsx
+3:30:41 PM [vite] (client) hmr update /src/components/visuals/DomainDetailOverlay.tsx
+3:30:41 PM [vite] (client) hmr update /src/components/visuals/DomainDetailOverlay.tsx
+3:31:01 PM [vite] (client) hmr update /src/components/visuals/FrameworkVisuals.css
+3:31:03 PM [vite] (client) hmr update /src/components/visuals/FrameworkRadar.tsx
+3:31:05 PM [vite] (client) hmr update /src/components/visuals/FrameworkVisuals.css
+4:23:58 PM [vite] (client) hmr update /src/pages/TriageInbox.tsx
+4:24:00 PM [vite] (client) hmr update /src/pages/ExternalDropbox.tsx
+4:24:12 PM [vite] (client) hmr update /src/pages/ExternalDropbox.tsx
+4:46:02 PM [vite] (client) hmr update /src/layout/AppLayout.tsx
+4:46:18 PM [vite] (client) hmr update /src/pages/Login.tsx
+5:04:05 PM [vite] (client) hmr update /src/pages/AssessmentFlow.tsx
+10:06:24 AM [vite] (client) hmr update /src/pages/CaseFlow.tsx
+10:06:25 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:06:25 AM [vite] (client) Pre-transform error: Failed to resolve import "../../../utils/stringUtils" from "src/pages/cases/components/CaseSidebar.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/cases/components/CaseSidebar.tsx:3:35
+  2  |  import React from "react";
+  3  |  import { STEPS } from "../constants";
+  4  |  import { replaceUnderscores } from "../../../utils/stringUtils";
+     |                                      ^
+  5  |  const formatLabel = (label) => label;
+  6  |  export const CaseSidebar = ({ currentStepKey, onNavigate }) => {
+10:08:17 AM [vite] (client) hmr update /src/pages/cases/context/CaseContext.tsx
+10:08:18 AM [vite] (client) hmr update /src/pages/cases/components/CaseInvestigation.tsx, /src/pages/cases/components/CaseExperts.tsx, /src/pages/cases/components/CaseFlags.tsx
+10:08:27 AM [vite] (client) hmr update /src/pages/cases/components/CaseAdversarial.tsx
+10:09:05 AM [vite] (client) hmr update /src/pages/cases/context/CaseContext.tsx
+10:09:23 AM [vite] (client) hmr update /src/pages/cases/components/CaseAdversarial.tsx
+10:09:29 AM [vite] (client) hmr update /src/pages/cases/context/CaseContext.tsx, /src/pages/cases/components/CaseInvestigation.tsx, /src/pages/cases/components/CaseExperts.tsx, /src/pages/cases/components/CaseFlags.tsx
+10:09:29 AM [vite] (client) hmr update /src/pages/cases/context/CaseContext.tsx, /src/pages/cases/components/CaseInvestigation.tsx, /src/pages/cases/components/CaseExperts.tsx, /src/pages/cases/components/CaseFlags.tsx
+10:09:41 AM [vite] (client) page reload src/pages/cases/components/CaseSidebar.tsx
+10:09:41 AM [vite] (client) Pre-transform error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+10:09:43 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:10:06 AM [vite] (client) hmr update /src/pages/cases/components/CaseInvestigation.tsx, /src/pages/cases/components/CaseDecision.tsx, /src/pages/cases/components/CaseIntake.tsx, /src/pages/cases/components/CaseExperts.tsx, /src/pages/cases/components/CaseNotes.tsx, /src/pages/cases/components/CaseSeriousCause.tsx
+10:10:08 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:21:39 AM [vite] (client) hmr update /src/pages/cases/context/CaseContext.tsx
+10:21:41 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:22:28 AM [vite] (client) hmr update /src/pages/cases/components/CaseInvestigation.tsx, /src/pages/cases/components/CaseExperts.tsx, /src/pages/cases/components/CaseFlags.tsx
+10:22:29 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:29:56 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:30:28 AM [vite] (client) hmr update /src/App.tsx
+10:30:28 AM [vite] (client) Pre-transform error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+10:30:30 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:30:30 AM [vite] (client) hmr update /src/App.tsx
+10:30:32 AM [vite] (client) Pre-transform error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+10:30:34 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:31:07 AM [vite] (client) hmr update /src/App.tsx
+10:31:07 AM [vite] (client) Pre-transform error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+10:31:08 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:31:33 AM [vite] (client) hmr update /src/App.tsx
+10:31:33 AM [vite] (client) Pre-transform error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+10:31:34 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:32:12 AM [vite] (client) hmr update /src/App.tsx
+10:33:23 AM [vite] (client) hmr update /src/pages/InsiderRiskProgram.tsx
+10:33:33 AM [vite] (client) Pre-transform error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+10:33:33 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:33:58 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:34:14 AM [vite] (client) hmr update /src/pages/insider-risk/components/ActionPlan.tsx
+10:34:16 AM [vite] (client) hmr update /src/pages/insider-risk/components/ControlRegister.tsx
+10:34:18 AM [vite] (client) hmr update /src/pages/insider-risk/context/ProgramContext.tsx
+10:34:30 AM [vite] (client) hmr update /src/pages/insider-risk/context/ProgramContext.tsx
+10:34:33 AM [vite] (client) hmr update /src/pages/InsiderRiskProgram.tsx
+10:34:57 AM [vite] (client) hmr update /src/pages/insider-risk/context/ProgramContext.tsx
+10:34:58 AM [vite] (client) hmr update /src/pages/insider-risk/components/ControlRegister.tsx
+10:35:01 AM [vite] (client) hmr update /src/pages/insider-risk/components/ControlRegister.tsx
+10:35:02 AM [vite] (client) hmr update /src/pages/insider-risk/components/ControlRegister.tsx
+10:35:04 AM [vite] (client) hmr update /src/pages/insider-risk/components/ControlRegister.tsx
+10:35:07 AM [vite] (client) hmr update /src/pages/insider-risk/components/ControlRegister.tsx
+10:35:09 AM [vite] (client) hmr update /src/pages/insider-risk/components/ControlRegister.tsx
+10:35:29 AM [vite] (client) hmr update /src/pages/insider-risk/components/ControlRegister.tsx
+10:35:41 AM [vite] (client) hmr update /src/pages/insider-risk/components/PolicyManager.tsx
+10:35:57 AM [vite] (client) hmr update /src/pages/insider-risk/components/PolicyManager.tsx
+10:36:06 AM [vite] (client) Pre-transform error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+10:36:06 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:36:17 AM [vite] (client) hmr update /src/pages/insider-risk/components/PolicyManager.tsx
+10:36:18 AM [vite] (client) hmr update /src/pages/InsiderRiskProgram.tsx
+10:43:14 AM [vite] (client) Pre-transform error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+10:43:14 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:45:32 AM [vite] (client) hmr update /src/pages/insider-risk/context/ProgramContext.tsx
+10:45:52 AM [vite] (client) Pre-transform error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+10:45:52 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:46:27 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+10:47:16 AM [vite] (client) hmr update /src/App.tsx
+10:47:16 AM [vite] Internal server error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+10:47:16 AM [vite] (client) Pre-transform error: Failed to resolve import "../components/Layout" from "src/pages/CaseFlow.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/CaseFlow.tsx:3:23
+  3  |  import React from "react";
+  4  |  import { useParams } from "react-router-dom";
+  5  |  import { Layout } from "../components/Layout";
+     |                          ^
+  6  |  import { CaseProvider, useCase } from "./cases/context/CaseContext";
+  7  |  import { CaseSidebar } from "./cases/components/CaseSidebar";
+10:47:18 AM [vite] (client) hmr update /src/App.tsx
+10:58:11 AM [vite] vite.config.ts changed, restarting server...
+10:58:12 AM [vite] server restarted.
+11:06:47 AM [vite] (client) hmr update /src/pages/CaseFlow.tsx
+11:07:24 AM [vite] (client) hmr update /src/pages/CaseFlow.tsx
+11:12:49 AM [vite] (client) hmr update /src/pages/cases/components/CaseAdversarial.tsx, /src/pages/cases/components/CaseCredentialing.tsx, /src/pages/cases/components/CaseInvestigation.tsx, /src/pages/cases/components/CaseDecision.tsx, /src/pages/cases/components/CaseLegitimacy.tsx, /src/pages/cases/components/CaseIntake.tsx, /src/pages/cases/components/CaseWorksCouncil.tsx, /src/pages/cases/components/CaseTasks.tsx, /src/pages/cases/components/CaseEvidenceRegister.tsx, /src/pages/cases/components/CaseExperts.tsx, /src/pages/cases/components/CaseNotes.tsx, /src/pages/cases/components/CaseSeriousCause.tsx, /src/pages/cases/components/CaseFlags.tsx
+11:25:13 AM [vite] (client) hmr update /src/pages/insider-risk/components/PolicyManager.tsx
+11:25:30 AM [vite] (client) hmr update /src/pages/insider-risk/components/PolicyManager.tsx
+11:43:06 AM [vite] (client) hmr update /src/pages/InsiderRiskProgramLayout.tsx
+11:55:00 AM [vite] (client) hmr update /src/App.tsx
+11:55:00 AM [vite] Internal server error: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx: Identifier 'InsiderRiskProgramLayout' has already been declared. (17:7)
+
+  15 | import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+> 17 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |        ^
+  18 | import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 | import Resources from './pages/insider-risk/components/Resources'
+  20 | import Settings from './pages/Settings'
+  Plugin: vite:react-babel
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx:17:7
+  15 |  import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+  17 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |         ^
+  18 |  import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 |  import Resources from './pages/insider-risk/components/Resources'
+      at constructor (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:4880:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at TypeScriptParserMixin.checkLVal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at TypeScriptParserMixin.finishImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14256:10)
+      at TypeScriptParserMixin.parseImportSpecifierLocal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14253:31)
+      at TypeScriptParserMixin.maybeParseDefaultImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14356:12)
+      at TypeScriptParserMixin.parseImportSpecifiersAndAfter (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14229:29)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14225:17)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9353:26)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12866:27)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12757:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12734:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13306:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13299:10)
+      at TypeScriptParserMixin.parseProgram (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12612:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12602:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14478:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10116:18)
+      at parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14512:38)
+      at parser (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/parser/index.js:41:34)
+      at parser.next (<anonymous>)
+      at normalizeFile (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+      at normalizeFile.next (<anonymous>)
+      at run (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/index.js:22:50)
+      at run.next (<anonymous>)
+      at transform (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transform.js:22:33)
+      at transform.next (<anonymous>)
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:261:32)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:189:28
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/gensync-utils/async.js:67:7
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:113:33
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:287:14)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+11:55:00 AM [vite] Internal server error: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx: Identifier 'InsiderRiskProgramLayout' has already been declared. (17:7)
+
+  15 | import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+> 17 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |        ^
+  18 | import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 | import Resources from './pages/insider-risk/components/Resources'
+  20 | import Settings from './pages/Settings'
+  Plugin: vite:react-babel
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx:17:7
+  15 |  import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+  17 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |         ^
+  18 |  import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 |  import Resources from './pages/insider-risk/components/Resources'
+      at constructor (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:4880:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at TypeScriptParserMixin.checkLVal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at TypeScriptParserMixin.finishImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14256:10)
+      at TypeScriptParserMixin.parseImportSpecifierLocal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14253:31)
+      at TypeScriptParserMixin.maybeParseDefaultImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14356:12)
+      at TypeScriptParserMixin.parseImportSpecifiersAndAfter (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14229:29)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14225:17)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9353:26)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12866:27)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12757:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12734:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13306:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13299:10)
+      at TypeScriptParserMixin.parseProgram (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12612:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12602:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14478:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10116:18)
+      at parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14512:38)
+      at parser (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/parser/index.js:41:34)
+      at parser.next (<anonymous>)
+      at normalizeFile (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+      at normalizeFile.next (<anonymous>)
+      at run (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/index.js:22:50)
+      at run.next (<anonymous>)
+      at transform (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transform.js:22:33)
+      at transform.next (<anonymous>)
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:261:32)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:189:28
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/gensync-utils/async.js:67:7
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:113:33
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:287:14)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+11:55:00 AM [vite] Internal server error: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx: Identifier 'InsiderRiskProgramLayout' has already been declared. (17:7)
+
+  15 | import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+> 17 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |        ^
+  18 | import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 | import Resources from './pages/insider-risk/components/Resources'
+  20 | import Settings from './pages/Settings'
+  Plugin: vite:react-babel
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx:17:7
+  15 |  import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+  17 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |         ^
+  18 |  import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 |  import Resources from './pages/insider-risk/components/Resources'
+      at constructor (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:4880:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at TypeScriptParserMixin.checkLVal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at TypeScriptParserMixin.finishImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14256:10)
+      at TypeScriptParserMixin.parseImportSpecifierLocal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14253:31)
+      at TypeScriptParserMixin.maybeParseDefaultImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14356:12)
+      at TypeScriptParserMixin.parseImportSpecifiersAndAfter (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14229:29)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14225:17)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9353:26)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12866:27)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12757:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12734:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13306:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13299:10)
+      at TypeScriptParserMixin.parseProgram (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12612:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12602:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14478:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10116:18)
+      at parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14512:38)
+      at parser (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/parser/index.js:41:34)
+      at parser.next (<anonymous>)
+      at normalizeFile (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+      at normalizeFile.next (<anonymous>)
+      at run (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/index.js:22:50)
+      at run.next (<anonymous>)
+      at transform (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transform.js:22:33)
+      at transform.next (<anonymous>)
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:261:32)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:189:28
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/gensync-utils/async.js:67:7
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:113:33
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:287:14)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+11:55:02 AM [vite] (client) hmr update /src/App.tsx
+11:55:02 AM [vite] Internal server error: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx: Identifier 'InsiderRiskProgramLayout' has already been declared. (17:7)
+
+  15 | import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+> 17 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |        ^
+  18 | import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 | import Resources from './pages/insider-risk/components/Resources'
+  20 | import Settings from './pages/Settings'
+  Plugin: vite:react-babel
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx:17:7
+  15 |  import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+  17 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |         ^
+  18 |  import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 |  import Resources from './pages/insider-risk/components/Resources'
+      at constructor (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:4880:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at TypeScriptParserMixin.checkLVal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at TypeScriptParserMixin.finishImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14256:10)
+      at TypeScriptParserMixin.parseImportSpecifierLocal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14253:31)
+      at TypeScriptParserMixin.maybeParseDefaultImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14356:12)
+      at TypeScriptParserMixin.parseImportSpecifiersAndAfter (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14229:29)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14225:17)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9353:26)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12866:27)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12757:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12734:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13306:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13299:10)
+      at TypeScriptParserMixin.parseProgram (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12612:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12602:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14478:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10116:18)
+      at parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14512:38)
+      at parser (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/parser/index.js:41:34)
+      at parser.next (<anonymous>)
+      at normalizeFile (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+      at normalizeFile.next (<anonymous>)
+      at run (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/index.js:22:50)
+      at run.next (<anonymous>)
+      at transform (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transform.js:22:33)
+      at transform.next (<anonymous>)
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:261:32)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:189:28
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/gensync-utils/async.js:67:7
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:113:33
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:287:14)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+11:55:02 AM [vite] Internal server error: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx: Identifier 'InsiderRiskProgramLayout' has already been declared. (17:7)
+
+  15 | import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+> 17 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |        ^
+  18 | import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 | import Resources from './pages/insider-risk/components/Resources'
+  20 | import Settings from './pages/Settings'
+  Plugin: vite:react-babel
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx:17:7
+  15 |  import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+  17 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |         ^
+  18 |  import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 |  import Resources from './pages/insider-risk/components/Resources'
+      at constructor (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:4880:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at TypeScriptParserMixin.checkLVal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at TypeScriptParserMixin.finishImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14256:10)
+      at TypeScriptParserMixin.parseImportSpecifierLocal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14253:31)
+      at TypeScriptParserMixin.maybeParseDefaultImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14356:12)
+      at TypeScriptParserMixin.parseImportSpecifiersAndAfter (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14229:29)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14225:17)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9353:26)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12866:27)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12757:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12734:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13306:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13299:10)
+      at TypeScriptParserMixin.parseProgram (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12612:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12602:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14478:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10116:18)
+      at parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14512:38)
+      at parser (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/parser/index.js:41:34)
+      at parser.next (<anonymous>)
+      at normalizeFile (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+      at normalizeFile.next (<anonymous>)
+      at run (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/index.js:22:50)
+      at run.next (<anonymous>)
+      at transform (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transform.js:22:33)
+      at transform.next (<anonymous>)
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:261:32)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:189:28
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/gensync-utils/async.js:67:7
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:113:33
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:287:14)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+11:55:02 AM [vite] Internal server error: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx: Identifier 'InsiderRiskProgramLayout' has already been declared. (17:7)
+
+  15 | import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+> 17 | import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |        ^
+  18 | import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 | import Resources from './pages/insider-risk/components/Resources'
+  20 | import Settings from './pages/Settings'
+  Plugin: vite:react-babel
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/App.tsx:17:7
+  15 |  import InsiderRiskProgram from './pages/InsiderRiskProgram'
+  16 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+  17 |  import InsiderRiskProgramLayout from './pages/InsiderRiskProgramLayout'
+     |         ^
+  18 |  import InsiderRiskRoadmap from './pages/InsiderRiskRoadmap'
+  19 |  import Resources from './pages/insider-risk/components/Resources'
+      at constructor (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:4880:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at TypeScriptParserMixin.checkLVal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at TypeScriptParserMixin.finishImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14256:10)
+      at TypeScriptParserMixin.parseImportSpecifierLocal (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14253:31)
+      at TypeScriptParserMixin.maybeParseDefaultImportSpecifier (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14356:12)
+      at TypeScriptParserMixin.parseImportSpecifiersAndAfter (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14229:29)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14225:17)
+      at TypeScriptParserMixin.parseImport (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9353:26)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12866:27)
+      at TypeScriptParserMixin.parseStatementContent (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12757:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12734:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13306:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:13299:10)
+      at TypeScriptParserMixin.parseProgram (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12612:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:12602:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14478:25)
+      at TypeScriptParserMixin.parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:10116:18)
+      at parse (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/parser/lib/index.js:14512:38)
+      at parser (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/parser/index.js:41:34)
+      at parser.next (<anonymous>)
+      at normalizeFile (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+      at normalizeFile.next (<anonymous>)
+      at run (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transformation/index.js:22:50)
+      at run.next (<anonymous>)
+      at transform (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/transform.js:22:33)
+      at transform.next (<anonymous>)
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:261:32)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:189:28
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/@babel/core/lib/gensync-utils/async.js:67:7
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:113:33
+      at step (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:287:14)
+      at /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/node_modules/gensync/index.js:223:11)
+11:55:04 AM [vite] (client) hmr update /src/pages/InsiderRiskProgramLayout.tsx
+11:55:06 AM [vite] (client) hmr update /src/pages/InsiderRiskProgramLayout.tsx
+11:55:16 AM [vite] (client) hmr update /src/App.tsx
+11:55:16 AM [vite] Internal server error: Failed to resolve import "../../lib/api" from "src/pages/insider-risk/components/Resources.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/insider-risk/components/Resources.tsx:3:25
+  2  |  var _s = $RefreshSig$();
+  3  |  import React, { useState, useEffect, useMemo } from "react";
+  4  |  import { apiFetch } from "../../lib/api";
+     |                            ^
+  5  |  import { Template, TemplateFilter } from "../../types/resources";
+  6  |  const Resources = () => {
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 2)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+11:55:16 AM [vite] Internal server error: Failed to resolve import "../../lib/api" from "src/pages/insider-risk/components/Resources.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/insider-risk/components/Resources.tsx:3:25
+  2  |  var _s = $RefreshSig$();
+  3  |  import React, { useState, useEffect, useMemo } from "react";
+  4  |  import { apiFetch } from "../../lib/api";
+     |                            ^
+  5  |  import { Template, TemplateFilter } from "../../types/resources";
+  6  |  const Resources = () => {
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 2)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+11:55:16 AM [vite] (client) Pre-transform error: Failed to resolve import "../../lib/api" from "src/pages/insider-risk/components/Resources.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/insider-risk/components/Resources.tsx:3:25
+  2  |  var _s = $RefreshSig$();
+  3  |  import React, { useState, useEffect, useMemo } from "react";
+  4  |  import { apiFetch } from "../../lib/api";
+     |                            ^
+  5  |  import { Template, TemplateFilter } from "../../types/resources";
+  6  |  const Resources = () => {
+11:55:16 AM [vite] Internal server error: Failed to resolve import "../../lib/api" from "src/pages/insider-risk/components/Resources.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/insider-risk/components/Resources.tsx:3:25
+  2  |  var _s = $RefreshSig$();
+  3  |  import React, { useState, useEffect, useMemo } from "react";
+  4  |  import { apiFetch } from "../../lib/api";
+     |                            ^
+  5  |  import { Template, TemplateFilter } from "../../types/resources";
+  6  |  const Resources = () => {
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 2)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+11:55:23 AM [vite] Internal server error: Failed to resolve import "../../lib/api" from "src/pages/insider-risk/components/Resources.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/insider-risk/components/Resources.tsx:3:25
+  2  |  var _s = $RefreshSig$();
+  3  |  import React, { useState, useEffect, useMemo } from "react";
+  4  |  import { apiFetch } from "../../lib/api";
+     |                            ^
+  5  |  import { Template, TemplateFilter } from "../../types/resources";
+  6  |  const Resources = () => {
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 2)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+11:55:50 AM [vite] Internal server error: Failed to resolve import "../../lib/api" from "src/pages/insider-risk/components/Resources.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jacobmareen/Documents/IRMMF Project/IRMMF-Project/frontend/src/pages/insider-risk/components/Resources.tsx:3:25
+  2  |  var _s = $RefreshSig$();
+  3  |  import React, { useState, useEffect, useMemo } from "react";
+  4  |  import { apiFetch } from "../../lib/api";
+     |                            ^
+  5  |  import { Template, TemplateFilter } from "../../types/resources";
+  6  |  const Resources = () => {
+      at TransformPluginContext._formatLog (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 2)
+      at async TransformPluginContext.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///Users/jacobmareen/Documents/IRMMF%20Project/IRMMF-Project/frontend/node_modules/vite/dist/node/chunks/config.js:24542:20)
+11:56:17 AM [vite] (client) hmr update /src/App.tsx
+11:58:03 AM [vite] (client) hmr update /src/pages/insider-risk/components/Resources.tsx
+11:58:03 AM [vite] (client) hmr update /src/App.tsx
+11:58:06 AM [vite] (client) hmr update /src/pages/insider-risk/components/ResourcesComponents.tsx
+11:58:06 AM [vite] (client) hmr update /src/pages/insider-risk/components/Resources.tsx
+11:58:07 AM [vite] (client) hmr update /src/App.tsx
+11:58:56 AM [vite] (client) hmr update /src/pages/insider-risk/components/Resources.tsx
+3:28:25 PM [vite] (client) hmr update /src/pages/insider-risk/components/Resources.tsx
+3:28:27 PM [vite] (client) hmr update /src/pages/insider-risk/components/Resources.tsx

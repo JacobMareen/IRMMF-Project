@@ -4,7 +4,7 @@
       "q_id": "ADD-AI-Q01",
       "domain": "4. Legal, Privacy & Ethics",
       "question_title": "Data Minimization & Purpose Limitation",
-      "question_text": "To what extent does your organization maintain visibility into what data employees are inputting into AI tools (ChatGPT, Copilot, Claude)?",
+      "question_text": "To what extent does your organization maintain visibility into sensitive corporate data being submitted to generative AI platforms (e.g., ChatGPT, Copilot)?",
       "guidance": "Consider: AI tool logging, prompt monitoring, sensitive data detection, approved tool guidance.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T2",
       "branch_type": "Gatekeeper",
@@ -27,7 +27,7 @@
     {
       "q_id": "ADD-AI-Q02",
       "domain": "1. Strategy & Governance",
-      "question_title": "Funding & resourcing model (OpEx/CapEx)",
+      "question_title": "Strategic Investment & Resourcing Model",
       "question_text": "To what extent does your organization provide approved AI tools so employees don't use unauthorized alternatives?",
       "guidance": "Think about: enterprise AI deployment, use case guidance, training on appropriate use, feedback channels.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T2",
@@ -143,8 +143,8 @@
     {
       "q_id": "ADD-AW-Q03",
       "domain": "1. Strategy & Governance",
-      "question_title": "RACI & decision rights",
-      "question_text": "To what extent do employees understand what monitoring exists and why it benefits them (protection, not just surveillance)?",
+      "question_title": "Roles, Responsibilities & Decision Rights",
+      "question_text": "To what extent do employees understand the purpose of monitoring controls (emphasizing asset protection rather than surveillance)?",
       "guidance": "Consider: positive framing, false accusation protection, fairness emphasis, transparency communication.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T2",
       "branch_type": "Drilldown",
@@ -399,7 +399,7 @@
     {
       "q_id": "ADD-CR-Q01",
       "domain": "9. Performance & Resilience",
-      "question_title": "BCP/DR for insider-caused damage",
+      "question_title": "Business Continuity & Crisis Management",
       "question_text": "To what extent do business continuity plans account for insider-caused disruptions (sabotage, key person loss)?",
       "guidance": "Consider: insider sabotage scenarios, key person dependencies, succession planning, recovery procedures.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T2",
@@ -469,7 +469,7 @@
     {
       "q_id": "ADD-CR-Q04",
       "domain": "9. Performance & Resilience",
-      "question_title": "BCP/DR for insider-caused damage",
+      "question_title": "Business Continuity & Crisis Management",
       "question_text": "What level of capability exists to rapidly restore systems and data after insider sabotage (backups, integrity verification)?",
       "guidance": "Consider: backup isolation from insiders, integrity checking, recovery testing, rollback procedures.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T3",
@@ -492,7 +492,7 @@
     {
       "q_id": "ADD-DB-Q01",
       "domain": "6. Technical Controls",
-      "question_title": "OT privileged access & engineering workstatio",
+      "question_title": "Operational Technology (OT) & Engineering Access",
       "question_text": "What level of monitoring capability exists for database access patterns for insider-relevant anomalies (bulk queries, unusual tables, off-hours access)?",
       "guidance": "Consider: database activity monitoring, query logging, privileged user tracking, data masking effectiveness.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T2",
@@ -609,7 +609,7 @@
     {
       "q_id": "ADD-DC-Q03",
       "domain": "6. Technical Controls",
-      "question_title": "DLP (endpoint + cloud + SaaS)",
+      "question_title": "Data Loss Prevention (DLP) Coverage",
       "question_text": "What level of capability exists to identify and investigate sensitive data being uploaded to personal cloud storage, webmail, or file sharing services?",
       "guidance": "Consider: CASB coverage, browser extension controls, SSL inspection, content-aware blocking, sanctioned alternatives.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T2",
@@ -1515,7 +1515,7 @@
       "domain": "1. Strategy & Governance",
       "question_title": "Cross-functional steering committee",
       "question_text": "To what extent are insider risk roles and responsibilities clearly defined across Security, HR, Legal, and IT?",
-      "guidance": "Consider: RACI matrix, documented responsibilities, handoff points, escalation paths, conflict resolution.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
+      "guidance": "Consider: RACI matrix (Responsible, Accountable, Consulted, Informed), documented responsibilities, handoff points, escalation paths, conflict resolution.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T2",
       "branch_type": "Drilldown",
       "next_if_low": "ADD-G-Q06",
@@ -5354,7 +5354,7 @@
       "branch_type": "Drilldown",
       "next_if_low": "EXCO-D7-Q01",
       "next_if_high": "EXCO-D7-Q01",
-      "next_default": "EXCO-D7-Q01",
+      "next_default": "CORR-PROC-01",
       "axis1": "L",
       "cw": 1.0,
       "pts_g": 0.3,
@@ -5887,7 +5887,7 @@
       "branch_type": "ShadowProbe",
       "next_if_low": "HR-D4-Q15",
       "next_if_high": "HR-D4-Q15",
-      "next_default": "HR-D5-Q17",
+      "next_default": "CORR-DEF-01",
       "axis1": "E",
       "cw": 1.0,
       "pts_g": 0.1,
@@ -6903,7 +6903,7 @@
       "domain": "8. Investigation & Response",
       "question_title": "Case management (process + tooling)",
       "question_text": "Do we know where monitoring data/logs are stored (countries/cloud regions) and control cross-border transfers?",
-      "guidance": "This includes SaaS logs, SIEM, case management, and any outsourced SOC tooling.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
+      "guidance": "This includes SaaS logs, Security Information & Event Management (SIEM), case management, and any outsourced SOC tooling.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T1",
       "branch_type": "Gatekeeper",
       "gate_threshold": 2.0,
@@ -7598,7 +7598,7 @@
       "domain": "4. Legal, Privacy & Ethics",
       "question_title": "Data Minimization & Purpose Limitation",
       "question_text": "Is log collection centralized enough that you can investigate across systems without manual log pulling from many tools?",
-      "guidance": "Centralization could be a SIEM/log platform or consistent API exports. Key test: can you correlate user + device + data activity efficiently.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
+      "guidance": "Centralization could be a SIEM (Security Information & Event Management) platform or consistent API exports. Key test: can you correlate user + device + data activity efficiently.\n\nRegulatory Considerations: Assess alignment with applicable frameworks (NIS2, DORA, SOX 404, GDPR Article 32, sector-specific requirements).",
       "tier": "T2",
       "branch_type": "Drilldown",
       "next_if_low": "SEC-D3-Q07",
@@ -9893,7 +9893,7 @@
       "pts_r": 0.0,
       "pts_f": 0.1,
       "pts_w": 0.0,
-      "next_default": "AUD-D3-Q06"
+      "next_default": "CORR-CUL-01"
     },
     {
       "q_id": "CORR-PROC-01",
@@ -9932,7 +9932,8 @@
       "pts_v": 0.1,
       "pts_r": 0.0,
       "pts_f": 0.1,
-      "pts_w": 0.0
+      "pts_w": 0.0,
+      "next_default": "EXCO-D7-Q01"
     },
     {
       "q_id": "CORR-SUB-01",
@@ -9972,8 +9973,7 @@
       "pts_r": 0.0,
       "pts_f": 0.0,
       "pts_w": 0.0,
-      "end_flag": "Y",
-      "branch_type": "End"
+      "next_default": "HR-LIFECYCLE-01"
     },
     {
       "q_id": "CORR-CUL-01",
@@ -9993,7 +9993,7 @@
       "pts_r": 0.0,
       "pts_f": 0.0,
       "pts_w": 0.0,
-      "next_default": "ADD-WB-Q02"
+      "next_default": "HR-D5-Q17"
     }
   ],
   "answers": [

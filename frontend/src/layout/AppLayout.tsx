@@ -108,6 +108,7 @@ const AppLayout = () => {
           <button className="top-link theme-toggle" onClick={toggleTheme} title="Toggle Light/Dark Mode">
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
+          {currentUser && <span className="top-link user-display" style={{ fontSize: '0.85rem', opacity: 0.8, marginRight: '0.5rem' }}>{currentUser}</span>}
           <button className="top-link theme-toggle" onClick={handleLogout}>
             Logout
           </button>

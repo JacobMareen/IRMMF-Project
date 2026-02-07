@@ -34,6 +34,7 @@ type AssessmentData = {
     resumeState: ResumptionState | null
     statusNote: string
     loading: boolean
+    target_maturity?: Record<string, number>
 }
 
 export const useAssessmentData = (
@@ -51,6 +52,7 @@ export const useAssessmentData = (
         resumeState: null,
         statusNote: '',
         loading: false,
+        target_maturity: {},
     })
 
     // Helper to update specific fields
@@ -96,9 +98,10 @@ export const useAssessmentData = (
                 let anyOk = false
 
                 if (resumeResp.status === 'fulfilled' && resumeResp.value.ok) {
-                    const state = (await resumeResp.value.json()) as ResumptionState
+                    const state = (await resumeResp.value.json()) as ResumptionState & { target_maturity?: Record<string, number> }
                     nextState.completionPct = state.completion_pct ?? null
                     nextState.resumeState = state
+                    nextState.target_maturity = state.target_maturity || {}
                     anyOk = true
                 }
 

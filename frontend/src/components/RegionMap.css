@@ -1,0 +1,29 @@
+.region-map-container {
+    width: 100%;
+    background: var(--bg-shade);
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.region-map-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.map-link {
+    fill: none;
+    stroke: var(--border-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+}
+
+.region-circle {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.region-node:hover .region-circle {
+    filter: drop-shadow(0 0 8px var(--primary-glow));
+}

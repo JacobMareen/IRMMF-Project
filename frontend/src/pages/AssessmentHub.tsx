@@ -9,6 +9,7 @@ import { apiFetch } from '../lib/api'
 
 import { useAssessmentData } from '../hooks/useAssessmentData'
 import { AssessmentNav } from '../components/AssessmentNav'
+import { TargetMaturityModal } from '../components/TargetMaturityModal'
 import { useToast } from '../context/ToastContext'
 import FrameworkRadar from '../components/visuals/FrameworkRadar'
 import DomainDetailOverlay from '../components/visuals/DomainDetailOverlay'
@@ -40,7 +41,8 @@ const AssessmentHub = () => {
     heatmapCount,
     resumeState,
     statusNote,
-    setStatusNote
+    setStatusNote,
+    target_maturity
   } = useAssessmentData(assessmentId, currentUser, handleReset)
 
   useEffect(() => {
@@ -156,10 +158,29 @@ const AssessmentHub = () => {
     navigate('/assessment/flow')
   }
 
+  const [status, setStatus] = useState<string>('idle')
+  const [showTargetModal, setShowTargetModal] = useState(false)
+
+  // Handlers
   const handleStartDomainByName = (domainName: string) => {
     const card = domainCards.find(d => d.domain === domainName)
     if (card) {
       handleStartDomain(card.domain, card.reachable)
+    }
+  }
+
+  const handleTargetSave = async (targets: Record<string, number>) => {
+    if (!assessmentId) return
+    try {
+      await apiFetch(`/assessment/${assessmentId}/target-maturity`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target_maturity: targets }),
+      })
+      showToast('Targets updated.', 'success')
+      // Optimistically update or re-fetch could happen here
+    } catch {
+      showToast('Failed to update targets.', 'error')
     }
   }
 
@@ -269,11 +290,16 @@ const AssessmentHub = () => {
             <p>Resume where you left off or create a new assessment.</p>
             <div className="ah-status-row">
               <span>Current assessment</span>
-              <strong>{assessmentId ? assessmentId : 'Not set'}</strong>
+              <strong>Active</strong>
             </div>
             <div className="ah-status-row">
               <span>Progress</span>
               <strong>{completionPct != null ? `${completionPct}%` : '--%'}</strong>
+            </div>
+            <div className="ah-actions" style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+              <button className="ah-btn secondary" onClick={() => setShowTargetModal(true)}>
+                Set Targets
+              </button>
             </div>
           </div>
 
@@ -347,7 +373,14 @@ const AssessmentHub = () => {
           </section>
         ) : null
       }
-    </section >
+      {showTargetModal && (
+        <TargetMaturityModal
+          currentTargets={target_maturity || {}}
+          onSave={handleTargetSave}
+          onClose={() => setShowTargetModal(false)}
+        />
+      )}
+    </section>
   )
 }
 

@@ -565,26 +565,26 @@ const AssessmentFlow = () => {
             <div className="af-progress-summary">
               <div className="af-progress-stats">
                 <div className="af-stat">
-                  <span className="af-stat-value">{Object.keys(responses).filter(id => !deferredIds.has(id)).length}</span>
+                  <span className="af-stat-value">{reachable.filter(id => responses[id] && !deferredIds.has(id)).length}</span>
                   <span className="af-stat-label">Answered</span>
                 </div>
                 <div className="af-stat">
-                  <span className="af-stat-value">{deferredIds.size}</span>
+                  <span className="af-stat-value">{reachable.filter(id => deferredIds.has(id)).length}</span>
                   <span className="af-stat-label">Deferred</span>
                 </div>
                 <div className="af-stat">
-                  <span className="af-stat-value">{flaggedIds.size}</span>
+                  <span className="af-stat-value">{reachable.filter(id => flaggedIds.has(id)).length}</span>
                   <span className="af-stat-label">Flagged</span>
                 </div>
               </div>
               <div className="af-progress-bar">
                 <div
                   className="af-progress-fill"
-                  style={{ width: `${(Object.keys(responses).filter(id => !deferredIds.has(id)).length / reachable.length * 100).toFixed(0)}%` }}
+                  style={{ width: `${reachable.length ? (reachable.filter(id => responses[id] && !deferredIds.has(id)).length / reachable.length * 100).toFixed(0) : 0}%` }}
                 />
               </div>
               <div className="af-progress-text">
-                {((Object.keys(responses).filter(id => !deferredIds.has(id)).length / reachable.length) * 100).toFixed(0)}% Complete
+                {reachable.length ? ((reachable.filter(id => responses[id] && !deferredIds.has(id)).length / reachable.length) * 100).toFixed(0) : 0}% Complete
               </div>
             </div>
           )}

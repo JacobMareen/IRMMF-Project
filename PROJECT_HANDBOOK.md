@@ -197,7 +197,8 @@ The Assessment Module (v10) focuses on a streamlined intake process and maturity
 
 ### Frontend Architecture (`frontend/src/pages/`)
 *   **Networking (`api/client.ts`):** Centralized `ApiClient` handles auth injection (`Authorization`, `X-IRMMF-KEY`, `X-IRMMF-ROLES`) and error parsing. Replaces global `window.fetch` patching.
-*   **CaseFlow.tsx:** Monolithic controller for the investigation workflow (Evidence, Tasks, Gates).
+*   **CaseFlow (Pages/Cases):** Modular case management system (`frontend/src/pages/cases/`) using React Context (`CaseContext`) and breakdown components (`CaseIntake`, `CaseInvestigation`, `CaseDecision`).
+*   **CaseList (`Cases.tsx`):** Dashboard view for active cases.
 *   **AssessmentFlow.tsx:** Maturity assessment runner with neuro-adaptive branching.
 *   **CommandCenter.tsx:** Operational dashboard.
 *   **Settings.tsx:** Tenant configuration (Jurisdiction rules, Holidays).
@@ -247,28 +248,15 @@ Enhance the user friendliness and professional feel of the application while rob
 **Risk Treatment:** Interactive treatment planning module (current placeholder in Risks view).
 **AI Analysis:** Free-text intake analysis (requires new `app/modules/ai` backend service).
 
-### Phase 8: Security Hardening & Review (Planned)
-**Session & Identity:** Enforce strict SUPER_ADMIN vs TENANT_ADMIN RBAC; verify JWT session expiration (`ACCESS_TOKEN_EXPIRE_MINUTES`) and, if cookie auth is introduced, require HttpOnly/SameSite; add email lookup flow to remove tenant_key from the login form.
-**Data Protection:** Ensure assessment_id is never exposed in URL bars or readable text for unauthorized users; review all *Out schemas to prevent internal PII or config leakage.
-**Abuse Prevention:** Add slowapi rate limiting (login 5/min per IP, invite/register 10/min per IP, general API 100/min per IP).
-**Input Validation:** Review `schemas.py` for loose types (dict/Any); enforce string length limits on free-text fields; sanitize RiskHeatmap inputs to prevent stored XSS.
-**Secrets:** Verify Argon2/Bcrypt hashing; scan codebase for hardcoded tokens/keys.
-**Update:** Added max-length validation for core case/user text inputs in `app/modules/cases/schemas.py` and `app/modules/users/schemas.py`.
-**Update:** Added max-length validation for tenant settings and registration inputs in `app/modules/tenant/schemas.py`.
-**Update:** SlowAPI middleware wired with per-route limits for login/invite/register and a default global limit (configurable via `IRMMF_RATE_LIMIT_*` settings).
-**Update:** Startup warning logged if `SECRET_KEY` remains the dev default when `DEBUG` is false.
-**Update:** Added max-length validation for assessment inputs (`app/schemas.py`), insider program payloads (`app/modules/insider_program/schemas.py`), and third-party risk payloads (`app/modules/third_party/schemas.py`).
-**Update:** Added max-length validation for PIA, DWF, SSO, and AI request schemas (`app/modules/pia/schemas.py`, `app/modules/dwf/schemas.py`, `app/modules/sso/schemas.py`, `app/modules/ai/schemas.py`).
-**Update:** Added new rate-limit envs to `.env.example` for login/invite thresholds.
-**Update:** Login now uses email-based tenant lookup to remove tenant_key input (`frontend/src/pages/Login.tsx`).
-**Update:** Tenant-scoped routes now enforce tenant-key match for non-super admins; Settings UI uses stored tenant key for API calls.
-**Update:** Added TENANT_ADMIN role support and UI selection (legacy ADMIN remains accepted).
-**Update:** Hid assessment_id from Third-Party Risk UI surfaces.
-**Update:** Added AI risk-heatmap input length limits and trimming in `app/modules/ai/schemas.py`.
-**Update:** Added size limits for assessment evidence and sidebar context payloads in `app/schemas.py`.
-**Update:** Added `ACCESS_TOKEN_EXPIRE_MINUTES` to `.env.example` for session TTL configuration.
-**Update:** Frontend now clears auth and redirects to `/login` on 401 responses to enforce session timeouts.
-**Secrets Audit (initial):** No hardcoded secrets found beyond dev defaults (e.g., `DEV_TOKEN`, `SECRET_KEY`). Ensure production overrides via env.
+### Phase 8: Security Hardening & Review (Completed)
+**Session & Identity:** Enforced strict SUPER_ADMIN vs TENANT_ADMIN RBAC; added email-based tenant lookup to remove `tenant_key` from login.
+**Data Protection:** Hidden `assessment_id` from URL bars; reviewed schemas to prevent PII leakage.
+**Abuse Prevention:** Implemented `slowapi` rate limiting (Login: 5/min, Register: 10/min, API: 100/min).
+**Input Validation:** Enforced max-length limits on all text inputs (User, Tenant, Assessment, AI, SSO).
+**Secrets:** Verified Argon2 hashing; scanned codebase for secrets (no hardcoded credentials found).
+**Registration Audit:** Captured IP/User-Agent during registration for audit trails.
+**Session Timeout:** Frontend enforces 401 redirects; `ACCESS_TOKEN_EXPIRE_MINUTES` configurable.
+**Secrets Audit:** Clean scan confirmed.
 
 ### Phase 9: SSO Prep & Modular Auth (Planned)
 **Goal:** Enable pluggable identity providers (Auth0, Azure AD, SAML) without rewriting core auth logic.
@@ -297,7 +285,8 @@ Enhance the user friendliness and professional feel of the application while rob
 **Rapid Benchmark (Tier 1):** Promote the 25-question Intake module to be the default starting experience.
 **Unified Schema (Refactor):** [x] Merge `IntakeQuestion` and `Question` tables. Treat Intake as Tier 0 questions to simplify DB and remove redundant tables.
 **Streamline:** [x] Remove Auto-fill / Scraper feature to reduce friction and complexity.
-**Expansion (Procurement, Corruption & Defense):** [partial] Question bank added; branching insertion pending.
+**Expansion (Procurement, Corruption & Defense):** [Completed] Added 7 specialized questions (`CORR-*`) covering FCPA, ITAR, Gifts, and Whistleblowing.
+**Branching Logic:** Integrated Corruption module into Governance (`EXCO-D6-Q03`), Legal (`SEC-D9-Q26`), and Culture (`HR-D4-Q14`) flows.
 **Smart Extension:** Use Gatekeeper Logic to dynamically unlock Deep Dive tiers based on Tier 0 answers.
 **Score Integrity:** Tag assessment results as `CONFIDENCE_LEVEL: LOW` (Rapid) vs `CONFIDENCE_LEVEL: HIGH` (Full) to prevent apples-to-oranges benchmarking.
 **Gatekeeper Logic:** Ensure Rapid answers automatically close/open downstream Deep Dive sections.

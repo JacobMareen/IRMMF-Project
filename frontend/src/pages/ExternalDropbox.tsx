@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { client, API_ROOT } from '../api/client'
+import { client } from '../api/client'
 import './ExternalDropbox.css'
 
 const ExternalDropbox = () => {
@@ -18,8 +18,14 @@ const ExternalDropbox = () => {
     }
     setLoading(true)
     setStatus('Submitting...')
+    const params = new URLSearchParams(location.search)
+    const tenantKey = params.get('tenant_key')
+    const apiUrl = tenantKey
+      ? `/api/external/dropbox?tenant_key=${encodeURIComponent(tenantKey)}`
+      : '/api/external/dropbox'
+
     client.fetch(
-      `/api/external/dropbox`,
+      apiUrl,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

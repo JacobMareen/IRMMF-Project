@@ -50,6 +50,8 @@ body {
   min-height: 100vh;
   background: var(--bg-page);
   color: var(--text-main);
+  font-size: 1.05rem;
+  /* Increased for readability per user feedback */
 }
 
 body.modal-open {

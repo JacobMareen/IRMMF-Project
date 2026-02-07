@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import './InsiderRiskProgramLayout.css'
+import './InsiderRiskProgram.css'
 
 const InsiderRiskProgramLayout = () => {
   return (
@@ -42,6 +43,12 @@ const InsiderRiskProgramLayout = () => {
           className={({ isActive }) => `irp-shell-tab${isActive ? ' active' : ''}`}
         >
           Actions
+        </NavLink>
+        <NavLink
+          to="/insider-risk-program/resources"
+          className={({ isActive }) => `irp-shell-tab${isActive ? ' active' : ''}`}
+        >
+          Resources
         </NavLink>
       </div>
       <div className="irp-shell-content">

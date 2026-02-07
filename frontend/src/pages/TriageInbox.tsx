@@ -33,7 +33,26 @@ const TriageInbox = () => {
   const [busyId, setBusyId] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  const publicUrl = useMemo(() => `${location.origin}/external/dropbox`, [])
+  const [tenantKey, setTenantKey] = useState<string>('')
+
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem('irmmf_user')
+      if (userStr) {
+        const user = JSON.parse(userStr)
+        if (user.tenant_key) {
+          setTenantKey(user.tenant_key)
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse user', e)
+    }
+  }, [])
+
+  const publicUrl = useMemo(() => {
+    const baseUrl = `${location.origin}/external/dropbox`
+    return tenantKey ? `${baseUrl}?tenant_key=${tenantKey}` : baseUrl
+  }, [tenantKey])
 
   const loadTickets = () => {
     setStatus('Loading inbox...')

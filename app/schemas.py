@@ -75,6 +75,9 @@ class ResponseCreate(BaseModel):
         return v
 
     
+class TargetMaturityUpdate(BaseModel):
+    target_maturity: Dict[str, float]
+
 class ResumptionState(BaseModel):
     responses: Dict[str, str | List[str]]  # Maps Q_ID to A_ID (single) or [A_ID, ...] (multi-select)
     next_best_qid: Optional[str]   # The ID of the first unanswered question in the path
@@ -87,7 +90,9 @@ class ResumptionState(BaseModel):
     completion_pct: Optional[int] = None
     depth: Optional[str] = None
     override_depth: Optional[bool] = None
+    override_depth: Optional[bool] = None
     market_research_opt_in: bool = False
+    target_maturity: Optional[Dict[str, float]] = None
 
     @field_validator("sidebar_context")
     @classmethod

@@ -1,0 +1,96 @@
+.tm-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.tm-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    width: 500px;
+    max-width: 90vw;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.tm-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tm-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-main);
+}
+
+.tm-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.tm-body {
+    padding: 1rem;
+}
+
+.tm-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.tm-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tm-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: var(--bg-page);
+    border-radius: 4px;
+}
+
+.tm-domain {
+    font-size: 0.85rem;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.tm-input {
+    width: 60px;
+    padding: 0.25rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    background: var(--bg-card);
+    color: var(--text-main);
+    text-align: right;
+    font-family: inherit;
+}
+
+.tm-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}

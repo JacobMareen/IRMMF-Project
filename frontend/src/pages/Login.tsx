@@ -246,6 +246,20 @@ const Login = () => {
             Sign In
           </button>
 
+          <button
+            type="button"
+            className="login-btn"
+            style={{ marginTop: '0.75rem', background: 'transparent', border: '1px dashed var(--primary-color)', color: 'var(--primary-color)' }}
+            onClick={() => {
+              setUsername('demo@democorp.com')
+              setTenantKey('demo_corp')
+              setTenantOptions([{ name: 'Demo Corp (Medium Maturity)', key: 'demo_corp' }])
+              setStatus('Demo credentials applied. Click Sign In.')
+            }}
+          >
+            🚀 Demo Environment
+          </button>
+
           <div className="login-status">{status}</div>
 
           <div className="login-link" style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>

@@ -22,7 +22,9 @@ from app.modules.tenant.routes import router as tenant_router
 from app.modules.users.routes import router as users_router
 from app.modules.cases.routes import router as cases_router
 from app.modules.insider_program.routes import router as insider_program_router
+from app.modules.insider_program.routes import router as insider_program_router
 from app.modules.third_party.routes import router as third_party_router
+from app.api.v1.endpoints import templates as templates_router
 from app.security.audit import AuditContext, reset_audit_context, set_audit_context
 from app.security.rate_limit import RateLimiter, load_rate_limit_config, resolve_client_ip
 from app.security import slowapi
@@ -157,6 +159,10 @@ app.include_router(insider_program_router)
 app.include_router(third_party_router)
 from app.modules.sso.routes import router as sso_router
 app.include_router(sso_router)
+from app.modules.research.routes import router as research_router
+app.include_router(research_router)
+from app.modules.content_library.routes import router as content_library_router
+app.include_router(content_library_router)
 
 
 @app.get("/")

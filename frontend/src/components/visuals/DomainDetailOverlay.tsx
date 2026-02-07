@@ -95,18 +95,27 @@ const DomainDetailOverlay = ({ domainData, onClose, onOpen, overrideEnabled, onT
 
                     <div className="ah-divider" style={{ margin: '1.5rem 0', borderTop: '1px solid var(--border-color)' }} />
 
-                    <h3 style={{ fontSize: '1rem' }}>Configuration</h3>
-                    <label className="ah-toggle" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                        <input
-                            type="checkbox"
-                            checked={overrideEnabled}
-                            onChange={(e) => onToggleOverride(e.target.checked)}
-                        />
-                        <span>Include Deep-Dive Questions</span>
-                    </label>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-sub)', marginTop: '0.25rem' }}>
-                        Enables additional questions for this domain. Does not affect global benchmark scoring.
-                    </p>
+                    <div className="ah-divider" style={{ margin: '1.5rem 0', borderTop: '1px solid var(--border-color)' }} />
+
+                    {/* Deep Dive Unlock Section */}
+                    {overrideEnabled ? (
+                        <div className="check-card active" onClick={() => onToggleOverride(false)}>
+                            <div className="check-card-icon">✓</div>
+                            <div className="check-card-content">
+                                <h4>Deep Dive Active</h4>
+                                <p>Extended question set enabled. Uncheck to revert to standard scope.</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="unlock-card" onClick={() => onToggleOverride(true)}>
+                            <div className="unlock-icon">🔒</div>
+                            <div className="unlock-content">
+                                <h4>Unlock Deep Dive</h4>
+                                <p>Reveal advanced capability questions for this domain.</p>
+                            </div>
+                            <button className="ah-btn sm">Unlock</button>
+                        </div>
+                    )}
 
                 </div>
 

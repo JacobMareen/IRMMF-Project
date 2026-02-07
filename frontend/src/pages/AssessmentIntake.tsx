@@ -5,6 +5,7 @@ import './AssessmentIntake.css'
 import { describeAssessmentError, getStoredAssessmentId } from '../utils/assessment'
 import { AssessmentNav } from '../components/AssessmentNav'
 import { PageHeader } from '../components/PageHeader'
+import { useToast } from '../context/ToastContext'
 
 type IntakeOption = { value: string; display_order?: number }
 type IntakeQuestion = {
@@ -20,6 +21,7 @@ type IntakeAnswerRow = { intake_q_id: string; value?: string | null }
 
 const AssessmentIntake = () => {
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const currentUser = useMemo(() => localStorage.getItem('irmmf_user') || '', [])
   const [assessmentId, setAssessmentId] = useState<string>('')
   const [questions, setQuestions] = useState<IntakeQuestion[]>([])
@@ -118,7 +120,8 @@ const AssessmentIntake = () => {
       if (index < questions.length - 1) {
         setIndex(index + 1)
       } else {
-        setStatus('Intake saved.')
+        showToast('Intake complete.', 'success')
+        navigate('/assessment')
       }
     } catch {
       setStatus('Failed to save intake.')
@@ -134,7 +137,8 @@ const AssessmentIntake = () => {
       if (index < questions.length - 1) {
         window.setTimeout(() => setIndex(index + 1), 100)
       } else {
-        setStatus('Intake saved.')
+        showToast('Intake complete.', 'success')
+        navigate('/assessment')
       }
     } catch {
       setStatus('Failed to save intake.')
@@ -170,7 +174,7 @@ const AssessmentIntake = () => {
     <section className="ai-page">
       <PageHeader
         title="Intake"
-        subtitle={`Assessment ID: ${assessmentId}`}
+        subtitle="Rapid Benchmark"
         actions={<div className="ai-progress">{progress}</div>}
       />
 
@@ -189,6 +193,7 @@ const AssessmentIntake = () => {
               className="ai-text"
               value={currentValue}
               onChange={(event) => setAnswer(event.target.value)}
+              onBlur={() => submitDraft()}
               placeholder="Enter response"
             />
           )}

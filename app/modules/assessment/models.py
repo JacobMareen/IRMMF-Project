@@ -159,6 +159,7 @@ class Assessment(Base):
     override_depth: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     benchmark_tags: Mapped[dict] = mapped_column(JSONB, nullable=True)
     market_research_opt_in: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    target_maturity: Mapped[dict] = mapped_column(JSONB, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False) 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
